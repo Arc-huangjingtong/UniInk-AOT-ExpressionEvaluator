@@ -4,8 +4,8 @@
 
 # ✒️ UniInk - AOT C# Interpreter
 
-![Stars Num](https://img.shields.io/github/stars/Arc-huangjingtong/UniInk-CSharpInterpreter4Unity?style=social&logo=github)
-![Forks Num](https://img.shields.io/github/forks/Arc-huangjingtong/UniInk-CSharpInterpreter4Unity?style=social&logo=github)
+![Stars Num](https://img.shields.io/github/stars/Arc-huangjingtong/UniInk-CSharpInterpreter4AOT?style=social&logo=github)
+![Forks Num](https://img.shields.io/github/forks/Arc-huangjingtong/UniInk-CSharpInterpreter4AOT?style=social&logo=github)
 ![License  ](https://img.shields.io/badge/license-MIT-yellow)
 ![Version  ](https://img.shields.io/badge/version-1.0.0-green)
 ![C#       ](https://img.shields.io/badge/CSharp-8.0%20+%20-blue)
@@ -14,7 +14,11 @@
 
 # 😀Start
 
-### Download [This](https://github.com/Arc-huangjingtong/UniInk-CSharpInterpreter4AOT/blob/main/Arc.UniInk/Arc.UniInk/UniInk_Speed.cs) is Enough !
+### Download [UniInk.cs](https://github.com/Arc-huangjingtong/UniInk-CSharpInterpreter4AOT/blob/main/Arc.UniInk/Arc.UniInk/UniInk.cs) is Enough !
+
+> Optional : also grab [UniInk.Extensions.cs](https://github.com/Arc-huangjingtong/UniInk-CSharpInterpreter4AOT/blob/main/Arc.UniInk/Arc.UniInk/UniInk.Extensions.cs) if you need the `if` statement support (or want to extend the interpreter yourself).
+
+Both files live in the `Arc.UniInk` namespace, so remember to add `using Arc.UniInk;`.
 
 # 📝RoadMap
 
@@ -28,8 +32,8 @@
 
 # ✨Features
 
-- ### The UniInk is a single file, you can download/copy the file and put it in your project.
-- ### You can easy to extend the operator and function and more,because the code is clear and simple( only 2000lines )
+- ### [UniInk.cs](Arc.UniInk/Arc.UniInk/UniInk.cs) is a single file, you can download/copy the file and put it in your project.
+- ### You can easy to extend the operator and function and more,because the code is clear and simple( only about 2600 lines )
 - ### The performance is very good, the GC is 0 and the boxing is 0.
 
 | Method                                |            Mean |         Error |         StdDev |          Median |     Gen0 |    Gen1 | Allocated |
@@ -40,7 +44,7 @@
 | TEST_Arithmetic__Sprache              | 2,797,690.07 ns | 91,953.442 ns | 265,306.706 ns | 2,677,421.88 ns | 535.1563 | 19.5313 | 2817177 B |
 | TEST_Arithmetic__ParsecSharp          | 1,114,429.92 ns | 21,943.809 ns |  27,751.892 ns | 1,113,960.74 ns | 162.1094 |       - |  851830 B |
 
-summary : UniInkSpeed is fast , and UniInkSpeed support more features. would you like to try it?
+summary : UniInk is fast , and UniInk support more features. would you like to try it?
 
 ## Evaluate Expression
 
@@ -49,11 +53,11 @@ summary : UniInkSpeed is fast , and UniInkSpeed support more features. would you
 ```csharp
 
 // 1. Create a new instance of the interpreter 
-var Ink = new UniInk_Speed();
-// 2. Evaluate the expression , and as it to InkValue
-var res1 = Ink.Evaluate(" +9 * (1+1 + 1 + 1 + 1+1+1)") as InkValue;
+var ink = new UniInk();
+// 2. Evaluate the expression , it always returns an InkValue
+var res1 = ink.Evaluate("+9 * (1+1 + 1 + 1 + 1+1+1)");
 // 3. Get the result with the type you want, the result is 63
-Console.WriteLine(res1.Value_int); 
+Console.WriteLine(res1.ValueInt); 
 
 // PS : the process of calculation is 0 GC and 0 Boxing
 //      if you want improve the performance further , recycle the InkValue
@@ -66,14 +70,15 @@ Other example
 
 ```csharp
 
-var Ink = new UniInk_Speed();
-// float type
-var res = Ink.Evaluate("3333333.3333333f-3.3f+3.3f+  3.3f - 3.3f") as InkValue;
-Console.WriteLine(res.Value_float);
+var ink = new UniInk();
+
+// float type : GetResult_Float() returns the value and recycles the InkValue for you
+var res = ink.Evaluate("3333333.3333333f-3.3f+3.3f+  3.3f - 3.3f").GetResult_Float();
+Console.WriteLine(res);
 
 // double type
-var res2 = Ink.Evaluate("+123456789.987654321d + 987654321.123456789d") as InkValue;
-Console.WriteLine(res2.Value_double);
+var res2 = ink.Evaluate("+123456789.987654321d + 987654321.123456789d").GetResult_Double();
+Console.WriteLine(res2);
 
 ```
 
@@ -81,9 +86,11 @@ Console.WriteLine(res2.Value_double);
 
 ```csharp
 
+var ink = new UniInk();
+
 // bool type
-var res = Ink.Evaluate("1 < 2 || 2 ==1 || 2 < 1") as InkValue;
-Console.WriteLine(res.Value_bool); 
+var res = ink.Evaluate("1 < 2 || 2 ==1 || 2 < 1").GetResult_Bool();
+Console.WriteLine(res); // true
 
 ```
 
@@ -93,9 +100,11 @@ Console.WriteLine(res.Value_bool);
 
 ```csharp
 
+var ink = new UniInk();
+
 // the result will return the last expression
-var res = Ink.Evaluate("var aaa= 123 ;  var bbb =aaa + 1 ; aaa + bbb ") as InkValue;
-Console.WriteLine(res.Value_int); 
+var res = ink.Evaluate("var aaa= 123 ;  var bbb =aaa + 1 ; aaa + bbb ").GetResult_Int();
+Console.WriteLine(res); // 247
 
 ```
 
@@ -103,17 +112,20 @@ Console.WriteLine(res.Value_int);
 
 ```csharp
 
-// has API to register the function such as CRE:
-UniInk_Speed.RegisterFunction("CRE", new(prms =>
+var ink = new UniInk();
+
+// has API to register the function such as CRE ( RegisterFunction is an instance API )
+ink.RegisterFunction("CRE", new InkFunction(prms =>
 {
     var param1 = (InkValue)prms[0];
     var param2 = (InkValue)prms[1];
 
+    // the return value can be an InkValue , or any plain object ( it will be wrapped automatically )
     return new Card() { ID = param1, Rarity = param2 };
 }));
 
 // the result will return the last expression
-var res = Ink.Evaluate("var a = CRE(1,3) ;   GET(a, Rarity) == 3 ") as InkValue;
+var res = ink.Evaluate("var a = CRE(1,3) ;   GET(a, Rarity) == 3 ").GetResult_Bool();
 
 
 ```
@@ -122,8 +134,11 @@ var res = Ink.Evaluate("var a = CRE(1,3) ;   GET(a, Rarity) == 3 ") as InkValue;
 
 ```csharp
 
+var ink = new UniInk();
+
 // this may be complex, but we also support it
-var res = Ink.Evaluate("FLT(Config,var c => GET(c, Rarity) == 2 && GET(c, ID) == 1)") as InkValue;
+// ( FLT / GET / Config are your own registered function and variable )
+var res = ink.Evaluate("FLT(Config,var c => GET(c, Rarity) == 2 && GET(c, ID) == 1)").GetResult_Object();
 
 ```
 
@@ -131,15 +146,17 @@ var res = Ink.Evaluate("FLT(Config,var c => GET(c, Rarity) == 2 && GET(c, ID) ==
 
 ```csharp
 
+var ink = new UniInk();
+
 // use register variable to set getter
-UniInk_Speed.RegisterVariable("grower", InkValue.SetGetter(value =>
+ink.RegisterVariable("grower", InkValue.SetGetter(InkValue.GetIntValue(0), value =>
 {
     value.ValueType = TypeCode.Int32;
-    value.Value_int = grower++; // grower is a member variable 
+    value.ValueInt = grower++; // grower is a member variable 
 }));
 
 // the result is different every time
-var res = Ink.Evaluate("grower + 10086") as InkValue;
+var res = ink.Evaluate("grower + 10086").GetResult_Int();
 
 
 ```
@@ -149,6 +166,8 @@ var res = Ink.Evaluate("grower + 10086") as InkValue;
 
 
 ```csharp
+
+var ink = new UniInk();
 
 //Not Support Nested call now like : if ( xxx ) { if ( ) { }  }
 var script= @" if ( 1 > 2 )      
@@ -168,9 +187,13 @@ var script= @" if ( 1 > 2 )
                  return 666      
                }                 ";
 
-// you should copy the UniInk_Extensions.cs to your project
-// it may enlightened you to write the custom extension
-var res = Ink.Evaluate_IfStatement(script) as InkValue;
+// you should copy the UniInk.Extensions.cs (Arc.UniInk/Arc.UniInk/UniInk.Extensions.cs) to your project
+// it provides Evaluate_IfStatement / EvaluateInt / EvaluateBool , and may enlighten you to write the custom extension
+var res = ink.Evaluate_IfStatement(script) as InkValue;
+Console.WriteLine(res.ValueInt); // 456
+
+// or simply :
+// var res2 = ink.EvaluateInt(script);
 
 ```
 
@@ -178,7 +201,7 @@ var res = Ink.Evaluate_IfStatement(script) as InkValue;
 # 💬Support
 
 If you have any questions, suggestions, or need assistance, please feel free
-to [open an issue](https://github.com/Arc-huangjingtong/UniInk-CSharpInterpreter4Unity/issues) on the UniInk repository.
+to [open an issue](https://github.com/Arc-huangjingtong/UniInk-CSharpInterpreter4AOT/issues) on the UniInk repository.
 We're here to help! 😊
 
 Let's script with UniInk and unlock the full potential of your projects! 🚀💡🌟
