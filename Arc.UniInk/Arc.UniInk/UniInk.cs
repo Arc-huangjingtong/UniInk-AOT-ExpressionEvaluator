@@ -102,7 +102,7 @@
     /// <remarks> If you want to custom your own rules , you should read the code easily and modify it ! </remarks>
     public partial class UniInk
     {
-        /**************************************************  Config  **************************************************/
+        /***************************************************  Cfgs  ***************************************************/
 
         internal const float  EPSILON_FLOAT     = 0.000001f; // The epsilon value for float
         internal const double EPSILON_DOUBLE    = 0.000001d; // The epsilon value for double
@@ -1508,218 +1508,46 @@
         public override string ToString() => $"Operator : {Name}  Priority : {PriorityIndex}";
 
         /// <summary> Plus Operator Implementation </summary>
-        /// <param name="left"> the left operand </param>
-        /// <param name="right"> the right operand </param>
-        /// <returns> the result of the operation </returns>
-        public static object InkOperator_Plus(object left, object right)
-        {
-            switch (left)
-            {
-                case null when right is InkValue rightValue :
-                {
-                    rightValue.Calculate();
-
-                    var rightValueCopy = InkValue.Get();
-
-                    rightValue.CopyTo(rightValueCopy);
-                    return rightValueCopy;
-                }
-                case InkValue leftValue when right is InkValue rightValue :
-                {
-                    return leftValue + rightValue;
-                }
-
-
-                default : throw new InkSyntaxException($"unknown type{left}--{right}");
-            }
-        }
+        public static object InkOperator_Plus(object left, object right) => InkValue.Apply(Plus, left, right);
 
         /// <summary> Minus Operator Implementation </summary>
-        /// <param name="left"> the left operand </param>
-        /// <param name="right"> the right operand </param>
-        public static object InkOperator_Minus(object left, object right)
-        {
-            switch (left)
-            {
-                case null when right is InkValue rightValue :
-                {
-                    var inkDefault = InkValue.GetIntValue(0);
-                    var result     = inkDefault - rightValue;
-                    InkValue.Release(inkDefault);
-                    return result;
-                }
-                case InkValue leftValue when right is InkValue rightValue :
-                {
-                    return leftValue - rightValue;
-                }
-                default : throw new InkSyntaxException($"unknown type{left}--{right}");
-            }
-        }
+        public static object InkOperator_Minus(object left, object right) => InkValue.Apply(Minus, left, right);
 
         /// <summary> Multiplication operator implementation </summary>
-        public static object InkOperator_Multiply(object left, object right)
-        {
-            switch (left)
-            {
-                case null : return right;
-                case InkValue leftValue when right is InkValue rightValue :
-                {
-                    return leftValue * rightValue;
-                }
-                default : throw new InkSyntaxException($"unknown type{left}--{right}");
-            }
-        }
+        public static object InkOperator_Multiply(object left, object right) => InkValue.Apply(Multiply, left, right);
 
         /// <summary> Division operator implementation </summary>
-        public static object InkOperator_Divide(object left, object right)
-        {
-            switch (left)
-            {
-                case null : return right;
-                case InkValue leftValue when right is InkValue rightValue :
-                {
-                    return leftValue / rightValue;
-                }
-                default : throw new InkSyntaxException($"unknown type{left}--{right}");
-            }
-        }
+        public static object InkOperator_Divide(object left, object right) => InkValue.Apply(Divide, left, right);
 
         /// <summary> Modulo operator implementation </summary>
-        public static object InkOperator_Modulo(object left, object right)
-        {
-            switch (left)
-            {
-                case InkValue leftValue when right is InkValue rightValue :
-                {
-                    return leftValue % rightValue;
-                }
-                default : throw new InkSyntaxException($"unknown type{left}--{right}");
-            }
-        }
+        public static object InkOperator_Modulo(object left, object right) => InkValue.Apply(Modulo, left, right);
 
         /// <summary> Less than operator implementation </summary>
-        public static object InkOperator_Lower(object left, object right)
-        {
-            switch (left)
-            {
-                case null : return right;
-                case InkValue leftValue when right is InkValue rightValue :
-                {
-                    return leftValue < rightValue;
-                }
-                default : throw new InkSyntaxException($"unknown type{left}--{right}");
-            }
-        }
+        public static object InkOperator_Lower(object left, object right) => InkValue.Apply(Lower, left, right);
 
         /// <summary> Greater than operator implementation </summary>
-        public static object InkOperator_Greater(object left, object right)
-        {
-            switch (left)
-            {
-                case null : return right;
-                case InkValue leftValue when right is InkValue rightValue :
-                {
-                    return leftValue > rightValue;
-                }
-                default : throw new InkSyntaxException($"unknown type{left}--{right}");
-            }
-        }
+        public static object InkOperator_Greater(object left, object right) => InkValue.Apply(Greater, left, right);
 
         /// <summary> Equality operator implementation </summary>
-        public static object InkOperator_Equal(object left, object right)
-        {
-            switch (left)
-            {
-                case null : return right;
-                case InkValue leftValue when right is InkValue rightValue :
-                {
-                    return leftValue == rightValue;
-                }
-                default : throw new InkSyntaxException($"unknown type{left}--{right}");
-            }
-        }
+        public static object InkOperator_Equal(object left, object right) => InkValue.Apply(Equal, left, right);
 
         /// <summary> Less than or equal operator implementation </summary>
-        public static object InkOperator_LowerOrEqual(object left, object right)
-        {
-            switch (left)
-            {
-                case null : return right;
-                case InkValue leftValue when right is InkValue rightValue :
-                {
-                    return leftValue <= rightValue;
-                }
-                default : throw new InkSyntaxException($"unknown type{left}--{right}");
-            }
-        }
+        public static object InkOperator_LowerOrEqual(object left, object right) => InkValue.Apply(LowerOrEqual, left, right);
 
         /// <summary> Greater than or equal operator implementation </summary>
-        public static object InkOperator_GreaterOrEqual(object left, object right)
-        {
-            switch (left)
-            {
-                case null : return right;
-                case InkValue leftValue when right is InkValue rightValue :
-                {
-                    return leftValue >= rightValue;
-                }
-                default : throw new InkSyntaxException($"unknown type{left}--{right}");
-            }
-        }
+        public static object InkOperator_GreaterOrEqual(object left, object right) => InkValue.Apply(GreaterOrEqual, left, right);
 
         /// <summary> Not equal operator implementation </summary>
-        public static object InkOperator_NotEqual(object left, object right)
-        {
-            switch (left)
-            {
-                case null : return right;
-                case InkValue leftValue when right is InkValue rightValue :
-                {
-                    return leftValue != rightValue;
-                }
-                default : throw new InkSyntaxException($"unknown type{left}--{right}");
-            }
-        }
+        public static object InkOperator_NotEqual(object left, object right) => InkValue.Apply(NotEqual, left, right);
 
         /// <summary> Logical NOT operator implementation </summary>
-        public static object InkOperator_LogicalNOT(object left, object right)
-        {
-            switch (right)
-            {
-                case InkValue rightValue :
-                {
-                    return !rightValue;
-                }
-                default : throw new InkSyntaxException($"unknown type{left}--{right}");
-            }
-        }
+        public static object InkOperator_LogicalNOT(object left, object right) => InkValue.Apply(LogicalNot, left, right);
 
         /// <summary> Conditional AND operator implementation </summary>
-        public static object InkOperator_ConditionalAnd(object left, object right)
-        {
-            switch (left)
-            {
-                case InkValue leftValue when right is InkValue rightValue :
-                {
-                    return InkValue.GetBoolValue(leftValue.ValueBool && rightValue.ValueBool);
-                }
-                default : throw new InkSyntaxException($"unknown type{left}--{right}");
-            }
-        }
+        public static object InkOperator_ConditionalAnd(object left, object right) => InkValue.Apply(ConditionalAnd, left, right);
 
         /// <summary> Conditional OR operator implementation </summary>
-        public static object InkOperator_ConditionalOr(object left, object right)
-        {
-            switch (left)
-            {
-                case null : return right;
-                case InkValue leftValue when right is InkValue rightValue :
-                {
-                    return InkValue.GetBoolValue(leftValue.ValueBool || rightValue.ValueBool);
-                }
-                default : throw new InkSyntaxException($"unknown type{left}--{right}");
-            }
-        }
+        public static object InkOperator_ConditionalOr(object left, object right) => InkValue.Apply(ConditionalOr, left, right);
 
         /// <summary> Assignment operator implementation </summary>
         public static object InkOperator_Assign(object left, object right)
@@ -2229,125 +2057,43 @@
         /// <returns>True only when both references point at the same InkValue instance , otherwise false</returns>
         public override bool Equals(object obj) => obj is InkValue value && ValueMeta == value.ValueMeta;
 
-        /// <summary> Get the result of the value as an int, and auto release the value from pool. </summary>
-        public int GetResult_Int()
+        /// <summary> Get the result as an int and auto release the value </summary>
+        public int GetResult_Int() => Take(TypeCode.Int32, static value => value.ValueInt);
+
+        /// <summary> Get the result as a bool and auto release the value </summary>
+        public bool GetResult_Bool() => Take(TypeCode.Boolean, static value => value.ValueBool);
+
+        /// <summary> Get the result as a char and auto release the value </summary>
+        public char GetResult_Char() => Take(TypeCode.Char, static value => value.ValueChar);
+
+        /// <summary> Get the result as a float and auto release the value </summary>
+        public float GetResult_Float() => Take(TypeCode.Single, static value => value.ValueFloat);
+
+        /// <summary> Get the result as a double and auto release the value </summary>
+        public double GetResult_Double() => Take(TypeCode.Double, static value => value.ValueDouble);
+
+        /// <summary> Get the result as a string and auto release the value </summary>
+        public string GetResult_String() => Take(TypeCode.String, static value => value.ValueString);
+
+        /// <summary> Get the result as an object and auto release the value </summary>
+        public object GetResult_Object() => Take(TypeCode.Object, static value => value.ValueObject);
+
+        /// <summary> Read the result with the expected type , then release the value </summary>
+        private T Take<T>(TypeCode expected, Func<InkValue, T> read)
         {
             if (!IsCalculate) Calculate();
 
-            if (ValueType == TypeCode.Int32)
+            if (ValueType != expected)
             {
-                var result = ValueInt;
-
-                Release(this);
-
-                return result;
+                throw new InkSyntaxException($"The value type is not {expected}, but {ValueType}");
             }
 
-            throw new InkSyntaxException($"The value type is not Int32, but {ValueType}");
+            var result = read(this);
+
+            Release(this);
+
+            return result;
         }
-
-        /// <summary> Get the result of the value as a bool, and auto release the value from pool. </summary>
-        public bool GetResult_Bool()
-        {
-            if (!IsCalculate) Calculate();
-
-            if (ValueType == TypeCode.Boolean)
-            {
-                var result = ValueBool;
-
-                Release(this);
-
-                return result;
-            }
-
-            throw new InkSyntaxException($"The value type is not Boolean, but {ValueType}");
-        }
-
-        /// <summary> Get the result of the value as a char, and auto release the value from pool. </summary>
-        public char GetResult_Char()
-        {
-            if (!IsCalculate) Calculate();
-
-            if (ValueType == TypeCode.Char)
-            {
-                var result = ValueChar;
-
-                Release(this);
-
-                return result;
-            }
-
-            throw new InkSyntaxException($"The value type is not Char, but {ValueType}");
-        }
-
-        /// <summary> Get the result of the value as a float, and auto release the value from pool. </summary>
-        public float GetResult_Float()
-        {
-            if (!IsCalculate) Calculate();
-
-            if (ValueType == TypeCode.Single)
-            {
-                var result = ValueFloat;
-
-                Release(this);
-
-                return result;
-            }
-
-            throw new InkSyntaxException($"The value type is not Single, but {ValueType}");
-        }
-
-        /// <summary> Get the result of the value as a double, and auto release the value from pool. </summary>
-        public double GetResult_Double()
-        {
-            if (!IsCalculate) Calculate();
-
-            if (ValueType == TypeCode.Double)
-            {
-                var result = ValueDouble;
-
-                Release(this);
-
-                return result;
-            }
-
-            throw new InkSyntaxException($"The value type is not Double, but {ValueType}");
-        }
-
-        /// <summary> Get the result of the value as a string, and auto release the value from pool. </summary>
-        public string GetResult_String()
-        {
-            if (!IsCalculate) Calculate();
-
-            if (ValueType == TypeCode.String)
-            {
-                var result = ValueString;
-
-                Release(this);
-
-                return result;
-            }
-
-            throw new InkSyntaxException($"The value type is not String, but {ValueType}");
-        }
-
-        /// <summary> Get the result of the value as an object, and auto release the value from pool. </summary>
-        public object GetResult_Object()
-        {
-            if (!IsCalculate) Calculate();
-
-            if (ValueType == TypeCode.Object)
-            {
-                var result = ValueObject;
-
-                Release(this);
-
-                return result;
-            }
-
-            throw new InkSyntaxException($"The value type is not Object, but {ValueType}");
-        }
-
 
         /************************************************  Promotion  *************************************************/
 
@@ -2415,337 +2161,144 @@
             _               => 0
         };
 
+        /***********************************************  Dispatch  ***************************************************/
 
-        /// <summary> Addition operator overload for InkValue </summary>
-        /// <param name="left">Left operand</param>
-        /// <param name="right">Right operand</param>
-        /// <returns>Result of the addition</returns>
-        public static InkValue operator +(InkValue left, InkValue right)
+        /// <summary> Apply a built-in operator to the raw operands of the syntax list </summary>
+        /// <remarks> left is null for the unary form ( +x , -x , !x ) </remarks>
+        internal static object Apply(InkOperator op, object left, object right)
         {
+            if (left is null) return ApplyUnary(op, right);
+
+            if (left is InkValue leftValue && right is InkValue rightValue) return Binary(op, leftValue, rightValue);
+
+            throw new InkSyntaxException($"unknown type{left}--{right}");
+        }
+
+        /// <summary> Apply the unary form of a built-in operator </summary>
+        private static object ApplyUnary(InkOperator op, object right)
+        {
+            if (right is not InkValue rightValue) throw new InkSyntaxException($"unknown type{null}--{right}");
+
+            switch (op.Name)
+            {
+                case "+" :
+                {
+                    rightValue.Calculate();
+
+                    var copy = Get();
+
+                    rightValue.CopyTo(copy);
+
+                    return copy;
+                }
+                case "-" :
+                {
+                    var zero   = GetIntValue(0);
+                    var result = Binary(InkOperator.Minus, zero, rightValue);
+
+                    Release(zero);
+
+                    return result;
+                }
+                case "!" : return !rightValue;
+                case "*" :
+                case "/" :
+                case "<" :
+                case ">" :
+                case "==" :
+                case "<=" :
+                case ">=" :
+                case "!=" :
+                case "||" : return right;
+                default :   throw new InkSyntaxException($"unknown type{null}--{right}");
+            }
+        }
+
+        /// <summary> Apply a binary operator to two values </summary>
+        private static InkValue Binary(InkOperator op, InkValue left, InkValue right)
+        {
+            switch (op.Name)
+            {
+                case "+" :
+                case "-" :
+                case "*" :
+                case "/" :
+                case "%" :  return Arithmetic(op, left, right);
+                case "==" : return Equality(left, right);
+                case "!=" : return Equality(left, right).Negate();
+                case "<" :  return Relational(InkOperator.Lower, left, right);
+                case ">" :  return Relational(InkOperator.Greater, left, right);
+                case "<=" : return Relational(InkOperator.Greater, left, right).Negate();
+                case ">=" : return Relational(InkOperator.Lower, left, right).Negate();
+                case "&&" :
+                case "||" : return Logical(op, left, right);
+                case "!" :  return !right;
+                default :   throw new InkSyntaxException($"unsupported operator : {op.Name}");
+            }
+        }
+
+        /// <summary> Arithmetic operators ( + - * / % ) , with the numeric promotion and the string add </summary>
+        private static InkValue Arithmetic(InkOperator op, InkValue left, InkValue right)
+        {
+            left.Calculate();
+            right.Calculate();
+
             var answer = Get();
 
             answer.ValueType = left.ValueType;
 
-            left.Calculate();
-            right.Calculate();
-
             switch (left.ValueType, right.ValueType)
             {
-                case (TypeCode.String, TypeCode.String) :
+                case (TypeCode.String, TypeCode.String) when op.Name == "+" :
                     foreach (var c in left.ValueMeta) answer.ValueMeta.Add(c);
                     foreach (var c in right.ValueMeta) answer.ValueMeta.Add(c);
                     break;
-                case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueInt    = left.ValueInt    + right.ValueInt; break;
-                case (TypeCode.Single, TypeCode.Single) : answer.ValueFloat  = left.ValueFloat  + right.ValueFloat; break;
-                case (TypeCode.Double, TypeCode.Double) : answer.ValueDouble = left.ValueDouble + right.ValueDouble; break;
+                case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueInt    = IntMath(op, left.ValueInt, right.ValueInt); break;
+                case (TypeCode.Single, TypeCode.Single) : answer.ValueFloat  = SingleMath(op, left.ValueFloat, right.ValueFloat); break;
+                case (TypeCode.Double, TypeCode.Double) : answer.ValueDouble = DoubleMath(op, left.ValueDouble, right.ValueDouble); break;
                 default :
                 {
-                    if (TryGetPromotedType(left, right, out var promoted))
+                    if (!TryGetPromotedType(left, right, out var promoted))
                     {
-                        answer.ValueType = promoted;
-
-                        switch (promoted)
-                        {
-                            case TypeCode.Int32 :  answer.ValueInt    = ToInt(left)    + ToInt(right);    break;
-                            case TypeCode.Single : answer.ValueFloat  = ToSingle(left) + ToSingle(right); break;
-                            case TypeCode.Double : answer.ValueDouble = ToDouble(left) + ToDouble(right); break;
-                        }
-
-                        break;
+                        throw new InkSyntaxException("worrying operator using!");
                     }
 
-                    throw new InkSyntaxException("worrying operator using!");
-                }
-            }
+                    answer.ValueType = promoted;
 
-            answer.IsCalculate = true;
-
-            return answer;
-        }
-
-        /// <summary> Subtraction operator overload for InkValue </summary>
-        /// <param name="left">Left operand</param>
-        /// <param name="right">Right operand</param>
-        /// <returns>Result of the subtraction</returns>
-        public static InkValue operator -(InkValue left, InkValue right)
-        {
-            var answer = Get();
-
-            answer.ValueType = left!.ValueType;
-
-            left.Calculate();
-            right!.Calculate();
-
-            switch (left.ValueType, right.ValueType)
-            {
-                case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueInt    = left.ValueInt    - right.ValueInt; break;
-                case (TypeCode.Single, TypeCode.Single) : answer.ValueFloat  = left.ValueFloat  - right.ValueFloat; break;
-                case (TypeCode.Double, TypeCode.Double) : answer.ValueDouble = left.ValueDouble - right.ValueDouble; break;
-                default :
-                {
-                    if (TryGetPromotedType(left, right, out var promoted))
+                    switch (promoted)
                     {
-                        answer.ValueType = promoted;
-
-                        switch (promoted)
-                        {
-                            case TypeCode.Int32 :  answer.ValueInt    = ToInt(left)    - ToInt(right);    break;
-                            case TypeCode.Single : answer.ValueFloat  = ToSingle(left) - ToSingle(right); break;
-                            case TypeCode.Double : answer.ValueDouble = ToDouble(left) - ToDouble(right); break;
-                        }
-
-                        break;
-                    }
-
-                    throw new InkSyntaxException("worrying operator using!");
-                }
-            }
-
-            answer.IsCalculate = true;
-
-            return answer;
-        }
-
-        /// <summary> Multiplication operator overload for InkValue </summary>
-        /// <param name="left">Left operand</param>
-        /// <param name="right">Right operand</param>
-        /// <returns>Result of the multiplication</returns>
-        public static InkValue operator *(InkValue left, InkValue right)
-        {
-            var answer = Get();
-
-            answer.ValueType = left!.ValueType;
-
-            left.Calculate();
-            right!.Calculate();
-
-            switch (left.ValueType, right.ValueType)
-            {
-                case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueInt    = left.ValueInt    * right.ValueInt; break;
-                case (TypeCode.Single, TypeCode.Single) : answer.ValueFloat  = left.ValueFloat  * right.ValueFloat; break;
-                case (TypeCode.Double, TypeCode.Double) : answer.ValueDouble = left.ValueDouble * right.ValueDouble; break;
-                default :
-                {
-                    if (TryGetPromotedType(left, right, out var promoted))
-                    {
-                        answer.ValueType = promoted;
-
-                        switch (promoted)
-                        {
-                            case TypeCode.Int32 :  answer.ValueInt    = ToInt(left)    * ToInt(right);    break;
-                            case TypeCode.Single : answer.ValueFloat  = ToSingle(left) * ToSingle(right); break;
-                            case TypeCode.Double : answer.ValueDouble = ToDouble(left) * ToDouble(right); break;
-                        }
-
-                        break;
-                    }
-
-                    throw new InkSyntaxException("worrying operator using!");
-                }            }
-
-            answer.IsCalculate = true;
-
-
-            return answer;
-        }
-
-        /// <summary> Division operator overload for InkValue </summary>
-        /// <param name="left">Left operand</param>
-        /// <param name="right">Right operand</param>
-        /// <returns>Result of the division</returns>
-        public static InkValue operator /(InkValue left, InkValue right)
-        {
-            var answer = Get();
-
-            left.Calculate();
-            right.Calculate();
-
-            answer.ValueType = left.ValueType;
-
-            switch (left.ValueType, right.ValueType)
-            {
-                case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueInt    = left.ValueInt    / right.ValueInt; break;
-                case (TypeCode.Single, TypeCode.Single) : answer.ValueFloat  = left.ValueFloat  / right.ValueFloat; break;
-                case (TypeCode.Double, TypeCode.Double) : answer.ValueDouble = left.ValueDouble / right.ValueDouble; break;
-                default :
-                {
-                    if (TryGetPromotedType(left, right, out var promoted))
-                    {
-                        answer.ValueType = promoted;
-
-                        switch (promoted)
-                        {
-                            case TypeCode.Int32 :  answer.ValueInt    = ToInt(left)    / ToInt(right);    break;
-                            case TypeCode.Single : answer.ValueFloat  = ToSingle(left) / ToSingle(right); break;
-                            case TypeCode.Double : answer.ValueDouble = ToDouble(left) / ToDouble(right); break;
-                        }
-
-                        break;
-                    }
-
-                    throw new InkSyntaxException("worrying operator using!");
-                }
-            }
-
-            answer.IsCalculate = true;
-
-            return answer;
-        }
-
-        /// <summary> Modulo operator overload for InkValue </summary>
-        /// <param name="left">Left operand</param>
-        /// <param name="right">Right operand</param>
-        /// <returns>Result of the modulo operation</returns>
-        public static InkValue operator %(InkValue left, InkValue right)
-        {
-            var answer = Get();
-
-            answer.ValueType = left.ValueType;
-
-            left.Calculate();
-            right.Calculate();
-
-            switch (left.ValueType, right.ValueType)
-            {
-                case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueInt    = left.ValueInt    % right.ValueInt; break;
-                case (TypeCode.Single, TypeCode.Single) : answer.ValueFloat  = left.ValueFloat  % right.ValueFloat; break;
-                case (TypeCode.Double, TypeCode.Double) : answer.ValueDouble = left.ValueDouble % right.ValueDouble; break;
-                default :
-                {
-                    if (TryGetPromotedType(left, right, out var promoted))
-                    {
-                        answer.ValueType = promoted;
-
-                        switch (promoted)
-                        {
-                            case TypeCode.Int32 :  answer.ValueInt    = ToInt(left)    % ToInt(right);    break;
-                            case TypeCode.Single : answer.ValueFloat  = ToSingle(left) % ToSingle(right); break;
-                            case TypeCode.Double : answer.ValueDouble = ToDouble(left) % ToDouble(right); break;
-                        }
-
-                        break;
-                    }
-
-                    throw new InkSyntaxException("worrying operator using!");
-                }
-            }
-
-            answer.IsCalculate = true;
-
-            return answer;
-        }
-
-        /// <summary> Greater than operator overload for InkValue </summary>
-        /// <param name="left">Left operand</param>
-        /// <param name="right">Right operand</param>
-        /// <returns>Result of the comparison</returns>
-        public static InkValue operator >(InkValue left, InkValue right)
-        {
-            var answer = GetBoolValue(false);
-
-            left.Calculate();
-            right.Calculate();
-
-            switch (left.ValueType, right.ValueType)
-            {
-                case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueBool = left.ValueInt    > right.ValueInt; break;
-                case (TypeCode.Single, TypeCode.Single) : answer.ValueBool = left.ValueFloat  > right.ValueFloat; break;
-                case (TypeCode.Double, TypeCode.Double) : answer.ValueBool = left.ValueDouble > right.ValueDouble; break;
-                case (TypeCode.Char, TypeCode.Char) :     answer.ValueBool = left.ValueChar   > right.ValueChar; break;
-                default :
-                {
-                    if (TryGetPromotedType(left, right, out _))
-                    {
-                        answer.ValueBool = ToDouble(left) > ToDouble(right);
-
-                        break;
-                    }
-
-                    throw new InkSyntaxException("worrying operator using!");
-                }
-            }
-
-
-            return answer;
-        }
-
-        /// <summary> Less than operator overload for InkValue </summary>
-        /// <param name="left">Left operand</param>
-        /// <param name="right">Right operand</param>
-        /// <returns>Result of the comparison</returns>
-        public static InkValue operator <(InkValue left, InkValue right)
-        {
-            var answer = GetBoolValue(false);
-
-            left.Calculate();
-            right.Calculate();
-
-            switch (left.ValueType, right.ValueType)
-            {
-                case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueBool = left.ValueInt    < right.ValueInt; break;
-                case (TypeCode.Single, TypeCode.Single) : answer.ValueBool = left.ValueFloat  < right.ValueFloat; break;
-                case (TypeCode.Double, TypeCode.Double) : answer.ValueBool = left.ValueDouble < right.ValueDouble; break;
-                case (TypeCode.Char, TypeCode.Char) :     answer.ValueBool = left.ValueChar   < right.ValueChar; break;
-                default :
-                {
-                    if (TryGetPromotedType(left, right, out _))
-                    {
-                        answer.ValueBool = ToDouble(left) < ToDouble(right);
-
-                        break;
-                    }
-
-                    throw new InkSyntaxException("worrying operator using!");
-                }
-            }
-
-
-            return answer;
-        }
-
-        /// <summary> Equality operator overload for InkValue </summary>
-        /// <param name="left">Left operand</param>
-        /// <param name="right">Right operand</param>
-        public static InkValue operator ==(InkValue left, InkValue right)
-        { 
-            if (left is null || right is null)
-            {
-                return GetBoolValue(left is null && right is null);
-            }
-
-            left.Calculate();
-            right.Calculate();
-
-            var answer = GetBoolValue(false);
-
-            switch (left.ValueType, right.ValueType)
-            {
-                case (TypeCode.Int32, TypeCode.Int32) :     answer.ValueBool = left.ValueInt                                  == right.ValueInt; break;
-                case (TypeCode.Boolean, TypeCode.Boolean) : answer.ValueBool = left.ValueBool                                 == right.ValueBool; break;
-                case (TypeCode.Char, TypeCode.Char) :       answer.ValueBool = left.ValueChar                                 == right.ValueChar; break;
-                case (TypeCode.Single, TypeCode.Single) :   answer.ValueBool = Math.Abs(left.ValueFloat  - right.ValueFloat)  < UniInk.EPSILON_FLOAT; break;
-                case (TypeCode.Double, TypeCode.Double) :   answer.ValueBool = Math.Abs(left.ValueDouble - right.ValueDouble) < UniInk.EPSILON_DOUBLE; break;
-                case (TypeCode.String, TypeCode.String) :
-                {
-                    if (left.ValueMeta.Count != right.ValueMeta.Count) break;
-
-                    answer.ValueBool = true;
-
-                    for (var i = 0 ; i < left.ValueMeta.Count ; i++)
-                    {
-                        if (left.ValueMeta[i] != right.ValueMeta[i])
-                        {
-                            answer.ValueBool = false;
-                            break;
-                        }
+                        case TypeCode.Int32 :  answer.ValueInt    = IntMath(op, ToInt(left), ToInt(right)); break;
+                        case TypeCode.Single : answer.ValueFloat  = SingleMath(op, ToSingle(left), ToSingle(right)); break;
+                        case TypeCode.Double : answer.ValueDouble = DoubleMath(op, ToDouble(left), ToDouble(right)); break;
                     }
 
                     break;
                 }
+            }
+
+            answer.IsCalculate = true;
+
+            return answer;
+        }
+
+        /// <summary> Equality operators ( == != ) </summary>
+        private static InkValue Equality(InkValue left, InkValue right)
+        {
+            left.Calculate();
+            right.Calculate();
+
+            var answer = GetBoolValue(false);
+
+            switch (left.ValueType, right.ValueType)
+            {
+                case (TypeCode.Int32, TypeCode.Int32) :     answer.ValueBool = left.ValueInt == right.ValueInt; break;
+                case (TypeCode.Boolean, TypeCode.Boolean) : answer.ValueBool = left.ValueBool == right.ValueBool; break;
+                case (TypeCode.Char, TypeCode.Char) :       answer.ValueBool = left.ValueChar == right.ValueChar; break;
+                case (TypeCode.Single, TypeCode.Single) :   answer.ValueBool = Math.Abs(left.ValueFloat - right.ValueFloat) < UniInk.EPSILON_FLOAT; break;
+                case (TypeCode.Double, TypeCode.Double) :   answer.ValueBool = Math.Abs(left.ValueDouble - right.ValueDouble) < UniInk.EPSILON_DOUBLE; break;
+                case (TypeCode.String, TypeCode.String) :   answer.ValueBool = ValueMetaEquals(left, right); break;
                 default :
                 {
-                    answer.ValueBool = false;
-
                     if (TryGetPromotedType(left, right, out var promoted))
                     {
                         answer.ValueBool = promoted switch
@@ -2761,33 +2314,139 @@
                 }
             }
 
+            return answer;
+        }
+
+        /// <summary> Relational operators ( &lt; &gt; ) , &lt;= and &gt;= negate the opposite comparison </summary>
+        private static InkValue Relational(InkOperator op, InkValue left, InkValue right)
+        {
+            left.Calculate();
+            right.Calculate();
+
+            var answer = GetBoolValue(false);
+
+            switch (left.ValueType, right.ValueType)
+            {
+                case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueBool = IntCompare(op, left.ValueInt, right.ValueInt); break;
+                case (TypeCode.Single, TypeCode.Single) : answer.ValueBool = SingleCompare(op, left.ValueFloat, right.ValueFloat); break;
+                case (TypeCode.Double, TypeCode.Double) : answer.ValueBool = DoubleCompare(op, left.ValueDouble, right.ValueDouble); break;
+                case (TypeCode.Char, TypeCode.Char) :     answer.ValueBool = IntCompare(op, left.ValueChar, right.ValueChar); break;
+                default :
+                {
+                    if (!TryGetPromotedType(left, right, out _))
+                    {
+                        throw new InkSyntaxException("worrying operator using!");
+                    }
+
+                    answer.ValueBool = op.Name == ">" ? ToDouble(left) > ToDouble(right) : ToDouble(left) < ToDouble(right);
+
+                    break;
+                }
+            }
 
             return answer;
         }
 
+        /// <summary> Conditional operators ( &amp;&amp; || ) </summary>
+        private static InkValue Logical(InkOperator op, InkValue left, InkValue right)
+        {
+            if (left.ValueType == TypeCode.Boolean && right.ValueType == TypeCode.Boolean)
+            {
+                return GetBoolValue(op.Name == "&&" ? left.ValueBool && right.ValueBool : left.ValueBool || right.ValueBool);
+            }
+
+            throw new InkSyntaxException($"unknown type{left}--{right}");
+        }
+
+        private static int IntMath(InkOperator op, int left, int right) => op.Name[0] switch
+        {
+            '+' => left + right,
+            '-' => left - right,
+            '*' => left * right,
+            '/' => left / right,
+            _   => left % right
+        };
+
+        private static float SingleMath(InkOperator op, float left, float right) => op.Name[0] switch
+        {
+            '+' => left + right,
+            '-' => left - right,
+            '*' => left * right,
+            '/' => left / right,
+            _   => left % right
+        };
+
+        private static double DoubleMath(InkOperator op, double left, double right) => op.Name[0] switch
+        {
+            '+' => left + right,
+            '-' => left - right,
+            '*' => left * right,
+            '/' => left / right,
+            _   => left % right
+        };
+
+        private static bool IntCompare(InkOperator op, int left, int right)         => op.Name[0] == '>' ? left > right : left < right;
+        private static bool SingleCompare(InkOperator op, float left, float right) => op.Name[0] == '>' ? left > right : left < right;
+        private static bool DoubleCompare(InkOperator op, double left, double right) => op.Name[0] == '>' ? left > right : left < right;
+
+        /// <summary> Compare two string values held by <see cref="ValueMeta"/> without allocating </summary>
+        private static bool ValueMetaEquals(InkValue left, InkValue right)
+        {
+            if (left.ValueMeta.Count != right.ValueMeta.Count) return false;
+
+            for (var i = 0 ; i < left.ValueMeta.Count ; i++)
+            {
+                if (left.ValueMeta[i] != right.ValueMeta[i]) return false;
+            }
+
+            return true;
+        }
+
+        /***********************************************  Operators  **************************************************/
+
+        /// <summary> Addition operator overload for InkValue </summary>
+        public static InkValue operator +(InkValue left, InkValue right) => Binary(InkOperator.Plus, left, right);
+
+        /// <summary> Subtraction operator overload for InkValue </summary>
+        public static InkValue operator -(InkValue left, InkValue right) => Binary(InkOperator.Minus, left, right);
+
+        /// <summary> Multiplication operator overload for InkValue </summary>
+        public static InkValue operator *(InkValue left, InkValue right) => Binary(InkOperator.Multiply, left, right);
+
+        /// <summary> Division operator overload for InkValue </summary>
+        public static InkValue operator /(InkValue left, InkValue right) => Binary(InkOperator.Divide, left, right);
+
+        /// <summary> Modulo operator overload for InkValue </summary>
+        public static InkValue operator %(InkValue left, InkValue right) => Binary(InkOperator.Modulo, left, right);
+
+        /// <summary> Greater than operator overload for InkValue </summary>
+        public static InkValue operator >(InkValue left, InkValue right) => Binary(InkOperator.Greater, left, right);
+
+        /// <summary> Less than operator overload for InkValue </summary>
+        public static InkValue operator <(InkValue left, InkValue right) => Binary(InkOperator.Lower, left, right);
+
+        /// <summary> Equality operator overload for InkValue , null safe </summary>
+        public static InkValue operator ==(InkValue left, InkValue right)
+        {
+            if (left is null || right is null)
+            {
+                return GetBoolValue(left is null && right is null);
+            }
+
+            return Binary(InkOperator.Equal, left, right);
+        }
+
         /// <summary> Inequality operator overload for InkValue </summary>
-        /// <param name="left">Left operand</param>
-        /// <param name="right">Right operand</param>
-        /// <returns>True if left does not equal right</returns>
         public static InkValue operator !=(InkValue left, InkValue right) => (left == right).Negate();
 
         /// <summary> Greater than or equal operator overload for InkValue </summary>
-        /// <param name="left">Left operand</param>
-        /// <param name="right">Right operand</param>
-        /// <returns>True if left is greater than or equal to right</returns>
-        public static InkValue operator >=(InkValue left, InkValue right) => (left < right).Negate();
+        public static InkValue operator >=(InkValue left, InkValue right) => Binary(InkOperator.GreaterOrEqual, left, right);
 
         /// <summary> Less than or equal operator overload for InkValue </summary>
-        /// <param name="left">Left operand</param>
-        /// <param name="right">Right operand</param>
-        /// <returns>True if left is less than or equal to right</returns>
-        public static InkValue operator <=(InkValue left, InkValue right) => (left > right).Negate();
+        public static InkValue operator <=(InkValue left, InkValue right) => Binary(InkOperator.LowerOrEqual, left, right);
 
         /// <summary> Logical NOT operator overload for InkValue </summary>
-        /// <param name="left">The operand to negate</param>
-        /// <returns>Negated boolean value</returns>
         public static InkValue operator !(InkValue left) => left.Clone().Negate();
-
 
         /// <summary> Implicit conversion from InkValue to int </summary>
         /// <param name="st">The InkValue to convert</param>
