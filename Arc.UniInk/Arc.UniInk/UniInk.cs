@@ -1,8 +1,8 @@
-﻿// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable PartialTypeWithSinglePart
-// ReSharper disable SpecifyACultureInStringConversionExplicitly
-namespace Arc.UniInk
+﻿namespace Arc.UniInk
 {
+
+    // ReSharper disable SpecifyACultureInStringConversionExplicitly
+    // ReSharper disable PartialTypeWithSinglePart
     using System;
     using System.Collections.Generic;
 
@@ -35,7 +35,7 @@ namespace Arc.UniInk
     /*    // res04 == ans04 == 232                                                                                    */
     /*    // 2.4 Don't support two operators together                                                                 */
     /*    var worry01 = "9 * -1"                                                                                      */
-    /*    var suggest01 = "9 * (-1)"; // you should use parenthesis to avoid the worry01                                */
+    /*    var suggest01 = "9 * (-1)"; // you should use parenthesis to avoid the worry01                              */
     /*    var suggest02 = "-1*9"; // just those two operators are not together to avoid the worry01                   */
     /*                                                                                                                */
     /*    // 2.5 String add is zero GC too(the inner logic is List<char>                                              */
@@ -95,7 +95,7 @@ namespace Arc.UniInk
     /*                                                                                                                */
     /*                                                                                                                */
     /*                                                                                                                */
-    /*                                                                                                                */
+    /*================================================================================================================*/
 
 
     /// <summary> The C# Evaluator easy to use : you can execute simple expression or scripts with a string </summary>
@@ -104,39 +104,39 @@ namespace Arc.UniInk
     {
         /**************************************************  Config  **************************************************/
 
-        internal const float EPSILON_FLOAT = 0.000001f; // The epsilon value for float
-        internal const double EPSILON_DOUBLE = 0.000001d; // The epsilon value for double
-        internal const int FUNC_NAME_MAX_LEN = 10; // Max length of function name
-        internal const int VARI_NAME_MAX_LEN = 10; // Max length of variable name
+        internal const float  EPSILON_FLOAT     = 0.000001f; // The epsilon value for float
+        internal const double EPSILON_DOUBLE    = 0.000001d; // The epsilon value for double
+        internal const int    FUNC_NAME_MAX_LEN = 10;        // Max length of function name
+        internal const int    VARI_NAME_MAX_LEN = 10;        // Max length of variable name
 
-        internal const int INK_VALUE_POOL_CAPACITY = 128; // The capacity of InkValue.Pool
-        internal const int INK_SYNTAX_POOL_CAPACITY = 64; // The capacity of InkSyntaxList.Pool and Lambda.Pool
-        internal const int STRING_MAX_LEN = 128; // The max length of string that will be parsed
-        internal const int EXPRESS_ELEMENT_MAX_LEN = 1024; // The max length of expression's element that will be parsed
-        internal const int FUNCTION_CAPACITY = 32; // The capacity of UniInk.dic_Functions
-        internal const int FUNCTION_GLOBAL_CAPACITY = 64; // The capacity of UniInk.dic_GlobalFunctions
-        internal const int VARIABLE_CAPACITY = 32; // The capacity of UniInk.dic_Variables
-        internal const int VARIABLE_TEMP_CAPACITY = 32; // The capacity of UniInk.dic_Variables_Temp
-        internal const int OPERATOR_FUNC_CAPACITY = 32; // The capacity of InkOperator.Dic_OperatorsFunc
-        internal const int INK_OPERATOR_CAPACITY = 64; // The capacity of InkOperator.Dic_Values
+        internal const int INK_VALUE_POOL_CAPACITY  = 128;  // The capacity of InkValue.Pool
+        internal const int INK_SYNTAX_POOL_CAPACITY = 64;   // The capacity of InkSyntaxList.Pool and Lambda.Pool
+        internal const int STRING_MAX_LEN           = 128;  // The max length of string that will be parsed
+        internal const int EXPRESS_ELEMENT_MAX_LEN  = 1024; // The max length of expression's element that will be parsed
+        internal const int FUNCTION_CAPACITY        = 32;   // The capacity of UniInk.dic_Functions
+        internal const int FUNCTION_GLOBAL_CAPACITY = 64;   // The capacity of UniInk.dic_GlobalFunctions
+        internal const int VARIABLE_CAPACITY        = 32;   // The capacity of UniInk.dic_Variables
+        internal const int VARIABLE_TEMP_CAPACITY   = 32;   // The capacity of UniInk.dic_Variables_Temp
+        internal const int OPERATOR_FUNC_CAPACITY   = 32;   // The capacity of InkOperator.Dic_OperatorsFunc
+        internal const int INK_OPERATOR_CAPACITY    = 64;   // The capacity of InkOperator.Dic_Values
 
         /***************************************************  Ctor  ***************************************************/
 
-        /// <summary> Default Constructor : Initialize variables and parsing Methods        </summary>
-        /// <remarks> the variables are saved the object’s reference, not the value         </remarks>
+        /// <summary> Default Constructor : Initialize variables and parsing Methods </summary>
+        /// <remarks> the variables are saved the object’s reference, not the value </remarks>
         /// <param name="variables"> Set variables can replace a key string with value object </param>
         public UniInk(IDictionary<string, InkValue> variables = null)
         {
             const int PARSING_METHODS_CAPACITY = 7;
             ParsingMethods = new List<ParsingMethodDelegate>(PARSING_METHODS_CAPACITY)
             {
-                EvaluateOperators,
-                EvaluateFunction, //
-                EvaluateNumber, //
-                EvaluateChar, //
-                EvaluateString, //
-                EvaluateBool, //
-                EvaluateVariable //
+                EvaluateOperators
+              , EvaluateFunction //
+              , EvaluateNumber   //
+              , EvaluateChar     //
+              , EvaluateString   //
+              , EvaluateBool     //
+              , EvaluateVariable //
             };
 
             if (variables == null) return;
@@ -216,7 +216,7 @@ namespace Arc.UniInk
         {
             var keys = InkSyntaxList.Get();
 
-            for (var i = startIndex; i <= endIndex; i++)
+            for (var i = startIndex ; i <= endIndex ; i++)
             {
                 if (char.IsWhiteSpace(expression[i])) continue;
 
@@ -272,7 +272,7 @@ namespace Arc.UniInk
 
         /*************************************************  Process  **************************************************/
 
-        /// <summary> UniInk SyntaxList : Process the SyntaxList span</summary>
+        /// <summary> UniInk SyntaxList : Process the SyntaxList span </summary>
         protected static object ProcessList(InkSyntaxList syntaxList, int start, int end)
         {
             if (start > end) return null;
@@ -296,7 +296,7 @@ namespace Arc.UniInk
         /// <summary> UniInk SyntaxList : Process the Scripts in SyntaxList </summary>
         protected static object ProcessList_Scripts(InkSyntaxList keys)
         {
-            var start = 0;
+            var    start = 0;
             object res;
 
             while (true)
@@ -328,8 +328,7 @@ namespace Arc.UniInk
             {
                 int startIndex, endIndex;
 
-                (hasParentheses, startIndex, endIndex) = FindSection(keys, InkOperator.ParenthesisLeft,
-                    InkOperator.ParenthesisRight, start, end);
+                (hasParentheses, startIndex, endIndex) = FindSection(keys, InkOperator.ParenthesisLeft, InkOperator.ParenthesisRight, start, end);
 
                 if (!hasParentheses) continue;
 
@@ -341,7 +340,6 @@ namespace Arc.UniInk
                 {
                     ProcessList_Operators(keys, startIndex + 1, endIndex - 1);
                 }
-
 
                 keys.SetDirty(startIndex);
                 keys.SetDirty(endIndex);
@@ -357,30 +355,29 @@ namespace Arc.UniInk
             {
                 var (curOperator, index) = GetHighestPriorityOperator(keys, start, end);
 
-
                 if (Equals(curOperator, InkOperator.Empty) || Equals(curOperator, InkOperator.Semicolon))
                 {
                     hasOperators = false;
                     continue;
                 }
 
-                object left = null;
+                object left  = null;
                 object right = null;
 
                 var lNeedRelease = false;
                 var rNeedRelease = false;
 
                 var startIndex = index;
-                var endIndex = index;
+                var endIndex   = index;
 
 
-                for (var i = index - 1; i >= start; i--) // Left
+                for (var i = index - 1 ; i >= start ; i--) // Left
                 {
                     if (keys.IndexDirty[i])
                     {
                         if (keys.CastOther[i] == null) continue;
 
-                        left = keys.CastOther[i];
+                        left              = keys.CastOther[i];
                         keys.CastOther[i] = null;
 
                         lNeedRelease = true;
@@ -399,17 +396,17 @@ namespace Arc.UniInk
 
                 if (left is InkOperator)
                 {
-                    left = null;
+                    left       = null;
                     startIndex = index;
                 }
 
-                for (var i = index + 1; i <= end; i++) // Right
+                for (var i = index + 1 ; i <= end ; i++) // Right
                 {
                     if (keys.IndexDirty[i])
                     {
                         if (keys.CastOther[i] == null) continue;
 
-                        right = keys.CastOther[i];
+                        right             = keys.CastOther[i];
                         keys.CastOther[i] = null;
 
                         rNeedRelease = true;
@@ -448,10 +445,10 @@ namespace Arc.UniInk
                 }
             }
 
-            for (var i = start; i <= end; i++)
+            for (var i = start ; i <= end ; i++)
             {
                 if (keys.IndexDirty[i]) continue;
-                
+
                 if (keys.ObjectList[i] is InkValue inkValue)
                 {
                     if (keys.CastOther[i] == null)
@@ -475,11 +472,11 @@ namespace Arc.UniInk
         /// <summary> UniInk SyntaxList : Process the Functions in SyntaxList </summary>
         protected static void ProcessList_Functions(InkSyntaxList keys, int paramStart, int paramEnd)
         {
-            var func = keys[paramStart - 1] as InkFunction;
-            var paramList = InkSyntaxList.GetTemp();
+            var func         = keys[paramStart - 1] as InkFunction;
+            var paramList    = InkSyntaxList.GetTemp();
             var sectionStart = 0;
 
-            for (var i = paramStart + 1; i <= paramEnd - 1; i++)
+            for (var i = paramStart + 1 ; i <= paramEnd - 1 ; i++)
             {
                 object current;
 
@@ -515,9 +512,7 @@ namespace Arc.UniInk
             ObjectRemoveNull(paramList.CastOther);
             var result = func?.FuncDelegate.Invoke(paramList.CastOther);
 
-            if (result is InkValue)
-            {
-            }
+            if (result is InkValue) { }
             else if (result is not null)
             {
                 result = InkValue.GetObjectValue(result);
@@ -535,8 +530,8 @@ namespace Arc.UniInk
 
                 if (!hasArrow) break;
 
-                var (hasBalance, endIndex) = FindNoBalanceOperator(keys, InkOperator.ParenthesisLeft,
-                    InkOperator.ParenthesisRight, arrowIndex, paramEnd);
+                var (hasBalance, endIndex) = FindNoBalanceOperator(keys,                         InkOperator.ParenthesisLeft,
+                                                                   InkOperator.ParenthesisRight, arrowIndex, paramEnd);
 
                 if (!hasBalance) throw new InkSyntaxException("Parenthesis is not balance!");
 
@@ -547,7 +542,7 @@ namespace Arc.UniInk
                 var lambdaData = InkSyntaxList.GetTemp();
 
 
-                for (var i = arrowIndex + 1; i <= endIndex - 1; i++)
+                for (var i = arrowIndex + 1 ; i <= endIndex - 1 ; i++)
                 {
                     object current;
 
@@ -607,37 +602,25 @@ namespace Arc.UniInk
         /*************************************************  Mapping  **************************************************/
 
         /// <summary> Some UnaryPostfix operators func mapping </summary>
-        protected static readonly Dictionary<InkOperator, Func<object, object, object>> DicOperatorsFunc =
-            new(OPERATOR_FUNC_CAPACITY)
-            {
-                { InkOperator.Plus, InkOperator.InkOperator_Plus } //
-                ,
-                { InkOperator.Minus, InkOperator.InkOperator_Minus } //
-               ,{ InkOperator.Multiply, InkOperator.InkOperator_Multiply } //
-               ,{ InkOperator.Divide, InkOperator.InkOperator_Divide } //
-               ,{ InkOperator.Modulo, InkOperator.InkOperator_Modulo } //
-               ,{ InkOperator.Lower, InkOperator.InkOperator_Lower } //
-                ,
-                { InkOperator.Greater, InkOperator.InkOperator_Greater } //
-                ,
-                { InkOperator.Equal, InkOperator.InkOperator_Equal } //
-                ,
-                { InkOperator.LowerOrEqual, InkOperator.InkOperator_LowerOrEqual } //
-                ,
-                { InkOperator.GreaterOrEqual, InkOperator.InkOperator_GreaterOrEqual } //
-                ,
-                { InkOperator.NotEqual, InkOperator.InkOperator_NotEqual } //
-                ,
-                { InkOperator.LogicalNot, InkOperator.InkOperator_LogicalNOT } //
-                ,
-                { InkOperator.ConditionalAnd, InkOperator.InkOperator_ConditionalAnd } //
-                ,
-                { InkOperator.ConditionalOr, InkOperator.InkOperator_ConditionalOr } //
-                ,
-                { InkOperator.Assign, InkOperator.InkOperator_Assign } //
-                ,
-                { InkOperator.KeyReturn, InkOperator.InkOperator_Return } //
-            };
+        protected static readonly Dictionary<InkOperator, Func<object, object, object>> DicOperatorsFunc = new(OPERATOR_FUNC_CAPACITY)
+        {
+            { InkOperator.Plus, InkOperator.InkOperator_Plus }                     //
+          , { InkOperator.Minus, InkOperator.InkOperator_Minus }                   //
+          , { InkOperator.Multiply, InkOperator.InkOperator_Multiply }             //
+          , { InkOperator.Divide, InkOperator.InkOperator_Divide }                 //
+          , { InkOperator.Modulo, InkOperator.InkOperator_Modulo }                 //
+          , { InkOperator.Lower, InkOperator.InkOperator_Lower }                   //
+          , { InkOperator.Greater, InkOperator.InkOperator_Greater }               //
+          , { InkOperator.Equal, InkOperator.InkOperator_Equal }                   //
+          , { InkOperator.LowerOrEqual, InkOperator.InkOperator_LowerOrEqual }     //
+          , { InkOperator.GreaterOrEqual, InkOperator.InkOperator_GreaterOrEqual } //
+          , { InkOperator.NotEqual, InkOperator.InkOperator_NotEqual }             //
+          , { InkOperator.LogicalNot, InkOperator.InkOperator_LogicalNOT }         //
+          , { InkOperator.ConditionalAnd, InkOperator.InkOperator_ConditionalAnd } //
+          , { InkOperator.ConditionalOr, InkOperator.InkOperator_ConditionalOr }   //
+          , { InkOperator.Assign, InkOperator.InkOperator_Assign }                 //
+          , { InkOperator.KeyReturn, InkOperator.InkOperator_Return }              //
+        };
 
         /// <summary> Some Escaped Char mapping </summary>
         protected static char GetEscapedChar(char c)
@@ -645,26 +628,16 @@ namespace Arc.UniInk
             return c switch
             {
                 '\\' => '\\' //
-                ,
-                '\'' => '\'' //
-                ,
-                '0' => '\0' //
-                ,
-                'a' => '\a' //
-                ,
-                'b' => '\b' //
-                ,
-                'f' => '\f' //
-                ,
-                'n' => '\n' //
-                ,
-                'r' => '\r' //
-                ,
-                't' => '\t' //
-                ,
-                'v' => '\v' //
-                ,
-                _ => throw new InkSyntaxException($"Unknown escape character[{c}]")
+              , '\'' => '\'' //
+              , '0'  => '\0' //
+              , 'a'  => '\a' //
+              , 'b'  => '\b' //
+              , 'f'  => '\f' //
+              , 'n'  => '\n' //
+              , 'r'  => '\r' //
+              , 't'  => '\t' //
+              , 'v'  => '\v' //
+              , _    => throw new InkSyntaxException($"Unknown escape character[{c}]")
             };
         }
 
@@ -683,26 +656,27 @@ namespace Arc.UniInk
 
         /*************************************************  Parsing  **************************************************/
 
+
         /// <summary> The delegate of Parsing Methods for <see cref="ParsingMethods"/> </summary>
         /// <param name="expression"> the expression to Evaluate </param>
         /// <param name="stack"> the object stack to push or pop </param>
         /// <param name="i"> the <paramref name="expression"/> start index </param>
         protected delegate bool ParsingMethodDelegate(string expression, InkSyntaxList stack, ref int i);
 
+
         /// <summary> The Parsing Methods for <see cref="CompileLexerAndFill"/> </summary>
         protected readonly List<ParsingMethodDelegate> ParsingMethods;
 
         /// <summary> Evaluate Operators in<see cref="InkOperator"/> </summary>
-        /// <param name="expression"> the expression to Evaluate       </param>
-        /// <param name="keys"> the object stack to push or pop        </param>
-        /// <param name="i"> the <paramref name="expression"/> start index  </param>
-        /// <returns> the evaluate is success or not                 </returns>
+        /// <param name="expression"> the expression to Evaluate </param>
+        /// <param name="keys"> the object stack to push or pop </param>
+        /// <param name="i"> the <paramref name="expression"/> start index </param>
+        /// <returns> the evaluate is success or not </returns>
         protected static bool EvaluateOperators(string expression, InkSyntaxList keys, ref int i)
         {
-            for (var operatorLen = InkOperator.MaxOperatorLen - 1; operatorLen >= 0; operatorLen--)
+            for (var operatorLen = InkOperator.MaxOperatorLen - 1 ; operatorLen >= 0 ; operatorLen--)
             {
-                if (i + operatorLen >= expression.Length)
-                    continue; // long=>short, || first than |, so we need to check the length
+                if (i + operatorLen >= expression.Length) continue; // long=>short, || first than |, so we need to check the length
 
                 var operatorHash = GetStringSliceHashCode(expression, i, i + operatorLen);
                 if (InkOperator.DicValues.TryGetValue(operatorHash, out var @operator))
@@ -716,11 +690,11 @@ namespace Arc.UniInk
             return false;
         }
 
-        /// <summary> Evaluate Number _eg: -3.64f                    </summary>
-        /// <param name="expression"> the expression to Evaluate       </param>
-        /// <param name="keys"> the object stack to push or pop        </param>
+        /// <summary> Evaluate Number _eg: -3.64f </summary>
+        /// <param name="expression"> the expression to Evaluate </param>
+        /// <param name="keys"> the object stack to push or pop </param>
         /// <param name="i"> the <paramref name="expression"/> start index  </param>
-        /// <returns> the evaluate is success or not                 </returns>
+        /// <returns> the evaluate is success or not </returns>
         protected static bool EvaluateNumber(string expression, InkSyntaxList keys, ref int i)
         {
             if (StartsWithNumbersFromIndex(expression, i, out var numberMatch, out var len))
@@ -734,11 +708,11 @@ namespace Arc.UniInk
             return false;
         }
 
-        /// <summary> Evaluate Bool _eg: true false                  </summary>
-        /// <param name="expression"> the expression to Evaluate       </param>
-        /// <param name="keys"> the object stack to push or pop        </param>
+        /// <summary> Evaluate Bool _eg: true false </summary>
+        /// <param name="expression"> the expression to Evaluate </param>
+        /// <param name="keys"> the object stack to push or pop </param>
         /// <param name="i"> the <paramref name="expression"/> start index  </param>
-        /// <returns> the evaluate is success or not                 </returns>
+        /// <returns> the evaluate is success or not </returns>
         protected static bool EvaluateBool(string expression, InkSyntaxList keys, ref int i)
         {
             if (StartsWithBoolFromIndex(expression, i, out var boolMatch, out var len))
@@ -751,11 +725,11 @@ namespace Arc.UniInk
             return false;
         }
 
-        /// <summary> Evaluate Char or Escaped Char  _eg: 'a' '\d'   </summary>
-        /// <param name="expression"> the expression to Evaluate       </param>
-        /// <param name="keys"> the object stack to push or pop        </param>
+        /// <summary> Evaluate Char or Escaped Char  _eg: 'a' '\d'          </summary>
+        /// <param name="expression"> the expression to Evaluate            </param>
+        /// <param name="keys"> the object stack to push or pop </param>
         /// <param name="i">the <paramref name="expression"/> start index   </param>
-        /// <returns> the evaluate is success or not                 </returns>
+        /// <returns> the evaluate is success or not                        </returns>
         protected static bool EvaluateChar(string expression, InkSyntaxList keys, ref int i)
         {
             if (StartsWithCharFormIndex(expression, i, out var value, out var len))
@@ -768,11 +742,11 @@ namespace Arc.UniInk
             return false;
         }
 
-        /// <summary> Evaluate String _eg:"string"                   </summary>
-        /// <param name="expression"> the expression to Evaluate       </param>
-        /// <param name="keys"> the object stack to push or pop        </param>
-        /// <param name="i"> the <paramref name="expression"/> start index  </param>
-        /// <returns> the evaluate is success or not                 </returns>
+        /// <summary> Evaluate String _eg:"string" </summary>
+        /// <param name="expression"> the expression to Evaluate </param>
+        /// <param name="keys"> the object stack to push or pop </param>
+        /// <param name="i"> the <paramref name="expression"/> start index </param>
+        /// <returns> the evaluate is success or not </returns>
         protected static bool EvaluateString(string expression, InkSyntaxList keys, ref int i)
         {
             if (StartsWithStringFormIndex(expression, i, out var value, out var len))
@@ -785,17 +759,16 @@ namespace Arc.UniInk
             return false;
         }
 
-        /// <summary> Evaluate Function _eg: LOG("Hello World")      </summary>
-        /// <param name="expression"> the expression to Evaluate       </param>
-        /// <param name="keys"> the object stack to push or pop        </param>
+        /// <summary> Evaluate Function _eg: LOG("Hello World")             </summary>
+        /// <param name="expression"> the expression to Evaluate            </param>
+        /// <param name="keys"> the object stack to push or pop             </param>
         /// <param name="i"> the <paramref name="expression"/> start index  </param>
-        /// <returns> the evaluate is success or not                 </returns>
+        /// <returns> the evaluate is success or not                        </returns>
         protected bool EvaluateFunction(string expression, InkSyntaxList keys, ref int i)
         {
-            for (var len = FUNC_NAME_MAX_LEN; len >= 0; len--)
+            for (var len = FUNC_NAME_MAX_LEN ; len >= 0 ; len--)
             {
-                if (i + len >= expression.Length)
-                    continue; // long=>short, || first than |, so we need to check the length
+                if (i + len >= expression.Length) continue; // long=>short, || first than |, so we need to check the length
 
                 var varHash = GetStringSliceHashCode(expression, i, i + len);
                 if (DicFunctions.TryGetValue(varHash, out var variable))
@@ -816,15 +789,14 @@ namespace Arc.UniInk
             return false;
         }
 
-        /// <summary> Evaluate Variable _eg: var a = 3;              </summary>
-        /// <param name="expression"> the expression to Evaluate       </param>
-        /// <param name="keys"> the object stack to push or pop        </param>
-        /// <param name="i"> the <paramref name="expression"/> start index  </param>
-        /// <returns> the evaluate is success or not                 </returns>
+        /// <summary> Evaluate Variable _eg: var a = 3; </summary>
+        /// <param name="expression"> the expression to Evaluate </param>
+        /// <param name="keys"> the object stack to push or pop </param>
+        /// <param name="i"> the <paramref name="expression"/> start index </param>
+        /// <returns> the evaluate is success or not </returns>
         protected bool EvaluateVariable(string expression, InkSyntaxList keys, ref int i)
         {
-            if (keys.Count > 0 && keys[keys.Count - 1] is InkOperator operatorValue &&
-                Equals(operatorValue, InkOperator.KeyVar))
+            if (keys.Count > 0 && keys[keys.Count - 1] is InkOperator operatorValue && Equals(operatorValue, InkOperator.KeyVar))
             {
                 var startIndex = i;
 
@@ -837,15 +809,13 @@ namespace Arc.UniInk
 
                 var keyHash = GetStringSliceHashCode(expression, startIndex, i);
 
-
                 if (DicVariables.TryGetValue(keyHash, out _))
                 {
-                    throw new InkSyntaxException(
-                        $"the variable[{expression.Substring(startIndex, i - startIndex)}] is already exist!");
+                    throw new InkSyntaxException($"the variable[{expression.Substring(startIndex, i - startIndex)}] is already exist!");
                 }
 
                 var inkValue = InkValue.Get();
-                inkValue.ValueType = TypeCode.DBNull;
+                inkValue.ValueType   = TypeCode.DBNull;
                 inkValue.DontRelease = true;
                 DicVariablesTemp.Add(keyHash, inkValue);
 
@@ -858,10 +828,9 @@ namespace Arc.UniInk
             }
 
 
-            for (var len = VARI_NAME_MAX_LEN; len >= 0; len--)
+            for (var len = VARI_NAME_MAX_LEN ; len >= 0 ; len--)
             {
-                if (i + len >= expression.Length)
-                    continue; // long=>short, || first than |, so we need to check the length
+                if (i + len >= expression.Length) continue; // long=>short, || first than |, so we need to check the length
 
                 var varHash = GetStringSliceHashCode(expression, i, i + len);
                 if (DicVariablesTemp.TryGetValue(varHash, out var variable))
@@ -891,8 +860,7 @@ namespace Arc.UniInk
         /**************************************************  Helper  **************************************************/
 
         /// <summary> Match <paramref name="value"/> from <paramref name="input"/> 's  <paramref name="startIndex"/> </summary>
-        protected static bool StartsWithInputStrFromIndex(string input, string value, int startIndex,
-            bool ignoreFirstCase = false)
+        protected static bool StartsWithInputStrFromIndex(string input, string value, int startIndex, bool ignoreFirstCase = false)
         {
             if (input.Length - startIndex < value.Length)
             {
@@ -914,7 +882,7 @@ namespace Arc.UniInk
                 }
             }
 
-            for (var i = 1; i < value.Length; i++)
+            for (var i = 1 ; i < value.Length ; i++)
             {
                 if (input[i + startIndex] != value[i])
                 {
@@ -925,23 +893,23 @@ namespace Arc.UniInk
             return true;
         }
 
-        /// <summary> Find <paramref name="input"/> is whether start with numbers from <paramref name="startIndex"/>    </summary>
+        /// <summary> Find <paramref name="input"/> is whether start with numbers from <paramref name="startIndex"/> </summary>
         protected static bool StartsWithNumbersFromIndex(string input, int startIndex, out InkValue value, out int len)
         {
             if (!char.IsDigit(input[startIndex]))
             {
                 value = null;
-                len = 0;
+                len   = 0;
                 return false;
             }
 
-            value = InkValue.Get();
+            value           = InkValue.Get();
             value.ValueType = TypeCode.Int32;
-            len = 0;
+            len             = 0;
 
             var pointNum = 0;
 
-            for (var i = startIndex; i < input.Length; i++)
+            for (var i = startIndex ; i < input.Length ; i++)
             {
                 if (char.IsDigit(input[i]))
                 {
@@ -956,7 +924,7 @@ namespace Arc.UniInk
                     if (pointNum > 1)
                     {
                         throw new InkSyntaxException(
-                            "[NotSupport]:Too many decimal points, can't calling method with float or double number.");
+                                                     "[NotSupport]:Too many decimal points, can't calling method with float or double number.");
                     }
 
                     value.ValueType = TypeCode.Double;
@@ -972,11 +940,11 @@ namespace Arc.UniInk
 
                     switch (input[i])
                     {
-                        case 'f' or 'F':
+                        case 'f' or 'F' :
                             value.ValueType = TypeCode.Single;
                             len++;
                             break;
-                        case 'd' or 'D':
+                        case 'd' or 'D' :
                             value.ValueType = TypeCode.Double;
                             len++;
                             break;
@@ -990,7 +958,7 @@ namespace Arc.UniInk
             return true;
         }
 
-        /// <summary> Find <paramref name="input"/> is whether start with char from <paramref name="startIndex"/>       </summary>
+        /// <summary> Find <paramref name="input"/> is whether start with char from <paramref name="startIndex"/> </summary>
         protected static bool StartsWithCharFormIndex(string input, int startIndex, out InkValue value, out int len)
         {
             var i = startIndex;
@@ -1024,23 +992,21 @@ namespace Arc.UniInk
                 throw new InkSyntaxException($"Illegal character[{i}] : too many characters in a character literal");
             }
 
-            len = 0;
+            len   = 0;
             value = null;
             return false;
         }
 
-        /// <summary> Find <paramref name="input"/> is whether start with string from <paramref name="startIndex"/>     </summary>
+        /// <summary> Find <paramref name="input"/> is whether start with string from <paramref name="startIndex"/> </summary>
         protected static bool StartsWithStringFormIndex(string input, int startIndex, out InkValue value, out int len)
         {
             var i = startIndex;
 
-
             if (input[i].Equals('\"'))
             {
                 i++;
-                value = InkValue.Get();
+                value           = InkValue.Get();
                 value.ValueType = TypeCode.String;
-
 
                 while (i < input.Length)
                 {
@@ -1067,7 +1033,7 @@ namespace Arc.UniInk
                 throw new InkSyntaxException($"Illegal character[{i}] : too many characters in a character literal");
             }
 
-            len = 0;
+            len   = 0;
             value = null;
             return false;
         }
@@ -1075,44 +1041,43 @@ namespace Arc.UniInk
         /// <summary> Find <paramref name="input"/> is whether start with bool from <paramref name="startIndex"/>       </summary>
         protected static bool StartsWithBoolFromIndex(string input, int startIndex, out InkValue value, out int len)
         {
-            const string TRUE_STR01 = "true";
-            const string TRUE_STR02 = "True";
+            const string TRUE_STR01  = "true";
+            const string TRUE_STR02  = "True";
             const string FALSE_STR01 = "false";
             const string FALSE_STR02 = "False";
 
             if (StartsWithInputStrFromIndex(input, FALSE_STR01, startIndex))
             {
-                len = FALSE_STR01.Length;
+                len   = FALSE_STR01.Length;
                 value = InkValue.GetBoolValue(false);
                 return true;
             }
 
             if (StartsWithInputStrFromIndex(input, FALSE_STR02, startIndex))
             {
-                len = FALSE_STR02.Length;
+                len   = FALSE_STR02.Length;
                 value = InkValue.GetBoolValue(false);
                 return true;
             }
 
             if (StartsWithInputStrFromIndex(input, TRUE_STR01, startIndex))
             {
-                len = TRUE_STR01.Length;
+                len   = TRUE_STR01.Length;
                 value = InkValue.GetBoolValue(true);
                 return true;
             }
 
             if (StartsWithInputStrFromIndex(input, TRUE_STR02, startIndex))
             {
-                len = TRUE_STR02.Length;
+                len   = TRUE_STR02.Length;
                 value = InkValue.GetBoolValue(true);
                 return true;
             }
 
-            len = 0;
+            len   = 0;
             value = null;
             return false;
         }
-
 
         /// <summary> Find the innermost section between <paramref name="sctStart"/> and <paramref name="sctEnd"/> </summary>
         /// <param name="keys"> the keys to find section in </param>
@@ -1121,13 +1086,12 @@ namespace Arc.UniInk
         /// <param name="start"> the start index to search from </param>
         /// <param name="end"> the end index to search to </param>
         /// <returns> the result is success or not , the start index and end index of the section </returns>
-        protected static (bool result, int startIndex, int endIndex) FindSection(InkSyntaxList keys,
-            InkOperator sctStart, InkOperator sctEnd, int start, int end)
+        protected static (bool result, int startIndex, int endIndex) FindSection(InkSyntaxList keys, InkOperator sctStart, InkOperator sctEnd, int start, int end)
         {
             var startIndex = -1;
-            var endIndex = -1;
+            var endIndex   = -1;
 
-            for (var i = start; i <= end; i++)
+            for (var i = start ; i <= end ; i++)
             {
                 if (keys.IndexDirty[i])
                 {
@@ -1154,22 +1118,21 @@ namespace Arc.UniInk
         }
 
         /// <summary> Find the outermost operator range in the specified left and right </summary>
-        protected static (int StartIndex, int EndIndex) GetMatchOperator(InkSyntaxList keys, InkOperator opLeft,
-            InkOperator opRight, int start, int end)
+        protected static (int StartIndex, int EndIndex) GetMatchOperator(InkSyntaxList keys, InkOperator opLeft, InkOperator opRight, int start, int end)
         {
             int startIndex = -1, balance = -1;
 
-            for (var i = start; i <= end; i++)
+            for (var i = start ; i <= end ; i++)
             {
                 if (keys[i] is InkOperator op && Equals(op, opLeft))
                 {
                     startIndex = i;
-                    balance = 1;
+                    balance    = 1;
                     break;
                 }
             }
 
-            for (var i = startIndex + 1; i <= end; i++)
+            for (var i = startIndex + 1 ; i <= end ; i++)
             {
                 if (keys[i] is InkOperator opL && Equals(opL, opLeft))
                 {
@@ -1186,7 +1149,6 @@ namespace Arc.UniInk
                 }
             }
 
-
             return (-1, -1);
         }
 
@@ -1198,7 +1160,7 @@ namespace Arc.UniInk
         /// <returns> the result is success or not , the index of the operator </returns>
         protected static (bool result, int index) FindOperator(InkSyntaxList keys, InkOperator @operator, int start, int end)
         {
-            for (var i = start; i <= end; i++)
+            for (var i = start ; i <= end ; i++)
             {
                 if (keys.IndexDirty[i])
                 {
@@ -1221,12 +1183,11 @@ namespace Arc.UniInk
         /// <param name="start"> the start index to search from </param>
         /// <param name="end"> the end index to search to </param>
         /// <returns> the result is success or not , the index of the right operator </returns>
-        protected static (bool result, int index) FindNoBalanceOperator(InkSyntaxList keys, InkOperator operatorLeft,
-            InkOperator operatorRight, int start, int end)
+        protected static (bool result, int index) FindNoBalanceOperator(InkSyntaxList keys, InkOperator operatorLeft, InkOperator operatorRight, int start, int end)
         {
             var balance = 0;
 
-            for (var i = start; i <= end; i++)
+            for (var i = start ; i <= end ; i++)
             {
                 var current = keys[i];
 
@@ -1256,13 +1217,12 @@ namespace Arc.UniInk
         /// <param name="startIndex"> the start index to search from </param>
         /// <param name="endIndex"> the end index to search to </param>
         /// <returns> the highest priority operator and its index </returns>
-        protected static (InkOperator @operator, int index) GetHighestPriorityOperator(InkSyntaxList keys,
-            int startIndex, int endIndex)
+        protected static (InkOperator @operator, int index) GetHighestPriorityOperator(InkSyntaxList keys, int startIndex, int endIndex)
         {
-            var index = -1;
+            var index            = -1;
             var priorityOperator = InkOperator.Empty;
 
-            for (var i = startIndex; i <= endIndex; i++)
+            for (var i = startIndex ; i <= endIndex ; i++)
             {
                 if (keys.IndexDirty[i])
                 {
@@ -1270,9 +1230,9 @@ namespace Arc.UniInk
                 }
 
                 if (keys[i] is InkOperator @operator
-                    && @operator.PriorityIndex < priorityOperator.PriorityIndex)
+                 && @operator.PriorityIndex < priorityOperator.PriorityIndex)
                 {
-                    index = i;
+                    index            = i;
                     priorityOperator = @operator;
                 }
             }
@@ -1294,7 +1254,6 @@ namespace Arc.UniInk
                 }
             }
 
-
             return false;
         }
 
@@ -1302,7 +1261,7 @@ namespace Arc.UniInk
         /// <param name="objectList"> the object list to remove null </param>
         protected static void ObjectRemoveNull(List<object> objectList)
         {
-            for (var i = 0; i < objectList.Count; i++)
+            for (var i = 0 ; i < objectList.Count ; i++)
             {
                 if (objectList[i] == null)
                 {
@@ -1320,7 +1279,7 @@ namespace Arc.UniInk
         public static int GetStringSliceHashCode(string str, int startIndex, int endIndex)
         {
             var hash = 0;
-            for (var i = startIndex; i <= endIndex; i++)
+            for (var i = startIndex ; i <= endIndex ; i++)
             {
                 hash = hash * 31 + str[i];
             }
@@ -1348,108 +1307,158 @@ namespace Arc.UniInk
         //keyword  refer to : https://learn.microsoft.com/zh-cn/dotnet/csharp/language-reference/keywords/
         /// <summary> Left Parenthesis  "(" </summary>
         public static readonly InkOperator ParenthesisLeft = new("(", 1);
+
         /// <summary> Right Parenthesis ")" </summary>
         public static readonly InkOperator ParenthesisRight = new(")", 1);
+
         /// <summary> Dot Operator "." (don't support , it's reserved) </summary>
         public static readonly InkOperator Dot = new(".", 2);
+
         /// <summary> Array Bracket Start  "[" (don't support , it's reserved) </summary>
-        public static readonly InkOperator BracketStart = new("[", 2); 
+        public static readonly InkOperator BracketStart = new("[", 2);
+
         /// <summary> Array Bracket End    "]" (don't support , it's reserved) </summary>
-        public static readonly InkOperator BracketEnd = new("]", 2); 
+        public static readonly InkOperator BracketEnd = new("]", 2);
+
         /// <summary> Unary Plus  "++" (don't support , it's reserved) </summary>
-        public static readonly InkOperator Increment = new("++", 2); 
+        public static readonly InkOperator Increment = new("++", 2);
+
         /// <summary> Unary Minus "--" (don't support , it's reserved) </summary>
         public static readonly InkOperator Decrement = new("--", 2);
+
         /// <summary> Logical NOT "!" </summary>
         public static readonly InkOperator LogicalNot = new("!", 3);
+
         /// <summary> Bitwise NOT "~" (don't support , it's reserved) </summary>
         public static readonly InkOperator BitNot = new("~", 3);
+
         /// <summary> Unary Plus  "+" (don't support , it's reserved) </summary>
         public static readonly InkOperator Cast = new("😊()", 4);
+
         /// <summary> Multiply "*" </summary>
         public static readonly InkOperator Multiply = new("*", 5);
+
         /// <summary> Divide "/" </summary>
         public static readonly InkOperator Divide = new("/", 5);
+
         /// <summary> Modulo "%" </summary>
         public static readonly InkOperator Modulo = new("%", 5);
+
         /// <summary> Plus "+" </summary>
         public static readonly InkOperator Plus = new("+", 6);
+
         /// <summary> Minus "-" </summary>
         public static readonly InkOperator Minus = new("-", 6);
+
         /// <summary> Left Shift "&lt;&lt;" (don't support , it's reserved) </summary>
         public static readonly InkOperator LeftShift = new("<<", 7);
+
         /// <summary> Right Shift "&gt;&gt;" (don't support , it's reserved) </summary>
         public static readonly InkOperator RightShift = new(">>", 7);
+
         /// <summary> Lower "&lt;" </summary>
         public static readonly InkOperator Lower = new("<", 8);
+
         /// <summary> Greater "&gt;" </summary>
         public static readonly InkOperator Greater = new(">", 8);
+
         /// <summary> Lower Or Equal "&lt;=" </summary>
         public static readonly InkOperator LowerOrEqual = new("<=", 8);
+
         /// <summary> Greater Or Equal "&gt;=" </summary>
         public static readonly InkOperator GreaterOrEqual = new(">=", 8);
+
         /// <summary> Equal "==" </summary>
         public static readonly InkOperator Equal = new("==", 9);
+
         /// <summary> Not Equal "!=" </summary>
         public static readonly InkOperator NotEqual = new("!=", 9);
+
         /// <summary> Bitwise AND "&amp;" (don't support , it's reserved) </summary>
         public static readonly InkOperator BitwiseAnd = new("&", 10); // don't support , its reserved
+
         /// <summary> Bitwise XOR "^" (don't support , it's reserved) </summary>
         public static readonly InkOperator BitwiseXor = new("^", 11); // don't support , its reserved
+
         /// <summary> Bitwise OR "|" (don't support , it's reserved) </summary>
         public static readonly InkOperator BitwiseOr = new("|", 12); // don't support , its reserved
+
         /// <summary> Conditional AND "&amp;&amp;" </summary>
         public static readonly InkOperator ConditionalAnd = new("&&", 13);
+
         /// <summary> Conditional OR "||" </summary>
         public static readonly InkOperator ConditionalOr = new("||", 14);
+
         /// <summary> Conditional Ternary Operator "?:" (don't support , it's reserved) </summary>
         public static readonly InkOperator Conditional = new("?:", 15); // don't support , its reserved
+
         /// <summary> Assignment Operator "=" </summary>
         public static readonly InkOperator Assign = new("=", 16);
+
         /// <summary> Comma Operator "," </summary>
         public static readonly InkOperator Comma = new(",", 16);
+
         /// <summary> Lambda Expression Operator "=&gt;" </summary>
         public static readonly InkOperator Lambda = new("=>", 17);
+
         /// <summary> Left Brace "{" </summary>
         public static readonly InkOperator BraceLeft = new("{", 20);
+
         /// <summary> Right Brace "}" </summary>
         public static readonly InkOperator BraceRight = new("}", 20);
+
         /// <summary> Semicolon ";" </summary>
         public static readonly InkOperator Semicolon = new(";", 20);
+
         /// <summary> Colon ":" (don't support , it's reserved) </summary>
         public static readonly InkOperator Colon = new(":", -1);
+
         /// <summary> Question Mark "?" (don't support , it's reserved) </summary>
         public static readonly InkOperator QuestionMark = new("?", -1);
+
         /// <summary> Verbatim String Prefix "@\"" (don't support , it's reserved) </summary>
         public static readonly InkOperator At = new("@\"", -1);
+
         /// <summary> Interpolated String Prefix "$\"" (don't support , it's reserved) </summary>
         public static readonly InkOperator Dollar = new("$\"", -1);
+
         /// <summary> Preprocessor Directive "#" (don't support , it's reserved) </summary>
         public static readonly InkOperator Hash = new("#", -1);
 
 
         /// <summary> Keyword "if" - Conditional Statement </summary>
         public static readonly InkOperator KeyIf = new("if", 20);
+
         /// <summary> Keyword "var" - Variable Declaration </summary>
         public static readonly InkOperator KeyVar = new("var", 20);
+
         /// <summary> Keyword "else" - Alternative Conditional Branch </summary>
         public static readonly InkOperator KeyElse = new("else", 20);
+
         /// <summary> Keyword "return" - Return Statement </summary>
         public static readonly InkOperator KeyReturn = new("return", 20);
+
         /// <summary> Keyword "switch" - Switch Statement (don't support , it's reserved) </summary>
         public static readonly InkOperator KeySwitch = new("switch", 20);
+
         /// <summary> Keyword "while" - While Loop (don't support , it's reserved) </summary>
         public static readonly InkOperator KeyWhile = new("while", 20);
+
         /// <summary> Keyword "for" - For Loop (don't support , it's reserved) </summary>
         public static readonly InkOperator KeyFor = new("for", 20);
+
         /// <summary> Keyword "foreach" - Foreach Loop (don't support , it's reserved) </summary>
         public static readonly InkOperator KeyForeach = new("foreach", 20);
+
         /// <summary> Keyword "in" - Collection Iterator (don't support , it's reserved) </summary>
         public static readonly InkOperator KeyIn = new("in", 20);
+
         /// <summary> Keyword "break" - Break Statement (don't support , it's reserved) </summary>
         public static readonly InkOperator KeyBreak = new("break", 20);
+
         /// <summary> Keyword "continue" - Continue Statement (don't support , it's reserved) </summary>
         public static readonly InkOperator KeyContinue = new("continue", 20);
+
         /// <summary> Empty Placeholder Operator with Maximum Priority </summary>
         public static readonly InkOperator Empty = new("😊", short.MaxValue);
 
@@ -1461,9 +1470,9 @@ namespace Arc.UniInk
         /// <param name="priorityIndex"> the priority index of the operator </param>
         protected InkOperator(string name, short priorityIndex)
         {
-            PriorityIndex = priorityIndex;
+            PriorityIndex  = priorityIndex;
             MaxOperatorLen = Math.Max(MaxOperatorLen, (short)name.Length);
-            Name = name;
+            Name           = name;
             var hash = UniInk.GetStringSliceHashCode(name, 0, name.Length - 1);
             DicValues.Add(hash, this);
         }
@@ -1483,8 +1492,7 @@ namespace Arc.UniInk
         /// <summary> Override Equals Method </summary>
         /// <param name="otherOperator"> the other operator to compare </param>
         /// <returns> the result is equal or not </returns>
-        public override bool Equals(object otherOperator) =>
-            otherOperator is InkOperator @operator && OperatorValue == @operator.OperatorValue;
+        public override bool Equals(object otherOperator) => otherOperator is InkOperator @operator && OperatorValue == @operator.OperatorValue;
 
         /// <summary> Override GetHashCode Method </summary>
         /// <returns> the hash code of the operator </returns>
@@ -1501,7 +1509,7 @@ namespace Arc.UniInk
         {
             switch (left)
             {
-                case null when right is InkValue rightValue:
+                case null when right is InkValue rightValue :
                 {
                     rightValue.Calculate();
 
@@ -1510,13 +1518,13 @@ namespace Arc.UniInk
                     rightValue.CopyTo(rightValueCopy);
                     return rightValueCopy;
                 }
-                case InkValue leftValue when right is InkValue rightValue:
+                case InkValue leftValue when right is InkValue rightValue :
                 {
                     return leftValue + rightValue;
                 }
 
 
-                default: throw new InkSyntaxException($"unknown type{left}--{right}");
+                default : throw new InkSyntaxException($"unknown type{left}--{right}");
             }
         }
 
@@ -1527,18 +1535,18 @@ namespace Arc.UniInk
         {
             switch (left)
             {
-                case null when right is InkValue rightValue:
+                case null when right is InkValue rightValue :
                 {
                     var inkDefault = InkValue.GetIntValue(0);
-                    var result = inkDefault - rightValue;
+                    var result     = inkDefault - rightValue;
                     InkValue.Release(inkDefault);
                     return result;
                 }
-                case InkValue leftValue when right is InkValue rightValue:
+                case InkValue leftValue when right is InkValue rightValue :
                 {
                     return leftValue - rightValue;
                 }
-                default: throw new InkSyntaxException($"unknown type{left}--{right}");
+                default : throw new InkSyntaxException($"unknown type{left}--{right}");
             }
         }
 
@@ -1547,12 +1555,12 @@ namespace Arc.UniInk
         {
             switch (left)
             {
-                case null: return right;
-                case InkValue leftValue when right is InkValue rightValue:
+                case null : return right;
+                case InkValue leftValue when right is InkValue rightValue :
                 {
                     return leftValue * rightValue;
                 }
-                default: throw new InkSyntaxException($"unknown type{left}--{right}");
+                default : throw new InkSyntaxException($"unknown type{left}--{right}");
             }
         }
 
@@ -1561,12 +1569,12 @@ namespace Arc.UniInk
         {
             switch (left)
             {
-                case null: return right;
-                case InkValue leftValue when right is InkValue rightValue:
+                case null : return right;
+                case InkValue leftValue when right is InkValue rightValue :
                 {
                     return leftValue / rightValue;
                 }
-                default: throw new InkSyntaxException($"unknown type{left}--{right}");
+                default : throw new InkSyntaxException($"unknown type{left}--{right}");
             }
         }
 
@@ -1575,11 +1583,11 @@ namespace Arc.UniInk
         {
             switch (left)
             {
-                case InkValue leftValue when right is InkValue rightValue:
+                case InkValue leftValue when right is InkValue rightValue :
                 {
                     return leftValue % rightValue;
                 }
-                default: throw new InkSyntaxException($"unknown type{left}--{right}");
+                default : throw new InkSyntaxException($"unknown type{left}--{right}");
             }
         }
 
@@ -1588,12 +1596,12 @@ namespace Arc.UniInk
         {
             switch (left)
             {
-                case null: return right;
-                case InkValue leftValue when right is InkValue rightValue:
+                case null : return right;
+                case InkValue leftValue when right is InkValue rightValue :
                 {
                     return leftValue < rightValue;
                 }
-                default: throw new InkSyntaxException($"unknown type{left}--{right}");
+                default : throw new InkSyntaxException($"unknown type{left}--{right}");
             }
         }
 
@@ -1602,12 +1610,12 @@ namespace Arc.UniInk
         {
             switch (left)
             {
-                case null: return right;
-                case InkValue leftValue when right is InkValue rightValue:
+                case null : return right;
+                case InkValue leftValue when right is InkValue rightValue :
                 {
                     return leftValue > rightValue;
                 }
-                default: throw new InkSyntaxException($"unknown type{left}--{right}");
+                default : throw new InkSyntaxException($"unknown type{left}--{right}");
             }
         }
 
@@ -1616,12 +1624,12 @@ namespace Arc.UniInk
         {
             switch (left)
             {
-                case null: return right;
-                case InkValue leftValue when right is InkValue rightValue:
+                case null : return right;
+                case InkValue leftValue when right is InkValue rightValue :
                 {
                     return leftValue == rightValue;
                 }
-                default: throw new InkSyntaxException($"unknown type{left}--{right}");
+                default : throw new InkSyntaxException($"unknown type{left}--{right}");
             }
         }
 
@@ -1630,12 +1638,12 @@ namespace Arc.UniInk
         {
             switch (left)
             {
-                case null: return right;
-                case InkValue leftValue when right is InkValue rightValue:
+                case null : return right;
+                case InkValue leftValue when right is InkValue rightValue :
                 {
                     return leftValue <= rightValue;
                 }
-                default: throw new InkSyntaxException($"unknown type{left}--{right}");
+                default : throw new InkSyntaxException($"unknown type{left}--{right}");
             }
         }
 
@@ -1644,12 +1652,12 @@ namespace Arc.UniInk
         {
             switch (left)
             {
-                case null: return right;
-                case InkValue leftValue when right is InkValue rightValue:
+                case null : return right;
+                case InkValue leftValue when right is InkValue rightValue :
                 {
                     return leftValue >= rightValue;
                 }
-                default: throw new InkSyntaxException($"unknown type{left}--{right}");
+                default : throw new InkSyntaxException($"unknown type{left}--{right}");
             }
         }
 
@@ -1658,12 +1666,12 @@ namespace Arc.UniInk
         {
             switch (left)
             {
-                case null: return right;
-                case InkValue leftValue when right is InkValue rightValue:
+                case null : return right;
+                case InkValue leftValue when right is InkValue rightValue :
                 {
                     return leftValue != rightValue;
                 }
-                default: throw new InkSyntaxException($"unknown type{left}--{right}");
+                default : throw new InkSyntaxException($"unknown type{left}--{right}");
             }
         }
 
@@ -1672,11 +1680,11 @@ namespace Arc.UniInk
         {
             switch (right)
             {
-                case InkValue rightValue:
+                case InkValue rightValue :
                 {
                     return !rightValue;
                 }
-                default: throw new InkSyntaxException($"unknown type{left}--{right}");
+                default : throw new InkSyntaxException($"unknown type{left}--{right}");
             }
         }
 
@@ -1685,11 +1693,11 @@ namespace Arc.UniInk
         {
             switch (left)
             {
-                case InkValue leftValue when right is InkValue rightValue:
+                case InkValue leftValue when right is InkValue rightValue :
                 {
                     return InkValue.GetBoolValue(leftValue.ValueBool && rightValue.ValueBool);
                 }
-                default: throw new InkSyntaxException($"unknown type{left}--{right}");
+                default : throw new InkSyntaxException($"unknown type{left}--{right}");
             }
         }
 
@@ -1698,12 +1706,12 @@ namespace Arc.UniInk
         {
             switch (left)
             {
-                case null: return right;
-                case InkValue leftValue when right is InkValue rightValue:
+                case null : return right;
+                case InkValue leftValue when right is InkValue rightValue :
                 {
                     return InkValue.GetBoolValue(leftValue.ValueBool || rightValue.ValueBool);
                 }
-                default: throw new InkSyntaxException($"unknown type{left}--{right}");
+                default : throw new InkSyntaxException($"unknown type{left}--{right}");
             }
         }
 
@@ -1714,7 +1722,7 @@ namespace Arc.UniInk
             {
                 switch (right)
                 {
-                    case InkValue rightValue:
+                    case InkValue rightValue :
                     {
                         leftValue.ValueType = rightValue.ValueType;
                         rightValue.Calculate();
@@ -1722,16 +1730,16 @@ namespace Arc.UniInk
 
                         return null;
                     }
-                    case not null:
+                    case not null :
                     {
-                        leftValue.ValueType = TypeCode.Object;
+                        leftValue.ValueType   = TypeCode.Object;
                         leftValue.ValueObject = right;
                         leftValue.IsCalculate = true;
 
                         return null;
                     }
 
-                    default: throw new InkSyntaxException($"worrying operator using!");
+                    default : throw new InkSyntaxException($"worrying operator using!");
                 }
             }
 
@@ -1743,14 +1751,14 @@ namespace Arc.UniInk
         {
             switch (right)
             {
-                case InkValue rightValue:
+                case InkValue rightValue :
                 {
                     rightValue.Calculate();
                     var result = rightValue.Clone();
                     result.IsReturner = true;
                     return result;
                 }
-                default: throw new InkSyntaxException($"unknown type{left}--{right}");
+                default : throw new InkSyntaxException($"unknown type{left}--{right}");
             }
         }
     }
@@ -1809,8 +1817,8 @@ namespace Arc.UniInk
         public static InkValue GetCharValue(char c)
         {
             var value = Get();
-            value.ValueType = TypeCode.Char;
-            value.ValueChar = c;
+            value.ValueType   = TypeCode.Char;
+            value.ValueChar   = c;
             value.IsCalculate = true;
             return value;
         }
@@ -1821,8 +1829,8 @@ namespace Arc.UniInk
         public static InkValue GetBoolValue(bool b)
         {
             var value = Get();
-            value.ValueType = TypeCode.Boolean;
-            value.ValueBool = b;
+            value.ValueType   = TypeCode.Boolean;
+            value.ValueBool   = b;
             value.IsCalculate = true;
             return value;
         }
@@ -1833,8 +1841,8 @@ namespace Arc.UniInk
         public static InkValue GetIntValue(int i)
         {
             var value = Get();
-            value.ValueType = TypeCode.Int32;
-            value.ValueInt = i;
+            value.ValueType   = TypeCode.Int32;
+            value.ValueInt    = i;
             value.IsCalculate = true;
             return value;
         }
@@ -1845,8 +1853,8 @@ namespace Arc.UniInk
         public static InkValue GetFloatValue(float f)
         {
             var value = Get();
-            value.ValueType = TypeCode.Single;
-            value.ValueFloat = f;
+            value.ValueType   = TypeCode.Single;
+            value.ValueFloat  = f;
             value.IsCalculate = true;
             return value;
         }
@@ -1857,7 +1865,7 @@ namespace Arc.UniInk
         public static InkValue GetDoubleValue(double d)
         {
             var value = Get();
-            value.ValueType = TypeCode.Double;
+            value.ValueType   = TypeCode.Double;
             value.ValueDouble = d;
             value.IsCalculate = true;
             return value;
@@ -1886,7 +1894,7 @@ namespace Arc.UniInk
         public static InkValue GetObjectValue(object obj)
         {
             var value = Get();
-            value.ValueType = TypeCode.Object;
+            value.ValueType   = TypeCode.Object;
             value.ValueObject = obj;
             value.IsCalculate = true;
             return value;
@@ -1899,7 +1907,7 @@ namespace Arc.UniInk
         public static InkValue SetGetter(InkValue value, Action<InkValue> getter)
         {
             value.IsGetter = true;
-            value.Getter = getter;
+            value.Getter   = getter;
             return value;
         }
 
@@ -1932,13 +1940,13 @@ namespace Arc.UniInk
 
             value.ValueMeta.Clear();
             value.IsCalculate = false;
-            value.IsIsSetter = false;
-            value.IsGetter = false;
-            value.IsReturner = false;
-            value.ValueInt = 0;
-            value.ValueBool = false;
-            value.ValueChar = '\0';
-            value.ValueFloat = 0;
+            value.IsIsSetter  = false;
+            value.IsGetter    = false;
+            value.IsReturner  = false;
+            value.ValueInt    = 0;
+            value.ValueBool   = false;
+            value.ValueChar   = '\0';
+            value.ValueFloat  = 0;
             value.ValueDouble = 0;
             value.ValueObject = null;
 
@@ -1947,16 +1955,22 @@ namespace Arc.UniInk
 
         /// <summary> Integer value storage </summary>
         public int ValueInt;
+
         /// <summary> Boolean value storage </summary>
         public bool ValueBool;
+
         /// <summary> Char value storage </summary>
         public char ValueChar;
+
         /// <summary> Float value storage </summary>
         public float ValueFloat;
+
         /// <summary> Double value storage </summary>
         public double ValueDouble;
+
         /// <summary> Object reference storage </summary>
         public object ValueObject;
+
         /// <summary> String value computed from Value_Meta </summary>
         public string ValueString => string.Concat(ValueMeta);
 
@@ -1980,13 +1994,16 @@ namespace Arc.UniInk
 
         /// <summary> Indicates if this value is a setter </summary>
         public bool IsIsSetter;
+
         /// <summary> Indicates if this value is a getter </summary>
         public bool IsGetter;
+
         /// <summary> Indicates if this value is a return value </summary>
         public bool IsReturner;
 
         /// <summary> Setter action for this value </summary>
         public Action<InkValue> Setter;
+
         /// <summary> Getter action for this value </summary>
         public Action<InkValue> Getter;
 
@@ -1998,7 +2015,7 @@ namespace Arc.UniInk
 
             switch (ValueType)
             {
-                case TypeCode.Int32:
+                case TypeCode.Int32 :
                 {
                     ValueInt = 0;
 
@@ -2009,11 +2026,11 @@ namespace Arc.UniInk
 
                     break;
                 }
-                case TypeCode.Single:
+                case TypeCode.Single :
                 {
                     ValueFloat = 0;
                     var floatPart = 0.0f;
-                    var numCount = 0;
+                    var numCount  = 0;
 
                     foreach (var c in ValueMeta) //123
                     {
@@ -2023,7 +2040,7 @@ namespace Arc.UniInk
                         ValueFloat = ValueFloat * 10 + (c - '0');
                     }
 
-                    for (var i = ValueMeta.Count - 1; i >= numCount; i--)
+                    for (var i = ValueMeta.Count - 1 ; i >= numCount ; i--)
                     {
                         if (ValueMeta[i] == '.') break;
 
@@ -2034,11 +2051,11 @@ namespace Arc.UniInk
 
                     break;
                 }
-                case TypeCode.Double:
+                case TypeCode.Double :
                 {
                     ValueDouble = 0;
                     var floatPart = 0.0d;
-                    var numCount = 0;
+                    var numCount  = 0;
 
                     foreach (var c in ValueMeta)
                     {
@@ -2048,7 +2065,7 @@ namespace Arc.UniInk
                         numCount++;
                     }
 
-                    for (var i = ValueMeta.Count - 1; i >= numCount; i--)
+                    for (var i = ValueMeta.Count - 1 ; i >= numCount ; i--)
                     {
                         if (ValueMeta[i] == '.') break;
 
@@ -2059,9 +2076,9 @@ namespace Arc.UniInk
 
                     break;
                 }
-                case TypeCode.Object: break;
-                case TypeCode.String: break;
-                default: throw new InkSyntaxException("Unknown ValueType");
+                case TypeCode.Object : break;
+                case TypeCode.String : break;
+                default :              throw new InkSyntaxException("Unknown ValueType");
             }
 
             IsCalculate = true;
@@ -2071,13 +2088,13 @@ namespace Arc.UniInk
         /// <param name="value">The target InkValue to copy to</param>
         public void CopyTo(InkValue value)
         {
-            value.ValueType = ValueType;
+            value.ValueType   = ValueType;
             value.IsCalculate = IsCalculate;
 
-            value.ValueInt = ValueInt;
-            value.ValueBool = ValueBool;
-            value.ValueChar = ValueChar;
-            value.ValueFloat = ValueFloat;
+            value.ValueInt    = ValueInt;
+            value.ValueBool   = ValueBool;
+            value.ValueChar   = ValueChar;
+            value.ValueFloat  = ValueFloat;
             value.ValueDouble = ValueDouble;
             value.ValueObject = ValueObject;
             value.ValueMeta.Clear();
@@ -2105,14 +2122,14 @@ namespace Arc.UniInk
 
             switch (ValueType)
             {
-                case TypeCode.Int32: return ValueInt.ToString();
-                case TypeCode.Boolean: return ValueBool.ToString();
-                case TypeCode.Char: return ValueChar.ToString();
-                case TypeCode.Single: return ValueFloat.ToString();
-                case TypeCode.Double: return ValueDouble.ToString();
-                case TypeCode.String: return ValueString;
-                case TypeCode.Object: return ValueObject.ToString();
-                default: throw new InkSyntaxException("Unknown ValueType");
+                case TypeCode.Int32 :   return ValueInt.ToString();
+                case TypeCode.Boolean : return ValueBool.ToString();
+                case TypeCode.Char :    return ValueChar.ToString();
+                case TypeCode.Single :  return ValueFloat.ToString();
+                case TypeCode.Double :  return ValueDouble.ToString();
+                case TypeCode.String :  return ValueString;
+                case TypeCode.Object :  return ValueObject.ToString();
+                default :               throw new InkSyntaxException("Unknown ValueType");
             }
         }
 
@@ -2260,16 +2277,14 @@ namespace Arc.UniInk
 
             switch (left.ValueType, right.ValueType)
             {
-                case (TypeCode.String, TypeCode.String):
+                case (TypeCode.String, TypeCode.String) :
                     foreach (var c in left.ValueMeta) answer.ValueMeta.Add(c);
                     foreach (var c in right.ValueMeta) answer.ValueMeta.Add(c);
                     break;
-                case (TypeCode.Int32, TypeCode.Int32): answer.ValueInt = left.ValueInt + right.ValueInt; break;
-                case (TypeCode.Single, TypeCode.Single):
-                    answer.ValueFloat = left.ValueFloat + right.ValueFloat; break;
-                case (TypeCode.Double, TypeCode.Double):
-                    answer.ValueDouble = left.ValueDouble + right.ValueDouble; break;
-                default: throw new InkSyntaxException("worrying operator using!");
+                case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueInt    = left.ValueInt    + right.ValueInt; break;
+                case (TypeCode.Single, TypeCode.Single) : answer.ValueFloat  = left.ValueFloat  + right.ValueFloat; break;
+                case (TypeCode.Double, TypeCode.Double) : answer.ValueDouble = left.ValueDouble + right.ValueDouble; break;
+                default :                                 throw new InkSyntaxException("worrying operator using!");
             }
 
             answer.IsCalculate = true;
@@ -2292,12 +2307,10 @@ namespace Arc.UniInk
 
             switch (left.ValueType, right.ValueType)
             {
-                case (TypeCode.Int32, TypeCode.Int32): answer.ValueInt = left.ValueInt - right.ValueInt; break;
-                case (TypeCode.Single, TypeCode.Single):
-                    answer.ValueFloat = left.ValueFloat - right.ValueFloat; break;
-                case (TypeCode.Double, TypeCode.Double):
-                    answer.ValueDouble = left.ValueDouble - right.ValueDouble; break;
-                default: throw new InkSyntaxException("worrying operator using!");
+                case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueInt    = left.ValueInt    - right.ValueInt; break;
+                case (TypeCode.Single, TypeCode.Single) : answer.ValueFloat  = left.ValueFloat  - right.ValueFloat; break;
+                case (TypeCode.Double, TypeCode.Double) : answer.ValueDouble = left.ValueDouble - right.ValueDouble; break;
+                default :                                 throw new InkSyntaxException("worrying operator using!");
             }
 
             answer.IsCalculate = true;
@@ -2320,10 +2333,10 @@ namespace Arc.UniInk
 
             switch (answer.ValueType)
             {
-                case TypeCode.Int32: answer.ValueInt = left.ValueInt * right.ValueInt; break;
-                case TypeCode.Single: answer.ValueFloat = left.ValueFloat * right.ValueFloat; break;
-                case TypeCode.Double: answer.ValueDouble = left.ValueDouble * right.ValueDouble; break;
-                default: throw new InkSyntaxException("worrying operator using!");
+                case TypeCode.Int32 :  answer.ValueInt    = left.ValueInt    * right.ValueInt; break;
+                case TypeCode.Single : answer.ValueFloat  = left.ValueFloat  * right.ValueFloat; break;
+                case TypeCode.Double : answer.ValueDouble = left.ValueDouble * right.ValueDouble; break;
+                default :              throw new InkSyntaxException("worrying operator using!");
             }
 
             answer.IsCalculate = true;
@@ -2347,12 +2360,10 @@ namespace Arc.UniInk
 
             switch (left.ValueType, right.ValueType)
             {
-                case (TypeCode.Int32, TypeCode.Int32): answer.ValueInt = left.ValueInt / right.ValueInt; break;
-                case (TypeCode.Single, TypeCode.Single):
-                    answer.ValueFloat = left.ValueFloat / right.ValueFloat; break;
-                case (TypeCode.Double, TypeCode.Double):
-                    answer.ValueDouble = left.ValueDouble / right.ValueDouble; break;
-                default: throw new InkSyntaxException("worrying operator using!");
+                case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueInt    = left.ValueInt    / right.ValueInt; break;
+                case (TypeCode.Single, TypeCode.Single) : answer.ValueFloat  = left.ValueFloat  / right.ValueFloat; break;
+                case (TypeCode.Double, TypeCode.Double) : answer.ValueDouble = left.ValueDouble / right.ValueDouble; break;
+                default :                                 throw new InkSyntaxException("worrying operator using!");
             }
 
             answer.IsCalculate = true;
@@ -2375,12 +2386,10 @@ namespace Arc.UniInk
 
             switch (left.ValueType, right.ValueType)
             {
-                case (TypeCode.Int32, TypeCode.Int32): answer.ValueInt = left.ValueInt % right.ValueInt; break;
-                case (TypeCode.Single, TypeCode.Single):
-                    answer.ValueFloat = left.ValueFloat % right.ValueFloat; break;
-                case (TypeCode.Double, TypeCode.Double):
-                    answer.ValueDouble = left.ValueDouble % right.ValueDouble; break;
-                default: throw new InkSyntaxException("worrying operator using!");
+                case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueInt    = left.ValueInt    % right.ValueInt; break;
+                case (TypeCode.Single, TypeCode.Single) : answer.ValueFloat  = left.ValueFloat  % right.ValueFloat; break;
+                case (TypeCode.Double, TypeCode.Double) : answer.ValueDouble = left.ValueDouble % right.ValueDouble; break;
+                default :                                 throw new InkSyntaxException("worrying operator using!");
             }
 
             answer.IsCalculate = true;
@@ -2401,12 +2410,10 @@ namespace Arc.UniInk
 
             switch (left.ValueType, right.ValueType)
             {
-                case (TypeCode.Int32, TypeCode.Int32): answer.ValueBool = left.ValueInt > right.ValueInt; break;
-                case (TypeCode.Boolean, TypeCode.Boolean):
-                    answer.ValueBool = left.ValueFloat > right.ValueFloat; break;
-                case (TypeCode.Double, TypeCode.Double):
-                    answer.ValueBool = left.ValueDouble > right.ValueDouble; break;
-                default: throw new InkSyntaxException("worrying operator using!");
+                case (TypeCode.Int32, TypeCode.Int32) :     answer.ValueBool = left.ValueInt    > right.ValueInt; break;
+                case (TypeCode.Boolean, TypeCode.Boolean) : answer.ValueBool = left.ValueFloat  > right.ValueFloat; break;
+                case (TypeCode.Double, TypeCode.Double) :   answer.ValueBool = left.ValueDouble > right.ValueDouble; break;
+                default :                                   throw new InkSyntaxException("worrying operator using!");
             }
 
 
@@ -2426,12 +2433,10 @@ namespace Arc.UniInk
 
             switch (left.ValueType, right.ValueType)
             {
-                case (TypeCode.Int32, TypeCode.Int32): answer.ValueBool = left.ValueInt < right.ValueInt; break;
-                case (TypeCode.Boolean, TypeCode.Boolean):
-                    answer.ValueBool = left.ValueFloat < right.ValueFloat; break;
-                case (TypeCode.Double, TypeCode.Double):
-                    answer.ValueBool = left.ValueDouble < right.ValueDouble; break;
-                default: throw new InkSyntaxException("worrying operator using!");
+                case (TypeCode.Int32, TypeCode.Int32) :     answer.ValueBool = left.ValueInt    < right.ValueInt; break;
+                case (TypeCode.Boolean, TypeCode.Boolean) : answer.ValueBool = left.ValueFloat  < right.ValueFloat; break;
+                case (TypeCode.Double, TypeCode.Double) :   answer.ValueBool = left.ValueDouble < right.ValueDouble; break;
+                default :                                   throw new InkSyntaxException("worrying operator using!");
             }
 
 
@@ -2450,18 +2455,16 @@ namespace Arc.UniInk
 
             switch (left.ValueType, right.ValueType)
             {
-                case (TypeCode.Int32, TypeCode.Int32): answer.ValueBool = left.ValueInt == right.ValueInt; break;
-                case (TypeCode.Boolean, TypeCode.Boolean):
-                    answer.ValueBool = Math.Abs(left.ValueFloat - right.ValueFloat) < UniInk.EPSILON_FLOAT; break;
-                case (TypeCode.Double, TypeCode.Double):
-                    answer.ValueBool = Math.Abs(left.ValueDouble - right.ValueDouble) < UniInk.EPSILON_DOUBLE; break;
-                case (TypeCode.String, TypeCode.String):
+                case (TypeCode.Int32, TypeCode.Int32) :     answer.ValueBool = left.ValueInt                                  == right.ValueInt; break;
+                case (TypeCode.Boolean, TypeCode.Boolean) : answer.ValueBool = Math.Abs(left.ValueFloat  - right.ValueFloat)  < UniInk.EPSILON_FLOAT; break;
+                case (TypeCode.Double, TypeCode.Double) :   answer.ValueBool = Math.Abs(left.ValueDouble - right.ValueDouble) < UniInk.EPSILON_DOUBLE; break;
+                case (TypeCode.String, TypeCode.String) :
                 {
                     if (left.ValueMeta.Count != right.ValueMeta.Count) break;
 
                     answer.ValueBool = true;
 
-                    for (var i = 0; i < left.ValueMeta.Count; i++)
+                    for (var i = 0 ; i < left.ValueMeta.Count ; i++)
                     {
                         if (left.ValueMeta[i] != right.ValueMeta[i])
                         {
@@ -2472,7 +2475,7 @@ namespace Arc.UniInk
 
                     break;
                 }
-                default:
+                default :
                 {
                     answer.ValueBool = false;
                     break;
@@ -2488,16 +2491,19 @@ namespace Arc.UniInk
         /// <param name="right">Right operand</param>
         /// <returns>True if left does not equal right</returns>
         public static InkValue operator !=(InkValue left, InkValue right) => (left == right).Negate();
+
         /// <summary> Greater than or equal operator overload for InkValue </summary>
         /// <param name="left">Left operand</param>
         /// <param name="right">Right operand</param>
         /// <returns>True if left is greater than or equal to right</returns>
         public static InkValue operator >=(InkValue left, InkValue right) => (left < right).Negate();
+
         /// <summary> Less than or equal operator overload for InkValue </summary>
         /// <param name="left">Left operand</param>
         /// <param name="right">Right operand</param>
         /// <returns>True if left is less than or equal to right</returns>
         public static InkValue operator <=(InkValue left, InkValue right) => (right > left).Negate();
+
         /// <summary> Logical NOT operator overload for InkValue </summary>
         /// <param name="left">The operand to negate</param>
         /// <returns>Negated boolean value</returns>
@@ -2508,22 +2514,27 @@ namespace Arc.UniInk
         /// <param name="st">The InkValue to convert</param>
         /// <returns>The integer value</returns>
         public static implicit operator int(InkValue st) => st.ValueInt;
+
         /// <summary> Implicit conversion from InkValue to float </summary>
         /// <param name="st">The InkValue to convert</param>
         /// <returns>The float value</returns>
         public static implicit operator float(InkValue st) => st.ValueFloat;
+
         /// <summary> Implicit conversion from InkValue to double </summary>
         /// <param name="st">The InkValue to convert</param>
         /// <returns>The double value</returns>
         public static implicit operator double(InkValue st) => st.ValueDouble;
+
         /// <summary> Implicit conversion from InkValue to bool </summary>
         /// <param name="st">The InkValue to convert</param>
         /// <returns>The boolean value</returns>
         public static implicit operator bool(InkValue st) => st.ValueBool;
+
         /// <summary> Implicit conversion from InkValue to char </summary>
         /// <param name="st">The InkValue to convert</param>
         /// <returns>The character value</returns>
         public static implicit operator char(InkValue st) => st.ValueChar;
+
         /// <summary> Implicit conversion from InkValue to string </summary>
         /// <param name="st">The InkValue to convert</param>
         /// <returns>The string value</returns>
@@ -2549,8 +2560,10 @@ namespace Arc.UniInk
     {
         /// <summary> Object pool for InkSyntaxList instances to reduce allocations </summary>
         public static readonly Queue<InkSyntaxList> Pool = new(UniInk.INK_SYNTAX_POOL_CAPACITY);
+
         /// <summary> Cache for lambda expressions </summary>
         public static readonly List<InkSyntaxList> LambdaCache = new(UniInk.INK_SYNTAX_POOL_CAPACITY);
+
         /// <summary> Gets an InkSyntaxList instance from the pool or creates a new one </summary>
         /// <returns>An InkSyntaxList instance ready for use</returns>
         public static InkSyntaxList Get() => Pool.Count > 0 ? Pool.Dequeue() : new();
@@ -2609,7 +2622,7 @@ namespace Arc.UniInk
         /// <param name="value">The InkSyntaxList to recover</param>
         public static void Recover(InkSyntaxList value)
         {
-            for (var index = 0; index < value.CastOther.Count; index++)
+            for (var index = 0 ; index < value.CastOther.Count ; index++)
             {
                 var obj = value.CastOther[index];
                 if (obj is InkValue inkValue)
@@ -2620,7 +2633,7 @@ namespace Arc.UniInk
                 value.CastOther[index] = null;
             }
 
-            for (var index = 0; index < value.IndexDirty.Count; index++)
+            for (var index = 0 ; index < value.IndexDirty.Count ; index++)
             {
                 value.IndexDirty[index] = false;
             }
@@ -2628,8 +2641,10 @@ namespace Arc.UniInk
 
         /// <summary> The list of objects </summary>
         public readonly List<object> ObjectList = new(UniInk.EXPRESS_ELEMENT_MAX_LEN);
+
         /// <summary> The cast other objects </summary>
         public readonly List<object> CastOther = new(UniInk.EXPRESS_ELEMENT_MAX_LEN);
+
         /// <summary> The index dirty flags </summary>
         public readonly List<bool> IndexDirty = new(UniInk.EXPRESS_ELEMENT_MAX_LEN);
 
@@ -2654,7 +2669,7 @@ namespace Arc.UniInk
         /// <param name="end"> the end index </param>
         public void SetDirty(object other, int start, int end)
         {
-            for (var i = start; i <= end; i++)
+            for (var i = start ; i <= end ; i++)
             {
                 IndexDirty[i] = true;
             }
@@ -2674,5 +2689,6 @@ namespace Arc.UniInk
         /// <param name="message"> the exception message </param>
         public InkSyntaxException(string message) : base(message) { }
     }
+
 }
 //3000 lines of code [MAX]
