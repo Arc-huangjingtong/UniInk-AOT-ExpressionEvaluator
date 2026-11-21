@@ -330,8 +330,10 @@
                 InkValue.Release(inkValue);
             }
 
+#if DEBUG
             Console.WriteLine(InkValue.GetTime);
             Console.WriteLine(InkValue.ReleaseTime);
+#endif
 
             return result;
         }
@@ -347,8 +349,10 @@
                 InkValue.Release(inkValue);
             }
 
+#if DEBUG
             Console.WriteLine(InkValue.GetTime);
             Console.WriteLine(InkValue.ReleaseTime);
+#endif
         }
 
         #endregion
@@ -435,6 +439,45 @@
             }
         }
 
+        ///////////////////////////////////////////////  Pool Contract Test ///////////////////////////////////////////
+
+        #region SP : Pool contract : a double release must be reported
+
+        [Test]
+        public static void Test_Pool_DoubleRelease_Is_Reported()
+        {
+            var value = InkValue.Get();
+
+            InkValue.Release(value);
+
+#if DEBUG
+            // a second release is a bug : the instance would be handed out twice afterwards
+            Assert.Throws<InvalidOperationException>(() => InkValue.Release(value));
+#endif
+
+            // cleanup code should not need its own null check
+            InkValue.Release(null);
+
+            // a released instance must never be handed out twice
+            var leased = new List<InkValue>();
+
+            for (var i = 0; i < 64; i++)
+            {
+                var one = InkValue.Get();
+
+                Assert.That(leased.Contains(one), Is.False, "the pool must not hand out the same instance twice");
+
+                leased.Add(one);
+            }
+
+            foreach (var one in leased)
+            {
+                InkValue.Release(one);
+            }
+        }
+
+        #endregion
+
         ///////////////////////////////////////////////  Extension Test ////////////////////////////////////////////////
 
         //[Repeat(1)]
@@ -483,7 +526,7 @@
             if (test is InkValue value)
             {
 #if DEBUG
-                Console.WriteLine(value.Value_int); // each time , the result will be different
+                Console.WriteLine(value.ValueInt); // each time , the result will be different
 #endif
 
                 InkValue.Release(value);

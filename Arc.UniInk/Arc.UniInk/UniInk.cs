@@ -194,7 +194,9 @@ namespace Arc.UniInk
         public void RegisterVariable(string varName, InkValue inkValue)
         {
             var hash = GetStringSliceHashCode(varName, 0, varName.Length - 1);
-            InkValue.GetTime--;
+#if DEBUG
+            InkValue.GetTime--; // this value is kept by the table and will never be released
+#endif
             if (!DicVariables.ContainsKey(hash))
             {
                 inkValue.DontRelease = true;
@@ -448,26 +450,25 @@ namespace Arc.UniInk
 
             for (var i = start; i <= end; i++)
             {
-                if (!keys.IndexDirty[i])
+                if (keys.IndexDirty[i]) continue;
+                
+                if (keys.ObjectList[i] is InkValue inkValue)
                 {
-                    if (keys.ObjectList[i] is InkValue inkValue)
+                    if (keys.CastOther[i] == null)
                     {
-                        if (keys.CastOther[i] == null)
-                        {
-                            keys.CastOther[i] = inkValue.Clone();
-                        }
-                        else if (keys.CastOther[i] is InkValue inkValue2)
-                        {
-                            inkValue.CopyTo(inkValue2);
-                        }
+                        keys.CastOther[i] = inkValue.Clone();
                     }
-                    else if (keys.ObjectList[i] != null)
+                    else if (keys.CastOther[i] is InkValue inkValue2)
                     {
-                        keys.CastOther[i] = keys.ObjectList[i];
+                        inkValue.CopyTo(inkValue2);
                     }
-
-                    keys.SetDirty(i);
                 }
+                else if (keys.ObjectList[i] != null)
+                {
+                    keys.CastOther[i] = keys.ObjectList[i];
+                }
+
+                keys.SetDirty(i);
             }
         }
 
@@ -612,14 +613,10 @@ namespace Arc.UniInk
                 { InkOperator.Plus, InkOperator.InkOperator_Plus } //
                 ,
                 { InkOperator.Minus, InkOperator.InkOperator_Minus } //
-                ,
-                { InkOperator.Multiply, InkOperator.InkOperator_Multiply } //
-                ,
-                { InkOperator.Divide, InkOperator.InkOperator_Divide } //
-                ,
-                { InkOperator.Modulo, InkOperator.InkOperator_Modulo } //
-                ,
-                { InkOperator.Lower, InkOperator.InkOperator_Lower } //
+               ,{ InkOperator.Multiply, InkOperator.InkOperator_Multiply } //
+               ,{ InkOperator.Divide, InkOperator.InkOperator_Divide } //
+               ,{ InkOperator.Modulo, InkOperator.InkOperator_Modulo } //
+               ,{ InkOperator.Lower, InkOperator.InkOperator_Lower } //
                 ,
                 { InkOperator.Greater, InkOperator.InkOperator_Greater } //
                 ,
@@ -1783,17 +1780,28 @@ namespace Arc.UniInk
         /// <returns>An InkValue instance ready for use</returns>
         public static InkValue Get()
         {
+#if DEBUG
             GetTime++;
-            return pool.Count > 0 ? pool.Dequeue() : new();
+#endif
+
+            var value = pool.Count > 0 ? pool.Dequeue() : new();
+
+#if DEBUG
+            value.isReleased = false;
+#endif
+
+            return value;
         }
 
         /// <summary> Clears the InkValue pool, releasing all cached instances </summary>
         public static void ReleasePool() => pool.Clear();
 
-        /// <summary> Counter for tracking how many times Get() has been called </summary>
+#if DEBUG
+        /// <summary> DEBUG only : how many times Get() has been called </summary>
         public static int GetTime;
-        /// <summary> Counter for tracking how many times Release() has been called </summary>
+        /// <summary> DEBUG only : how many times Release() has been called </summary>
         public static int ReleaseTime;
+#endif
 
         /// <summary> Creates an InkValue containing a char value </summary>
         /// <param name="c">The char value to store</param>
@@ -1896,12 +1904,31 @@ namespace Arc.UniInk
         }
 
         /// <summary> Releases an InkValue back to the pool for reuse </summary>
+        /// <remarks>
+        /// Releasing the same instance twice is a bug : it throws in DEBUG builds , because the second call would
+        /// put the same instance into the pool twice and it would then be handed out to two different computations .
+        /// RELEASE builds pay nothing for the check , so a misuse there stays silent .
+        /// Releasing <c>null</c> is a no-op , so cleanup code does not need its own null check .
+        /// </remarks>
         /// <param name="value">The InkValue to release</param>
         public static void Release(InkValue value)
         {
+            if (value is null) return;
+
             if (value.DontRelease) return;
 
+#if DEBUG
+            if (value.isReleased)
+            {
+                throw new InvalidOperationException(
+                    $"InkValue.Release : the value has already been released ( last type : {value.ValueType} ) ! " +
+                    "Enqueuing it twice would hand the same instance to two different computations .");
+            }
+
+            value.isReleased = true;
+
             ReleaseTime++;
+#endif
 
             value.ValueMeta.Clear();
             value.IsCalculate = false;
@@ -1945,6 +1972,11 @@ namespace Arc.UniInk
 
         /// <summary> Prevents the value from being released to the pool </summary>
         public bool DontRelease;
+
+#if DEBUG
+        /// <summary> DEBUG only : the value is owned by the pool , releasing it again is a bug </summary>
+        private bool isReleased;
+#endif
 
         /// <summary> Indicates if this value is a setter </summary>
         public bool IsIsSetter;
@@ -2640,9 +2672,7 @@ namespace Arc.UniInk
     {
         /// <summary> Constructor </summary>
         /// <param name="message"> the exception message </param>
-        public InkSyntaxException(string message) : base(message)
-        {
-        }
+        public InkSyntaxException(string message) : base(message) { }
     }
 }
 //3000 lines of code [MAX]
