@@ -336,6 +336,9 @@
         [TestCase("'a' != 'b'",        ExpectedResult = 'a' != 'b')]
         [TestCase("'a' < 'b'",         ExpectedResult = 'a' < 'b')]
         [TestCase("'b' > 'a'",         ExpectedResult = 'b' > 'a')]
+        [TestCase("'a'=='a'",          ExpectedResult = 'a' == 'a')]
+        [TestCase("'a'!='a'",          ExpectedResult = 'a' != 'a')]
+        [TestCase("'a'=='b'",          ExpectedResult = 'a' == 'b')]
         [TestCase("\"ab\" == \"ab\"", ExpectedResult = true)]  // string == is not a C# constant expression
         [TestCase("\"ab\" == \"ac\"", ExpectedResult = false)]
         [TestCase("\"ab\" != \"ac\"", ExpectedResult = true)]
@@ -627,6 +630,20 @@
         #endregion
 
         ///////////////////////////////////////////////  Extension Test ////////////////////////////////////////////////
+
+
+        [Test]
+        public static void Test_Expression_IfStatement_WithCharCondition()
+        {
+            // the char literals used to swallow the following token , so "if('a'<'b')" could not be parsed at all
+            var result = Ink.Evaluate_IfStatement("if('a'<'b'){return 1}else{return 2}") as InkValue;
+
+            Assert.That(result is null, Is.False, "the if statement should return a value");
+            Assert.That(result!.ValueInt, Is.EqualTo(1));
+
+            InkValue.Release(result);
+        }
+
 
         //[Repeat(1)]
         ///////////////////////////////////////

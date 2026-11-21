@@ -744,7 +744,7 @@
             if (StartsWithCharFormIndex(expression, i, out var value, out var len))
             {
                 keys.Add(value);
-                i += len;
+                i += len - 1; // len contains the closing quote , the parsing loop adds the last step
                 return true;
             }
 
