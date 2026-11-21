@@ -114,7 +114,6 @@
         internal const int STRING_MAX_LEN           = 128;  // The max length of string that will be parsed
         internal const int EXPRESS_ELEMENT_MAX_LEN  = 1024; // The max length of expression's element that will be parsed
         internal const int FUNCTION_CAPACITY        = 32;   // The capacity of UniInk.dic_Functions
-        internal const int FUNCTION_GLOBAL_CAPACITY = 64;   // The capacity of UniInk.dic_GlobalFunctions
         internal const int VARIABLE_CAPACITY        = 32;   // The capacity of UniInk.dic_Variables
         internal const int VARIABLE_TEMP_CAPACITY   = 32;   // The capacity of UniInk.dic_Variables_Temp
         internal const int OPERATOR_FUNC_CAPACITY   = 32;   // The capacity of InkOperator.Dic_OperatorsFunc
@@ -212,13 +211,6 @@
                 inkValue.DontRelease = true;
                 DicVariables.Add(hash, inkValue);
             }
-        }
-
-        /// <summary> Register a local function </summary>
-        public static void RegisterGlobalFunction(string fucName, InkFunction inkFunc)
-        {
-            var hash = GetStringSliceHashCode(fucName, 0, fucName.Length - 1);
-            DicGlobalFunctions.Add(hash, inkFunc);
         }
 
         /// <summary> UniInk Lexer  :   Fill the SyntaxList       </summary>
@@ -662,9 +654,6 @@
             };
         }
 
-        /// <summary> Some Global Functions mapping </summary>
-        protected static readonly Dictionary<int, InkFunction> DicGlobalFunctions = new(FUNCTION_GLOBAL_CAPACITY);
-
         /// <summary> Some local functions mapping </summary>
         protected readonly Dictionary<int, InkFunction> DicFunctions = new(FUNCTION_CAPACITY);
 
@@ -792,13 +781,6 @@
                 if (DicFunctions.TryGetValue(varHash, out var variable))
                 {
                     keys.Add(variable);
-                    i += len;
-                    return true;
-                }
-
-                if (DicGlobalFunctions.TryGetValue(varHash, out var variable2))
-                {
-                    keys.Add(variable2);
                     i += len;
                     return true;
                 }

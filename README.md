@@ -67,6 +67,7 @@ Parallel.For(0, 8, _ => shared.Evaluate("SUM(1, 2, 3) + 1"));
 ```
 - ### Constraints
   - Register functions / variables **before** evaluating : registration itself is not synchronized
+  - Functions and variables belong to the instance that registered them ( there is no global function table )
   - A registered getter / setter , and any plain `object` you store in an `InkValue` , stay your own responsibility
   - `var` variables ( `var a = 1` ) live for one `Evaluate` call only
 - ### A registered function may evaluate again ( reentrant call ) on the same instance

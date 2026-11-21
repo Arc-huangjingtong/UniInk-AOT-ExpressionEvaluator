@@ -497,6 +497,22 @@
         }
 
 
+        [Test]
+        public static void Test_Expression_Function_IsolatedPerInstance()
+        {
+            // functions belong to the instance that registered them : there is no global function table
+            var owner = new UniInk();
+
+            owner.RegisterFunction("ONLYA", new InkFunction(_ => InkValue.GetIntValue(7)));
+
+            Assert.That(owner.Evaluate("ONLYA()").GetResult_Int(), Is.EqualTo(7));
+
+            var other = new UniInk();
+
+            Assert.Throws<InkSyntaxException>(() => other.Evaluate("ONLYA()"));
+        }
+
+
         #endregion
 
 
