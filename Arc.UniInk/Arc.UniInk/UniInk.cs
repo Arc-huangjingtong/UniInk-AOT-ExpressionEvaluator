@@ -185,11 +185,7 @@
                     InkSyntaxList.ReleaseAll(keys);
                 }
 
-                InkSyntaxList.ReleaseTemp();
-
-                ReleaseTempVariables();
-
-                context.PopFrame();
+                context.PopFrame(); // releases the temp lists and temp variables of this frame
             }
         }
 
@@ -1860,6 +1856,14 @@
 
             frames.RemoveAt(frames.Count - 1);
 
+            // the temp lists first : they may reference a temp variable , which must be released exactly once
+            for (var i = TempLists.Count - 1 ; i >= frame.TempListMark ; i--)
+            {
+                InkSyntaxList.ReleaseAll(TempLists[i]);
+
+                TempLists.RemoveAt(i);
+            }
+
             foreach (var variable in frame.TempVariables)
             {
                 variable.Value.DontRelease = false;
@@ -1867,13 +1871,6 @@
             }
 
             frame.TempVariables.Clear();
-
-            for (var i = TempLists.Count - 1 ; i >= frame.TempListMark ; i--)
-            {
-                InkSyntaxList.ReleaseAll(TempLists[i]);
-
-                TempLists.RemoveAt(i);
-            }
 
             freeFrames.Push(frame);
         }

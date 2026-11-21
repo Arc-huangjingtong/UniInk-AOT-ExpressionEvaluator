@@ -328,11 +328,7 @@
                     InkSyntaxList.ReleaseAll(keys);
                 }
 
-                InkSyntaxList.ReleaseTemp();
-
-                ReleaseTempVariables();
-
-                context.PopFrame();
+                context.PopFrame(); // releases the temp lists and temp variables of this frame
             }
         }
 
