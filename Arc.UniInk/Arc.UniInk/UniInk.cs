@@ -2349,6 +2349,73 @@
         }
 
 
+        /************************************************  Promotion  *************************************************/
+
+        /// <summary> Numeric rank used by the implicit promotion , -1 when the type is not numeric </summary>
+        private static int NumericRank(TypeCode type) => type switch
+        {
+            TypeCode.Char   => 0,
+            TypeCode.Int32  => 1,
+            TypeCode.Single => 2,
+            TypeCode.Double => 3,
+            _               => -1
+        };
+
+        /// <summary> Get the common type of two numeric operands , false when no promotion applies </summary>
+        /// <remarks> C# style : int -> single -> double , and char promotes to int </remarks>
+        private static bool TryGetPromotedType(InkValue left, InkValue right, out TypeCode promoted)
+        {
+            var leftRank  = NumericRank(left.ValueType);
+            var rightRank = NumericRank(right.ValueType);
+
+            if (leftRank < 0 || rightRank < 0)
+            {
+                promoted = TypeCode.Empty;
+
+                return false;
+            }
+
+            promoted = leftRank >= rightRank ? left.ValueType : right.ValueType;
+
+            if (promoted == TypeCode.Char)
+            {
+                promoted = TypeCode.Int32; // char combined with char is an int in C#
+            }
+
+            return promoted != left.ValueType || promoted != right.ValueType;
+        }
+
+        /// <summary> Read the value as an int </summary>
+        private static int ToInt(InkValue value) => value.ValueType switch
+        {
+            TypeCode.Char   => value.ValueChar,
+            TypeCode.Int32  => value.ValueInt,
+            TypeCode.Single => (int)value.ValueFloat,
+            TypeCode.Double => (int)value.ValueDouble,
+            _               => 0
+        };
+
+        /// <summary> Read the value as a single </summary>
+        private static float ToSingle(InkValue value) => value.ValueType switch
+        {
+            TypeCode.Char   => value.ValueChar,
+            TypeCode.Int32  => value.ValueInt,
+            TypeCode.Single => value.ValueFloat,
+            TypeCode.Double => (float)value.ValueDouble,
+            _               => 0
+        };
+
+        /// <summary> Read the value as a double </summary>
+        private static double ToDouble(InkValue value) => value.ValueType switch
+        {
+            TypeCode.Char   => value.ValueChar,
+            TypeCode.Int32  => value.ValueInt,
+            TypeCode.Single => value.ValueFloat,
+            TypeCode.Double => value.ValueDouble,
+            _               => 0
+        };
+
+
         /// <summary> Addition operator overload for InkValue </summary>
         /// <param name="left">Left operand</param>
         /// <param name="right">Right operand</param>
@@ -2371,7 +2438,24 @@
                 case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueInt    = left.ValueInt    + right.ValueInt; break;
                 case (TypeCode.Single, TypeCode.Single) : answer.ValueFloat  = left.ValueFloat  + right.ValueFloat; break;
                 case (TypeCode.Double, TypeCode.Double) : answer.ValueDouble = left.ValueDouble + right.ValueDouble; break;
-                default :                                 throw new InkSyntaxException("worrying operator using!");
+                default :
+                {
+                    if (TryGetPromotedType(left, right, out var promoted))
+                    {
+                        answer.ValueType = promoted;
+
+                        switch (promoted)
+                        {
+                            case TypeCode.Int32 :  answer.ValueInt    = ToInt(left)    + ToInt(right);    break;
+                            case TypeCode.Single : answer.ValueFloat  = ToSingle(left) + ToSingle(right); break;
+                            case TypeCode.Double : answer.ValueDouble = ToDouble(left) + ToDouble(right); break;
+                        }
+
+                        break;
+                    }
+
+                    throw new InkSyntaxException("worrying operator using!");
+                }
             }
 
             answer.IsCalculate = true;
@@ -2397,7 +2481,24 @@
                 case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueInt    = left.ValueInt    - right.ValueInt; break;
                 case (TypeCode.Single, TypeCode.Single) : answer.ValueFloat  = left.ValueFloat  - right.ValueFloat; break;
                 case (TypeCode.Double, TypeCode.Double) : answer.ValueDouble = left.ValueDouble - right.ValueDouble; break;
-                default :                                 throw new InkSyntaxException("worrying operator using!");
+                default :
+                {
+                    if (TryGetPromotedType(left, right, out var promoted))
+                    {
+                        answer.ValueType = promoted;
+
+                        switch (promoted)
+                        {
+                            case TypeCode.Int32 :  answer.ValueInt    = ToInt(left)    - ToInt(right);    break;
+                            case TypeCode.Single : answer.ValueFloat  = ToSingle(left) - ToSingle(right); break;
+                            case TypeCode.Double : answer.ValueDouble = ToDouble(left) - ToDouble(right); break;
+                        }
+
+                        break;
+                    }
+
+                    throw new InkSyntaxException("worrying operator using!");
+                }
             }
 
             answer.IsCalculate = true;
@@ -2418,13 +2519,29 @@
             left.Calculate();
             right!.Calculate();
 
-            switch (answer.ValueType)
+            switch (left.ValueType, right.ValueType)
             {
-                case TypeCode.Int32 :  answer.ValueInt    = left.ValueInt    * right.ValueInt; break;
-                case TypeCode.Single : answer.ValueFloat  = left.ValueFloat  * right.ValueFloat; break;
-                case TypeCode.Double : answer.ValueDouble = left.ValueDouble * right.ValueDouble; break;
-                default :              throw new InkSyntaxException("worrying operator using!");
-            }
+                case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueInt    = left.ValueInt    * right.ValueInt; break;
+                case (TypeCode.Single, TypeCode.Single) : answer.ValueFloat  = left.ValueFloat  * right.ValueFloat; break;
+                case (TypeCode.Double, TypeCode.Double) : answer.ValueDouble = left.ValueDouble * right.ValueDouble; break;
+                default :
+                {
+                    if (TryGetPromotedType(left, right, out var promoted))
+                    {
+                        answer.ValueType = promoted;
+
+                        switch (promoted)
+                        {
+                            case TypeCode.Int32 :  answer.ValueInt    = ToInt(left)    * ToInt(right);    break;
+                            case TypeCode.Single : answer.ValueFloat  = ToSingle(left) * ToSingle(right); break;
+                            case TypeCode.Double : answer.ValueDouble = ToDouble(left) * ToDouble(right); break;
+                        }
+
+                        break;
+                    }
+
+                    throw new InkSyntaxException("worrying operator using!");
+                }            }
 
             answer.IsCalculate = true;
 
@@ -2450,7 +2567,24 @@
                 case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueInt    = left.ValueInt    / right.ValueInt; break;
                 case (TypeCode.Single, TypeCode.Single) : answer.ValueFloat  = left.ValueFloat  / right.ValueFloat; break;
                 case (TypeCode.Double, TypeCode.Double) : answer.ValueDouble = left.ValueDouble / right.ValueDouble; break;
-                default :                                 throw new InkSyntaxException("worrying operator using!");
+                default :
+                {
+                    if (TryGetPromotedType(left, right, out var promoted))
+                    {
+                        answer.ValueType = promoted;
+
+                        switch (promoted)
+                        {
+                            case TypeCode.Int32 :  answer.ValueInt    = ToInt(left)    / ToInt(right);    break;
+                            case TypeCode.Single : answer.ValueFloat  = ToSingle(left) / ToSingle(right); break;
+                            case TypeCode.Double : answer.ValueDouble = ToDouble(left) / ToDouble(right); break;
+                        }
+
+                        break;
+                    }
+
+                    throw new InkSyntaxException("worrying operator using!");
+                }
             }
 
             answer.IsCalculate = true;
@@ -2476,7 +2610,24 @@
                 case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueInt    = left.ValueInt    % right.ValueInt; break;
                 case (TypeCode.Single, TypeCode.Single) : answer.ValueFloat  = left.ValueFloat  % right.ValueFloat; break;
                 case (TypeCode.Double, TypeCode.Double) : answer.ValueDouble = left.ValueDouble % right.ValueDouble; break;
-                default :                                 throw new InkSyntaxException("worrying operator using!");
+                default :
+                {
+                    if (TryGetPromotedType(left, right, out var promoted))
+                    {
+                        answer.ValueType = promoted;
+
+                        switch (promoted)
+                        {
+                            case TypeCode.Int32 :  answer.ValueInt    = ToInt(left)    % ToInt(right);    break;
+                            case TypeCode.Single : answer.ValueFloat  = ToSingle(left) % ToSingle(right); break;
+                            case TypeCode.Double : answer.ValueDouble = ToDouble(left) % ToDouble(right); break;
+                        }
+
+                        break;
+                    }
+
+                    throw new InkSyntaxException("worrying operator using!");
+                }
             }
 
             answer.IsCalculate = true;
@@ -2501,7 +2652,17 @@
                 case (TypeCode.Single, TypeCode.Single) : answer.ValueBool = left.ValueFloat  > right.ValueFloat; break;
                 case (TypeCode.Double, TypeCode.Double) : answer.ValueBool = left.ValueDouble > right.ValueDouble; break;
                 case (TypeCode.Char, TypeCode.Char) :     answer.ValueBool = left.ValueChar   > right.ValueChar; break;
-                default :                                 throw new InkSyntaxException("worrying operator using!");
+                default :
+                {
+                    if (TryGetPromotedType(left, right, out _))
+                    {
+                        answer.ValueBool = ToDouble(left) > ToDouble(right);
+
+                        break;
+                    }
+
+                    throw new InkSyntaxException("worrying operator using!");
+                }
             }
 
 
@@ -2525,7 +2686,17 @@
                 case (TypeCode.Single, TypeCode.Single) : answer.ValueBool = left.ValueFloat  < right.ValueFloat; break;
                 case (TypeCode.Double, TypeCode.Double) : answer.ValueBool = left.ValueDouble < right.ValueDouble; break;
                 case (TypeCode.Char, TypeCode.Char) :     answer.ValueBool = left.ValueChar   < right.ValueChar; break;
-                default :                                 throw new InkSyntaxException("worrying operator using!");
+                default :
+                {
+                    if (TryGetPromotedType(left, right, out _))
+                    {
+                        answer.ValueBool = ToDouble(left) < ToDouble(right);
+
+                        break;
+                    }
+
+                    throw new InkSyntaxException("worrying operator using!");
+                }
             }
 
 
@@ -2574,6 +2745,18 @@
                 default :
                 {
                     answer.ValueBool = false;
+
+                    if (TryGetPromotedType(left, right, out var promoted))
+                    {
+                        answer.ValueBool = promoted switch
+                        {
+                            TypeCode.Int32  => ToInt(left) == ToInt(right),
+                            TypeCode.Single => Math.Abs(ToSingle(left) - ToSingle(right)) < UniInk.EPSILON_FLOAT,
+                            TypeCode.Double => Math.Abs(ToDouble(left) - ToDouble(right)) < UniInk.EPSILON_DOUBLE,
+                            _               => false
+                        };
+                    }
+
                     break;
                 }
             }

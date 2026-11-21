@@ -79,6 +79,28 @@ ink.Evaluate("NEST(1) + 3"); // 5
 - ### The `InkValue` returned by `Evaluate` must still be released ( `GetResult_*` does it for you )
 
 
+## 🔢 Type rules
+
+- ### Numeric promotion is implicit , C# style : `int` -> `single` -> `double` , and `char` promotes to `int`
+```csharp
+ink.Evaluate("1 + 1.5");       // double 2.5
+ink.Evaluate("1 + 1.5f");      // single 2.5
+ink.Evaluate("1.5f + 2.5");    // double 4
+ink.Evaluate("'a' + 1");       // int 98
+ink.Evaluate("1 == 1.0");      // true
+ink.Evaluate("-1.5");          // double -1.5
+```
+- ### Integer division stays integer
+```csharp
+ink.Evaluate("7 / 2");         // int 3
+ink.Evaluate("7 / 2.0");       // double 3.5
+```
+- ### No implicit conversion for the other types
+  - `bool` / `string` / `object` never take part in the promotion : `1 + true` throws `InkSyntaxException`
+  - string concatenation only joins two strings : `"a" + "b"` works , `"a" + 1` throws
+  - integer overflow is not checked ( the arithmetic is the runtime one )
+
+
 ## Evaluate Expression
 
 - ### ✨Support Arithmetic Operations ( Easy extend Operator )

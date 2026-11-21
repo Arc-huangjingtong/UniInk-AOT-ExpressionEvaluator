@@ -791,6 +791,122 @@
         #endregion
 
 
+        #region 8.Promotion : implicit numeric conversion ( int -> single -> double , char -> int )
+
+
+        private static double ToNumber(InkValue value)
+        {
+            return value.ValueType switch
+            {
+                TypeCode.Int32  => value.ValueInt,
+                TypeCode.Single => value.ValueFloat,
+                TypeCode.Double => value.ValueDouble,
+                TypeCode.Char   => value.ValueChar,
+                _               => throw new AssertionException($"not a number : {value.ValueType}")
+            };
+        }
+
+
+        [TestCase("1 + 1.5",       ExpectedResult = 2.5d)]
+        [TestCase("1.5 + 1",       ExpectedResult = 2.5d)]
+        [TestCase("1 + 1.5f",      ExpectedResult = 2.5d)]
+        [TestCase("1.5f + 1",      ExpectedResult = 2.5d)]
+        [TestCase("1.5f + 2.5",    ExpectedResult = 4.0d)]
+        [TestCase("2.5 + 1.5f",    ExpectedResult = 4.0d)]
+        [TestCase("1 - 0.5",       ExpectedResult = 0.5d)]
+        [TestCase("0.5 - 1",       ExpectedResult = -0.5d)]
+        [TestCase("2 * 1.5",       ExpectedResult = 3.0d)]
+        [TestCase("1.5 * 2",       ExpectedResult = 3.0d)]
+        [TestCase("2 * 1.5f",      ExpectedResult = 3.0d)]
+        [TestCase("1.5f * 2",      ExpectedResult = 3.0d)]
+        [TestCase("7 / 2.0",       ExpectedResult = 3.5d)]
+        [TestCase("7.0 / 2",       ExpectedResult = 3.5d)]
+        [TestCase("7 / 2",         ExpectedResult = 3.0d)]   // int division stays int
+        [TestCase("7.5 % 2",       ExpectedResult = 1.5d)]
+        [TestCase("5 % 2.5",       ExpectedResult = 0.0d)]
+        [TestCase("-1.5",          ExpectedResult = -1.5d)]
+        [TestCase("-2.5f",         ExpectedResult = -2.5d)]
+        [TestCase("'a' + 1",       ExpectedResult = 98.0d)]
+        [TestCase("'a' + 'b'",     ExpectedResult = 195.0d)]
+        public static double Test_Promotion_Arithmetic(string input)
+        {
+            var res = Ink.Evaluate(input);
+
+            Assert.That(res is null, Is.False, $"the expression [{input}] should not be evaluated to null");
+
+            var result = ToNumber(res!);
+
+            InkValue.Release(res);
+
+            return result;
+        }
+
+
+        [TestCase("1 < 1.5",        ExpectedResult = true)]
+        [TestCase("1.5 > 1",        ExpectedResult = true)]
+        [TestCase("1.5f < 2",       ExpectedResult = true)]
+        [TestCase("2 > 1.5f",       ExpectedResult = true)]
+        [TestCase("1.5f <= 1.5",    ExpectedResult = true)]
+        [TestCase("2 <= 1.5",       ExpectedResult = false)]
+        [TestCase("1 >= 1.5f",      ExpectedResult = false)]
+        [TestCase("2 >= 1.5f",      ExpectedResult = true)]
+        [TestCase("1 == 1.0",       ExpectedResult = true)]
+        [TestCase("1 != 1.0",       ExpectedResult = false)]
+        [TestCase("1.5 != 2",       ExpectedResult = true)]
+        [TestCase("1.5f == 1.5",    ExpectedResult = true)]
+        [TestCase("2 == 2.0f",      ExpectedResult = true)]
+        [TestCase("'a' == 97",      ExpectedResult = true)]
+        [TestCase("'a' < 98",       ExpectedResult = true)]
+        [TestCase("'a' + 1 == 98",  ExpectedResult = true)]
+        public static bool Test_Promotion_Comparison(string input)
+        {
+            var res = Ink.Evaluate(input);
+
+            Assert.That(res is null, Is.False, $"the expression [{input}] should not be evaluated to null");
+
+            var result = res!.ValueBool;
+
+            InkValue.Release(res);
+
+            return result;
+        }
+
+
+        [TestCase("1 + 1.5",    TypeCode.Double)]
+        [TestCase("1.5 + 1",    TypeCode.Double)]
+        [TestCase("1 + 1.5f",   TypeCode.Single)]
+        [TestCase("1.5f + 1",   TypeCode.Single)]
+        [TestCase("1.5f + 2.5", TypeCode.Double)]
+        [TestCase("1 + 2",      TypeCode.Int32)]
+        [TestCase("7 / 2",      TypeCode.Int32)]
+        [TestCase("'a' + 1",    TypeCode.Int32)]
+        [TestCase("'a' + 'b'",  TypeCode.Int32)]
+        [TestCase("1 < 1.5",    TypeCode.Boolean)]
+        [TestCase("1 == 1.0",   TypeCode.Boolean)]
+        public static void Test_Promotion_ResultType(string input, TypeCode expected)
+        {
+            var res = Ink.Evaluate(input);
+
+            Assert.That(res is null, Is.False, $"the expression [{input}] should not be evaluated to null");
+            Assert.That(res!.ValueType, Is.EqualTo(expected));
+
+            InkValue.Release(res);
+        }
+
+
+        [Test]
+        public static void Test_Promotion_UnsupportedStaysUnsupported()
+        {
+            // no numeric promotion applies to bool / string / object operands
+            Assert.Throws<InkSyntaxException>(() => Ink.Evaluate("1 + true"));
+            Assert.Throws<InkSyntaxException>(() => Ink.Evaluate("\"x\" + 1"));
+            Assert.Throws<InkSyntaxException>(() => Ink.Evaluate("true > false"));
+        }
+
+
+        #endregion
+
+
         ///////////////////////////////////////////////  Extension Test ////////////////////////////////////////////////
 
 
