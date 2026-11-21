@@ -292,6 +292,78 @@
         #endregion
 
 
+        #region 1.2 Comparison: int / float / double / bool / char / string
+
+
+        [Repeat(1000)]
+        [TestCase("1 < 2",             ExpectedResult = 1 < 2)]
+        [TestCase("2 < 1",             ExpectedResult = 2 < 1)]
+        [TestCase("1 <= 2",            ExpectedResult = 1 <= 2)]
+        [TestCase("2 <= 1",            ExpectedResult = 2 <= 1)]
+        [TestCase("1 <= 1",            ExpectedResult = 1 <= 1)]
+        [TestCase("1 >= 2",            ExpectedResult = 1 >= 2)]
+        [TestCase("2 >= 1",            ExpectedResult = 2 >= 1)]
+        [TestCase("1 >= 1",            ExpectedResult = 1 >= 1)]
+        [TestCase("1 == 1",            ExpectedResult = 1 == 1)]
+        [TestCase("1 == 2",            ExpectedResult = 1 == 2)]
+        [TestCase("1 != 1",            ExpectedResult = 1 != 1)]
+        [TestCase("1 != 2",            ExpectedResult = 1 != 2)]
+        [TestCase("1.5 < 2.5",         ExpectedResult = 1.5 < 2.5)]
+        [TestCase("2.5 < 1.5",         ExpectedResult = 2.5 < 1.5)]
+        [TestCase("1.5 <= 2.5",        ExpectedResult = 1.5 <= 2.5)]
+        [TestCase("2.5 <= 1.5",        ExpectedResult = 2.5 <= 1.5)]
+        [TestCase("1.5 >= 2.5",        ExpectedResult = 1.5 >= 2.5)]
+        [TestCase("2.5 >= 2.5",        ExpectedResult = 2.5 >= 2.5)]
+        [TestCase("1.5 == 1.5",        ExpectedResult = 1.5 == 1.5)]
+        [TestCase("1.5 == 2.5",        ExpectedResult = 1.5 == 2.5)]
+        [TestCase("1.5 != 2.5",        ExpectedResult = 1.5 != 2.5)]
+        [TestCase("1.5f < 2.5f",       ExpectedResult = 1.5f < 2.5f)]
+        [TestCase("2.5f < 1.5f",       ExpectedResult = 2.5f < 1.5f)]
+        [TestCase("1.5f <= 2.5f",      ExpectedResult = 1.5f <= 2.5f)]
+        [TestCase("2.5f <= 1.5f",      ExpectedResult = 2.5f <= 1.5f)]
+        [TestCase("1.5f >= 1.5f",      ExpectedResult = 1.5f >= 1.5f)]
+        [TestCase("1.5f >= 2.5f",      ExpectedResult = 1.5f >= 2.5f)]
+        [TestCase("1.5f == 1.5f",      ExpectedResult = 1.5f == 1.5f)]
+        [TestCase("1.5f == 2.5f",      ExpectedResult = 1.5f == 2.5f)]
+        [TestCase("1.5f != 1.5f",      ExpectedResult = 1.5f != 1.5f)]
+        [TestCase("true == true",      ExpectedResult = true == true)]
+        [TestCase("true == false",     ExpectedResult = true == false)]
+        [TestCase("false == false",    ExpectedResult = false == false)]
+        [TestCase("true != false",     ExpectedResult = true != false)]
+        [TestCase("true != true",      ExpectedResult = true != true)]
+        [TestCase("'a' == 'a'",        ExpectedResult = 'a' == 'a')]
+        [TestCase("'a' == 'b'",        ExpectedResult = 'a' == 'b')]
+        [TestCase("'a' != 'b'",        ExpectedResult = 'a' != 'b')]
+        [TestCase("'a' < 'b'",         ExpectedResult = 'a' < 'b')]
+        [TestCase("'b' > 'a'",         ExpectedResult = 'b' > 'a')]
+        [TestCase("\"ab\" == \"ab\"", ExpectedResult = true)]  // string == is not a C# constant expression
+        [TestCase("\"ab\" == \"ac\"", ExpectedResult = false)]
+        [TestCase("\"ab\" != \"ac\"", ExpectedResult = true)]
+        public static bool Test_Comparison_Bool(string input)
+        {
+            var res = Ink.Evaluate(input);
+
+            Assert.That(res is null, Is.False, $"the expression [{input}] should not be evaluated to null");
+
+            var result = res!.ValueBool;
+
+            InkValue.Release(res);
+
+            return result;
+        }
+
+
+        [Test]
+        public static void Test_Comparison_Unsupported_Ordering_Throws()
+        {
+            // ordering values is only defined for numbers and chars , bool must be reported instead of silently comparing 0.0f
+            Assert.Throws<InkSyntaxException>(() => Ink.Evaluate("true > false"));
+        }
+
+
+        #endregion
+
+
         #region 2.Complex: variable declaration and assignment
 
 

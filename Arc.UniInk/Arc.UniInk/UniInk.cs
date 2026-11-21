@@ -2419,10 +2419,11 @@
 
             switch (left.ValueType, right.ValueType)
             {
-                case (TypeCode.Int32, TypeCode.Int32) :     answer.ValueBool = left.ValueInt    > right.ValueInt; break;
-                case (TypeCode.Boolean, TypeCode.Boolean) : answer.ValueBool = left.ValueFloat  > right.ValueFloat; break;
-                case (TypeCode.Double, TypeCode.Double) :   answer.ValueBool = left.ValueDouble > right.ValueDouble; break;
-                default :                                   throw new InkSyntaxException("worrying operator using!");
+                case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueBool = left.ValueInt    > right.ValueInt; break;
+                case (TypeCode.Single, TypeCode.Single) : answer.ValueBool = left.ValueFloat  > right.ValueFloat; break;
+                case (TypeCode.Double, TypeCode.Double) : answer.ValueBool = left.ValueDouble > right.ValueDouble; break;
+                case (TypeCode.Char, TypeCode.Char) :     answer.ValueBool = left.ValueChar   > right.ValueChar; break;
+                default :                                 throw new InkSyntaxException("worrying operator using!");
             }
 
 
@@ -2442,10 +2443,11 @@
 
             switch (left.ValueType, right.ValueType)
             {
-                case (TypeCode.Int32, TypeCode.Int32) :     answer.ValueBool = left.ValueInt    < right.ValueInt; break;
-                case (TypeCode.Boolean, TypeCode.Boolean) : answer.ValueBool = left.ValueFloat  < right.ValueFloat; break;
-                case (TypeCode.Double, TypeCode.Double) :   answer.ValueBool = left.ValueDouble < right.ValueDouble; break;
-                default :                                   throw new InkSyntaxException("worrying operator using!");
+                case (TypeCode.Int32, TypeCode.Int32) :   answer.ValueBool = left.ValueInt    < right.ValueInt; break;
+                case (TypeCode.Single, TypeCode.Single) : answer.ValueBool = left.ValueFloat  < right.ValueFloat; break;
+                case (TypeCode.Double, TypeCode.Double) : answer.ValueBool = left.ValueDouble < right.ValueDouble; break;
+                case (TypeCode.Char, TypeCode.Char) :     answer.ValueBool = left.ValueChar   < right.ValueChar; break;
+                default :                                 throw new InkSyntaxException("worrying operator using!");
             }
 
 
@@ -2464,8 +2466,10 @@
 
             switch (left.ValueType, right.ValueType)
             {
-                case (TypeCode.Int32, TypeCode.Int32) :     answer.ValueBool = left.ValueInt                                  == right.ValueInt; break;
-                case (TypeCode.Boolean, TypeCode.Boolean) : answer.ValueBool = Math.Abs(left.ValueFloat  - right.ValueFloat)  < UniInk.EPSILON_FLOAT; break;
+                case (TypeCode.Int32, TypeCode.Int32) :     answer.ValueBool = left.ValueInt  == right.ValueInt; break;
+                case (TypeCode.Boolean, TypeCode.Boolean) : answer.ValueBool = left.ValueBool == right.ValueBool; break;
+                case (TypeCode.Char, TypeCode.Char) :       answer.ValueBool = left.ValueChar == right.ValueChar; break;
+                case (TypeCode.Single, TypeCode.Single) :   answer.ValueBool = Math.Abs(left.ValueFloat  - right.ValueFloat)  < UniInk.EPSILON_FLOAT; break;
                 case (TypeCode.Double, TypeCode.Double) :   answer.ValueBool = Math.Abs(left.ValueDouble - right.ValueDouble) < UniInk.EPSILON_DOUBLE; break;
                 case (TypeCode.String, TypeCode.String) :
                 {
@@ -2511,7 +2515,7 @@
         /// <param name="left">Left operand</param>
         /// <param name="right">Right operand</param>
         /// <returns>True if left is less than or equal to right</returns>
-        public static InkValue operator <=(InkValue left, InkValue right) => (right > left).Negate();
+        public static InkValue operator <=(InkValue left, InkValue right) => (left > right).Negate();
 
         /// <summary> Logical NOT operator overload for InkValue </summary>
         /// <param name="left">The operand to negate</param>
