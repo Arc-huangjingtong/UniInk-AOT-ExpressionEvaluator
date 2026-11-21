@@ -1,5 +1,6 @@
 ﻿namespace Arc.UniInk.Benchmark
 {
+
     /*******************************************************************************************************************
     *  📰 Title    :  UniInk_Speed (https://github.com/Arc-huangjingtong/UniInk-CSharpInterpreter4Unity)              *
     *  🔖 Version  :  1.0.0                                                                                           *
@@ -78,11 +79,9 @@
 
                 return param2 switch
                 {
-                    0 => InkValue.GetIntValue(param1.ID) //
-                    ,
-                    5 => InkValue.GetIntValue(param1.Rarity) //
-                    ,
-                    _ => InkValue.GetIntValue(0)
+                    0 => InkValue.GetIntValue(param1.ID)     //
+                  , 5 => InkValue.GetIntValue(param1.Rarity) //
+                  , _ => InkValue.GetIntValue(0)
                 };
             }));
 
@@ -125,45 +124,47 @@
             Ink.RegisterVariable("Target", InkValue.SetGetter(InkValue.GetObjectValue(Target), _ => { Target.ID++; }));
 
 
-            Ink.RegisterVariable("Food", InkValue.GetIntValue(0));
+            Ink.RegisterVariable("Food",   InkValue.GetIntValue(0));
             Ink.RegisterVariable("Rarity", InkValue.GetIntValue(5));
-            Ink.RegisterVariable("ID", InkValue.GetIntValue(0));
+            Ink.RegisterVariable("ID",     InkValue.GetIntValue(0));
             Ink.RegisterVariable("Config", InkValue.GetObjectValue(Config));
         }
 
 
         #region SP : Features Test
 
+
         [Repeat(10000)]
-        [TestCase("999*123123*321321/999/666 ",
-            ExpectedResult = unchecked(999 * 123123 * 321321) / 999 / 666)] // arithmetic overflow
+        [TestCase("999*123123*321321/999/666 ", ExpectedResult = unchecked(999 * 123123 * 321321) / 999 / 666)] // arithmetic overflow
         public static object Test_Expression_Extreme(string input)
         {
             var result = Ink.Evaluate(input).GetResult_Int(); // result is 232
             return result;
         }
 
+
         #endregion
 
 
         #region 1.Basic: Arithmetic Test , return result InkValue and Release it
+
 
         [Repeat(10000)]
         [TestCase("+123456789             ", ExpectedResult = +123456789)]
         [TestCase("+123456789+987654321   ", ExpectedResult = +123456789 + 987654321)]
         [TestCase("111 * 111 * 3 /3*3/3   ", ExpectedResult = 111 * 111 * 3 / 3 * 3 / 3)]
         [TestCase("3333333-3+3+  3 - 3    ", ExpectedResult = 3333333 - 3 + 3 + 3 - 3)]
-        [TestCase("9*(1+1 + 1 + 1 + 1+1+1)", ExpectedResult = 9 * (1 + 1 + 1 + 1 + 1 + 1 + 1))]
+        [TestCase("9*(1+1 + 1 + 1 + 1+1+1)", ExpectedResult = 9 * (1  + 1 + 1 + 1 + 1 + 1 + 1))]
         [TestCase("   999999 + 999999     ", ExpectedResult = 999999 + 999999)]
-        [TestCase("9*((1+(1+1)+(1+1))+1+1)", ExpectedResult = 9 * ((1 + (1 + 1) + (1 + 1)) + 1 + 1))]
-        [TestCase("9*((1+(2+3)*(4+5))+6+7)", ExpectedResult = 9 * ((1 + (2 + 3) * (4 + 5)) + 6 + 7))]
-        [TestCase("9 * ( ( 1 + 2 * 3 ) /2)", ExpectedResult = 9 * ((1 + 2 * 3) / 2))]
+        [TestCase("9*((1+(1+1)+(1+1))+1+1)", ExpectedResult = 9  * ((1 + (1 + 1) + (1 + 1)) + 1 + 1))]
+        [TestCase("9*((1+(2+3)*(4+5))+6+7)", ExpectedResult = 9  * ((1 + (2 + 3) * (4 + 5)) + 6 + 7))]
+        [TestCase("9 * ( ( 1 + 2 * 3 ) /2)", ExpectedResult = 9  * ((1 + 2       * 3) / 2))]
         //[TestCase("9 *+5 ",                  ExpectedResult = 9  * +5)] // not support
-        [TestCase("+9*5 ", ExpectedResult = +9 * 5)] // support
-        [TestCase("9 * (-5) ", ExpectedResult = 9 * -5)] // support
+        [TestCase("+9*5 ",                   ExpectedResult = +9 * 5)]  // support
+        [TestCase("9 * (-5) ",               ExpectedResult = 9  * -5)] // support
         public static int Test_Arithmetic_Int(string input)
         {
-            var res = (InkValue)Ink.Evaluate(input);
+            var res    = (InkValue)Ink.Evaluate(input);
             var result = res!.ValueInt;
             InkValue.Release(res);
 
@@ -173,17 +174,17 @@
         [Repeat(10000)]
         [TestCase("   999999.9999f + 999999.9999f     ", ExpectedResult = 999999.9999f + 999999.9999f)]
         [TestCase("9.9f*((1.1f+(1.1f+1.1f)+(1.1f+1.1f))+1.1f+1.1f)",
-            ExpectedResult = 9.9f * ((1.1f + (1.1f + 1.1f) + (1.1f + 1.1f)) + 1.1f + 1.1f))]
+                     ExpectedResult = 9.9f * ((1.1f + (1.1f + 1.1f) + (1.1f + 1.1f)) + 1.1f + 1.1f))]
         [TestCase("+123456789.987654321f  ", ExpectedResult = 123456789.987654321f)]
         [TestCase("+123456789.987654321f + 987654321.123456789f",
-            ExpectedResult = 123456789.987654321f + 987654321.123456789f)]
+                     ExpectedResult = 123456789.987654321f + 987654321.123456789f)]
         [TestCase("111.111f * 111.111f * 3.3f /3.3f*3.3f/3.3f",
-            ExpectedResult = 111.111f * 111.111f * 3.3f / 3.3f * 3.3f / 3.3f)]
+                     ExpectedResult = 111.111f * 111.111f * 3.3f / 3.3f * 3.3f / 3.3f)]
         [TestCase("3333333.3333333f-3.3f+3.3f+  3.3f - 3.3f",
-            ExpectedResult = 3333333.3333333f - 3.3f + 3.3f + 3.3f - 3.3f)]
+                     ExpectedResult = 3333333.3333333f - 3.3f + 3.3f + 3.3f - 3.3f)]
         public static float Test_Arithmetic_Float(string input)
         {
-            var res = (InkValue)Ink.Evaluate(input);
+            var res    = (InkValue)Ink.Evaluate(input);
             var result = res!.ValueFloat;
             InkValue.Release(res);
 
@@ -194,15 +195,15 @@
         [Repeat(10000)]
         [TestCase("   999999.999d + 999999.999d     ", ExpectedResult = 999999.999 + 999999.999)]
         [TestCase("9.9*((1.1+(1.1+1.1)+(1.1+1.1))+1.1+1.1)",
-            ExpectedResult = 9.9 * ((1.1 + (1.1 + 1.1) + (1.1 + 1.1)) + 1.1 + 1.1))]
+                     ExpectedResult = 9.9 * ((1.1 + (1.1 + 1.1) + (1.1 + 1.1)) + 1.1 + 1.1))]
         [TestCase("+123456789.987654321d  ", ExpectedResult = 123456789.987654321)]
         [TestCase("+123456789.987654321d + 987654321.123456789d",
-            ExpectedResult = 123456789.987654321 + 987654321.123456789)]
+                     ExpectedResult = 123456789.987654321 + 987654321.123456789)]
         [TestCase("111.111 * 111.111 * 3.3 /3.3*3.3/3.3", ExpectedResult = 111.111 * 111.111 * 3.3 / 3.3 * 3.3 / 3.3)]
-        [TestCase("3333333.3333333-3.3+3.3+  3.3 - 3.3", ExpectedResult = 3333333.3333333 - 3.3 + 3.3 + 3.3 - 3.3)]
+        [TestCase("3333333.3333333-3.3+3.3+  3.3 - 3.3",  ExpectedResult = 3333333.3333333 - 3.3 + 3.3 + 3.3 - 3.3)]
         public static double Test_Arithmetic_Double(string input)
         {
-            var res = (InkValue)Ink.Evaluate(input);
+            var res    = (InkValue)Ink.Evaluate(input);
             var result = res!.ValueDouble;
             InkValue.Release(res);
 
@@ -211,30 +212,32 @@
 
 
         [Repeat(10000)]
-        [TestCase("!true && false || true && false ", ExpectedResult = (!true && false) || (true && false))]
-        [TestCase("1 > 2 || 2 > 1 || 2==1          ", ExpectedResult = 1 > 2 || 2 > 1 || 2 == 1)]
-        [TestCase("1 < 2 || 2 ==1 || 2 < 1         ", ExpectedResult = 1 < 2 || 2 == 1 || 2 < 1)]
-        [TestCase("1 >= 2 && 2 >= 1                ", ExpectedResult = 1 >= 2 && 2 >= 1)]
-        [TestCase("1 <= 2 || 2 <= 1                ", ExpectedResult = 1 <= 2 || 2 <= 1)]
-        [TestCase("1 == 2 && 2 == 1                ", ExpectedResult = 1 == 2 && 2 == 1)]
-        [TestCase("1 != 2 || 2 != 1                ", ExpectedResult = 1 != 2 || 2 != 1)]
-        [TestCase("1 != 1+1 || 2 != 1                ", ExpectedResult = 1 != 1 + 1 || 2 != 1)]
-        [TestCase("true && false || True && 1+1==1+1", ExpectedResult = true && false || true && 1 + 1 == 1 + 1)]
+        [TestCase("!true && false || true && false ",   ExpectedResult = (!true && false) || (true && false))]
+        [TestCase("1 > 2 || 2 > 1 || 2==1          ",   ExpectedResult = 1 > 2            || 2 > 1  || 2 == 1)]
+        [TestCase("1 < 2 || 2 ==1 || 2 < 1         ",   ExpectedResult = 1 < 2            || 2 == 1 || 2 < 1)]
+        [TestCase("1 >= 2 && 2 >= 1                ",   ExpectedResult = 1 >= 2 && 2           >= 1)]
+        [TestCase("1 <= 2 || 2 <= 1                ",   ExpectedResult = 1 <= 2 || 2           <= 1)]
+        [TestCase("1 == 2 && 2 == 1                ",   ExpectedResult = 1 == 2 && 2           == 1)]
+        [TestCase("1 != 2 || 2 != 1                ",   ExpectedResult = 1 != 2        || 2    != 1)]
+        [TestCase("1 != 1+1 || 2 != 1                ", ExpectedResult = 1 != 1 + 1    || 2    != 1)]
+        [TestCase("true && false || True && 1+1==1+1",  ExpectedResult = true && false || true && 1 + 1 == 1 + 1)]
         public static bool Test_Arithmetic_Bool(string input)
         {
-            var res = (InkValue)Ink.Evaluate(input);
+            var res    = (InkValue)Ink.Evaluate(input);
             var result = res!.ValueBool;
             InkValue.Release(res);
             return result;
         }
+
 
         #endregion
 
 
         #region 2.Complex: variable declaration and assignment
 
+
         [Repeat(10000)]
-        [TestCase("var a = 123 ;;  var b = a + 1 ; a + b    ", ExpectedResult = 123 + 123 + 1)]
+        [TestCase("var a = 123 ;;  var b = a + 1 ; a + b    ",        ExpectedResult = 123 + 123 + 1)]
         [TestCase("var aaa= 123 ;  var bbb =aaa + 1 ; aaa + bbb    ", ExpectedResult = 123 + 123 + 1)]
         public static int Test_Expression_Variable(string input)
         {
@@ -305,19 +308,21 @@
             return result;
         }
 
+
         #endregion
 
 
         #region 3.Function: Function call
 
+
         //[Repeat(10000)]
-        [TestCase("SUM(SUM(1,2,3),SUM(1,2,3),1) + 123456789 ", ExpectedResult = 1 + 2 + 3 + 1 + 2 + 3 + 1 + 123456789)]
+        [TestCase("SUM(SUM(1,2,3),SUM(1,2,3),1) + 123456789 ",  ExpectedResult = 1         + 2 + 3 + 1 + 2 + 3 + 1 + 123456789)]
         [TestCase("SUM(SUM(1,2,-3),SUM(1,2,3),1) + SUM(1,2,3)", ExpectedResult = 1 + 2 - 3 + 1 + 2 + 3 + 1 + 1 + 2 + 3)]
-        [TestCase("SUM(1,1-2,3)", ExpectedResult = 3)]
-        [TestCase("SUM(1,-2,3)", ExpectedResult = 2)]
-        [TestCase("SUM(1,2,-3)", ExpectedResult = 1 + 2 - 3)]
-        [TestCase("SUM(1,2,3);SUM(1,2,3);", ExpectedResult = 6)]
-        [TestCase("SUM(1,2,3);", ExpectedResult = 6)]
+        [TestCase("SUM(1,1-2,3)",                               ExpectedResult = 3)]
+        [TestCase("SUM(1,-2,3)",                                ExpectedResult = 2)]
+        [TestCase("SUM(1,2,-3)",                                ExpectedResult = 1 + 2 - 3)]
+        [TestCase("SUM(1,2,3);SUM(1,2,3);",                     ExpectedResult = 6)]
+        [TestCase("SUM(1,2,3);",                                ExpectedResult = 6)]
         public static int Test_Expression_Function(string input)
         {
             var res = Ink.Evaluate(input);
@@ -355,10 +360,12 @@
 #endif
         }
 
+
         #endregion
 
 
         #region 4.Best Practice: Lambda Function
+
 
         [Repeat(10000)]
         [TestCase("FLT(Config,var b => GET(b, Rarity) == 2)")]
@@ -367,7 +374,8 @@
         {
             var res = Ink.Evaluate(input);
 
-            if (res != null)
+            // "res != null" would call InkValue.op_Inequality and throw , so check the reference instead
+            if (res is not null)
             {
                 if (res.ValueObject is List<Card> cards)
                 {
@@ -386,10 +394,12 @@
             // Console.WriteLine(InkValue.ReleaseTime);
         }
 
+
         #endregion
 
 
         #region 5.Best Practice: Property Getter (setter will be supported in the future...)
+
 
         [Repeat(10000)]
         [TestCase("grower + 100000")]
@@ -405,21 +415,24 @@
             }
         }
 
+
         #endregion
 
 
         #region SP : Special Test
 
+
         [Repeat(10000)]
-        [TestCase(" ", ExpectedResult = null)]
-        [TestCase("", ExpectedResult = null)] // string.Empty
+        [TestCase(" ",  ExpectedResult = null)]
+        [TestCase("",   ExpectedResult = null)] // string.Empty
         [TestCase(";;", ExpectedResult = null)]
-        [TestCase(";", ExpectedResult = null)]
+        [TestCase(";",  ExpectedResult = null)]
         //[TestCase(null, ExpectedResult = null)] // null will throw exception
         public static object Test_Expression_SP(string input)
         {
             return Ink.Evaluate(input);
         }
+
 
         #endregion
 
@@ -443,6 +456,7 @@
 
         #region SP : Pool contract : a double release must be reported
 
+
         [Test]
         public static void Test_Pool_DoubleRelease_Is_Reported()
         {
@@ -461,7 +475,7 @@
             // a released instance must never be handed out twice
             var leased = new List<InkValue>();
 
-            for (var i = 0; i < 64; i++)
+            for (var i = 0 ; i < 64 ; i++)
             {
                 var one = InkValue.Get();
 
@@ -476,6 +490,7 @@
             }
         }
 
+
         #endregion
 
         ///////////////////////////////////////////////  Extension Test ////////////////////////////////////////////////
@@ -483,43 +498,43 @@
         //[Repeat(1)]
         ///////////////////////////////////////
         [TestCase("  if ( 1 > 2 )       "
-                  + "  {                  "
-                  + "    LOG(Target);     "
-                  + "  }                  "
-                  + "  else               "
-                  + "  {                  "
-                  + "    LOG(Target);     "
-                  + "  }                  ")]
+                + "  {                  "
+                + "    LOG(Target);     "
+                + "  }                  "
+                + "  else               "
+                + "  {                  "
+                + "    LOG(Target);     "
+                + "  }                  ")]
         ///////////////////////////////////////
         [TestCase("  if ( 1 > 2 )       "
-                  + "  {                  "
-                  + "     123             "
-                  + "  }                  "
-                  + "  else if ( 3 > 6 )  "
-                  + "  {                  "
-                  + "     456             "
-                  + "  }                  "
-                  + "  else               "
-                  + "  {                  "
-                  + "    return 666       "
-                  + "  }                  ")]
+                + "  {                  "
+                + "     123             "
+                + "  }                  "
+                + "  else if ( 3 > 6 )  "
+                + "  {                  "
+                + "     456             "
+                + "  }                  "
+                + "  else               "
+                + "  {                  "
+                + "    return 666       "
+                + "  }                  ")]
         ///////////////////////////////////////
         [TestCase("  if ( 1 > 2 )       "
-                  + "  {                  "
-                  + "     123             "
-                  + "  }                  "
-                  + "  else if ( 3 > 6 )  "
-                  + "  {                  "
-                  + "     456;            "
-                  + "  }                  "
-                  + "  else if ( 3 < 6 )  "
-                  + "  {                  "
-                  + "    return 456;      "
-                  + "  }                  "
-                  + "  else               "
-                  + "  {                  "
-                  + "    return 666       "
-                  + "  }                  ")]
+                + "  {                  "
+                + "     123             "
+                + "  }                  "
+                + "  else if ( 3 > 6 )  "
+                + "  {                  "
+                + "     456;            "
+                + "  }                  "
+                + "  else if ( 3 < 6 )  "
+                + "  {                  "
+                + "    return 456;      "
+                + "  }                  "
+                + "  else               "
+                + "  {                  "
+                + "    return 666       "
+                + "  }                  ")]
         public static void Test_Expression_IfStatements(string input)
         {
             var test = Ink.Evaluate_IfStatement(input);
@@ -540,17 +555,14 @@
 
         ///////////////////////////////////////////////  Helper Object  ////////////////////////////////////////////////
 
-        public enum MyEnum
-        {
-            Food
-        }
+        public enum MyEnum { Food }
 
         public int grower = 100;
 
         public static Card Target => new() { ID = 1, Rarity = 2 };
 
 
-        public int FoodNum;
+        public       int FoodNum;
         public const int Food = (int)MyEnum.Food;
 
         public static void PAY(MyEnum @enum, int num)
@@ -598,8 +610,13 @@
 
         public List<Card> Config = new()
         {
-            new Card() { ID = 1, Rarity = 2 }, new Card() { ID = 2, Rarity = 2 }, new Card() { ID = 3, Rarity = 3 },
-            new Card() { ID = 4, Rarity = 4 }, new Card() { ID = 5, Rarity = 5 }, new Card() { ID = 6, Rarity = 6 }
+            new Card() { ID = 1, Rarity = 2 } //
+          , new Card() { ID = 2, Rarity = 2 } //
+          , new Card() { ID = 3, Rarity = 3 } //
+          , new Card() { ID = 4, Rarity = 4 } //
+          , new Card() { ID = 5, Rarity = 5 } //
+          , new Card() { ID = 6, Rarity = 6 }
         };
     }
+
 }

@@ -1,33 +1,37 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFrameworks>net10.0;</TargetFrameworks>
-    <RootNamespace>Arc.UniInk.Benchmark</RootNamespace>
-    <AssemblyName>Arc.UniInk.Benchmark</AssemblyName>
-    <LangVersion>9</LangVersion>
-    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFrameworks>net10.0;</TargetFrameworks>
+        <RootNamespace>Arc.UniInk.Benchmark</RootNamespace>
+        <AssemblyName>Arc.UniInk.Benchmark</AssemblyName>
+        <LangVersion>9</LangVersion>
+        <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+        <GenerateProgramFile>false</GenerateProgramFile>
 
-    <!-- Assembly Information -->
-    <AssemblyTitle>Arc.UniInk.Benchmark</AssemblyTitle>
-    <Product>Arc.UniInk.Benchmark</Product>
-    <Copyright>Copyright © 2024</Copyright>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
-    <FileVersion>1.0.0.0</FileVersion>
-    <Guid>1BA70864-1706-44D0-9D58-669FD5703A14</Guid>
-  </PropertyGroup>
+        <!-- Assembly Information -->
+        <AssemblyTitle>Arc.UniInk.Benchmark</AssemblyTitle>
+        <Product>Arc.UniInk.Benchmark</Product>
+        <Copyright>Copyright © 2024</Copyright>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+        <FileVersion>1.0.0.0</FileVersion>
+        <Guid>1BA70864-1706-44D0-9D58-669FD5703A14</Guid>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Arc.UniInk\Arc.UniInk.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Arc.UniInk\Arc.UniInk.csproj"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <!-- Core benchmarking and parsing related packages -->
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
-    <PackageReference Include="CodingSeb.ExpressionEvaluator" Version="1.4.40" />
-    <PackageReference Include="NUnit" Version="4.1.0" />
-    <PackageReference Include="ParsecSharp" Version="3.5.0" />
-    <PackageReference Include="Sprache" Version="3.0.0-develop-00049" />
-    <PackageReference Include="Sprache.Calc" Version="1.1.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <!-- Core benchmarking and parsing related packages -->
+        <PackageReference Include="BenchmarkDotNet" Version="0.13.12"/>
+        <PackageReference Include="CodingSeb.ExpressionEvaluator" Version="1.4.40"/>
+        <PackageReference Include="NUnit" Version="4.1.0"/>
+        <!-- Test runner support : without these two Rider / "dotnet test" cannot discover the NUnit tests -->
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0"/>
+        <PackageReference Include="NUnit3TestAdapter" Version="4.5.0"/>
+        <PackageReference Include="ParsecSharp" Version="3.5.0"/>
+        <PackageReference Include="Sprache" Version="3.0.0-develop-00049"/>
+        <PackageReference Include="Sprache.Calc" Version="1.1.0"/>
+    </ItemGroup>
 
 </Project>

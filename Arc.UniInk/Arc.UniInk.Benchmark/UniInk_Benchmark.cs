@@ -1,6 +1,7 @@
-﻿// ReSharper disable UnusedVariable
-namespace Arc.UniInk.Benchmark
+﻿namespace Arc.UniInk.Benchmark
 {
+
+    // ReSharper disable UnusedVariable
     using System;
     using BenchmarkDotNet.Attributes;
     using CodingSeb.ExpressionEvaluator;
@@ -30,22 +31,21 @@ namespace Arc.UniInk.Benchmark
         public UniInkBenchmark() => TEST_INITIATION();
 
 
-        private const string TEST_INPUT_ARITHMETIC_INT_01 =
-            "12345678+87654321-1*2*3*4*5*6*7*8*9+9*8*7*6*5*4*3*2*1+1*2*3*4*5*6*7*8*9-87654321-12345678";
+        private const string TEST_INPUT_ARITHMETIC_INT_01 = "12345678+87654321-1*2*3*4*5*6*7*8*9+9*8*7*6*5*4*3*2*1+1*2*3*4*5*6*7*8*9-87654321-12345678";
 
         private const string TEST_INPUT_ARITHMETIC_INT_02 =
             "1+2+3+4+5+6+7+8+9+10+11+12+13+14+15+16+17+18+19+20+21+22+23+24+25+26+27+28+29+30+31+32+33+"
-            + "34+35+36+37+38+39+40+41+42+43+44+45+46+47+48+49+50+51+52+53+54+55+56+57+58+59+60+61+62+63+"
-            + "64+65+66+67+68+69+70+71+72+73+74+75+76+77+78+79+80+81+82+83+84+85+86+87+88+89+90+91+92+93+"
-            + "94+95+96+97+98+99+100";
+          + "34+35+36+37+38+39+40+41+42+43+44+45+46+47+48+49+50+51+52+53+54+55+56+57+58+59+60+61+62+63+"
+          + "64+65+66+67+68+69+70+71+72+73+74+75+76+77+78+79+80+81+82+83+84+85+86+87+88+89+90+91+92+93+"
+          + "94+95+96+97+98+99+100";
 
         private const string TEST_INPUT_ARITHMETIC_INT_03 = "1*2*3*4*5*6*7*8*9*10*11*12/12/11/10/9/8/7/6/5/4/3/2/1";
 
         private const string TEST_INPUT_ARITHMETIC_INT_04 =
             "0-1-2-3-4-5-6-7-8-9-10-11-12-13-14-15-16-17-18-19-20-21-22-23-24-25-26-27-28-29-30-31-32-33-"
-            + "34-35-36-37-38-39-40-41-42-43-44-45-46-47-48-49-50-51-52-53-54-55-56-57-58-59-60-61-62-63-64-"
-            + "65-66-67-68-69-70-71-72-73-74-75-76-77-78-79-80-81-82-83-84-85-86-87-88-89-90-91-92-93-94-95-"
-            + "96-97-98-99-100";
+          + "34-35-36-37-38-39-40-41-42-43-44-45-46-47-48-49-50-51-52-53-54-55-56-57-58-59-60-61-62-63-64-"
+          + "65-66-67-68-69-70-71-72-73-74-75-76-77-78-79-80-81-82-83-84-85-86-87-88-89-90-91-92-93-94-95-"
+          + "96-97-98-99-100";
 
         private const string TEST_INPUT_IF_STATEMENT = @" if ( 1 > 2 )      
                                                       {                 
@@ -87,7 +87,7 @@ namespace Arc.UniInk.Benchmark
         [Test]
         public void TEST_IfStatement__UniInkSpeed()
         {
-            var ink = UniInkNUnitTest.Ink;
+            var ink  = UniInkNUnitTest.Ink;
             var test = ink.Evaluate_IfStatement(TEST_INPUT_IF_STATEMENT);
             if (test is InkValue value)
             {
@@ -142,21 +142,13 @@ namespace Arc.UniInk.Benchmark
         }
 
 
-        private static readonly InkSyntaxList compiledTestInputArithmeticInt01 =
-            UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_01, 0,
-                TEST_INPUT_ARITHMETIC_INT_01.Length - 1);
+        private static readonly InkSyntaxList compiledTestInputArithmeticInt01 = UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_01, 0, TEST_INPUT_ARITHMETIC_INT_01.Length - 1);
 
-        private static readonly InkSyntaxList compiledTestInputArithmeticInt02 =
-            UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_02, 0,
-                TEST_INPUT_ARITHMETIC_INT_02.Length - 1);
+        private static readonly InkSyntaxList compiledTestInputArithmeticInt02 = UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_02, 0, TEST_INPUT_ARITHMETIC_INT_02.Length - 1);
 
-        private static readonly InkSyntaxList compiledTestInputArithmeticInt03 =
-            UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_03, 0,
-                TEST_INPUT_ARITHMETIC_INT_03.Length - 1);
+        private static readonly InkSyntaxList compiledTestInputArithmeticInt03 = UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_03, 0, TEST_INPUT_ARITHMETIC_INT_03.Length - 1);
 
-        private static readonly InkSyntaxList compiledTestInputArithmeticInt04 =
-            UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_04, 0,
-                TEST_INPUT_ARITHMETIC_INT_04.Length - 1);
+        private static readonly InkSyntaxList compiledTestInputArithmeticInt04 = UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_04, 0, TEST_INPUT_ARITHMETIC_INT_04.Length - 1);
 
 
         [Benchmark]
@@ -179,17 +171,13 @@ namespace Arc.UniInk.Benchmark
 #endif
         }
 
-        private static readonly Func<double> compiledTestInputArithmeticInt01Sprache =
-            Calculator.ParseExpression(TEST_INPUT_ARITHMETIC_INT_01).Compile();
+        private static readonly Func<double> compiledTestInputArithmeticInt01Sprache = Calculator.ParseExpression(TEST_INPUT_ARITHMETIC_INT_01).Compile();
 
-        private static readonly Func<double> compiledTestInputArithmeticInt02Sprache =
-            Calculator.ParseExpression(TEST_INPUT_ARITHMETIC_INT_02).Compile();
+        private static readonly Func<double> compiledTestInputArithmeticInt02Sprache = Calculator.ParseExpression(TEST_INPUT_ARITHMETIC_INT_02).Compile();
 
-        private static readonly Func<double> compiledTestInputArithmeticInt03Sprache =
-            Calculator.ParseExpression(TEST_INPUT_ARITHMETIC_INT_03).Compile();
+        private static readonly Func<double> compiledTestInputArithmeticInt03Sprache = Calculator.ParseExpression(TEST_INPUT_ARITHMETIC_INT_03).Compile();
 
-        private static readonly Func<double> compiledTestInputArithmeticInt04Sprache =
-            Calculator.ParseExpression(TEST_INPUT_ARITHMETIC_INT_04).Compile();
+        private static readonly Func<double> compiledTestInputArithmeticInt04Sprache = Calculator.ParseExpression(TEST_INPUT_ARITHMETIC_INT_04).Compile();
 
         // [Benchmark] [TestCase(ExpectedResult = 362881)] [Repeat(100)]
         // Debate : The Compiled Sprache is very fast, but the test answer is static and not dynamic.
@@ -208,4 +196,5 @@ namespace Arc.UniInk.Benchmark
             return result1 + result2 + result3 + result4;
         }
     }
+
 }
