@@ -1,5 +1,6 @@
 ﻿namespace Arc.UniInk
 {
+
     /* ================================================== SUMMARY  ================================================== */
     /* Title    :  UniInk_Extensions (https://github.com/Arc-huangjingtong/UniInk-CSharpInterpreter4Unity)            */
     /* Authors  :  Arc (https://github.com/Arc-huangjingtong)                                                         */
@@ -53,6 +54,7 @@
 
         #region Remove comments
 
+
         //Base on : https://stackoverflow.com/questions/3524317/regex-to-strip-line-comments-from-c-sharp/3524689#3524689
         private static readonly Regex removeCommentsRegex =
             new($"{BLOCK_COMMENTS}|{LINE_COMMENTS}|{STRINGS_IGNORE}|{VERBATIM_STRINGS_IGNORE}",
@@ -60,10 +62,10 @@
 
         private static readonly Regex newLineCharsRegex = new(@"\r\n|\r|\n", RegexOptions.Compiled);
 
-        private const string VERBATIM_STRINGS_IGNORE = @"@(""[^""]*"")+"; //language=regex
-        private const string STRINGS_IGNORE = @"""((\\[^\n]|[^""\n])*)"""; //language=regex
-        private const string BLOCK_COMMENTS = @"/\*(.*?)\*/"; //language=regex
-        private const string LINE_COMMENTS = @"//[^\r\n]*"; //language=regex
+        private const string VERBATIM_STRINGS_IGNORE = @"@(""[^""]*"")+";           //language=regex
+        private const string STRINGS_IGNORE          = @"""((\\[^\n]|[^""\n])*)"""; //language=regex
+        private const string BLOCK_COMMENTS          = @"/\*(.*?)\*/";              //language=regex
+        private const string LINE_COMMENTS           = @"//[^\r\n]*";               //language=regex
 
 
         /// <summary> Remove all line and block comments from the specified C# script </summary>
@@ -86,6 +88,7 @@
             }
         }
 
+
         #endregion
     }
 
@@ -97,14 +100,14 @@
         /// <remarks> Not support Nested if statement </remarks>
         protected static object ProcessList_ScriptsWithIfStatement(InkSyntaxList keys)
         {
-            var index_start = 0;
-            var index_end = keys.Count - 1;
-            object res = null;
+            var    index_start = 0;
+            var    index_end   = keys.Count - 1;
+            object res         = null;
 
             while (true)
             {
                 //找到第一个[if]
-                var (success_if, index_if) = FindOperator(keys, InkOperator.KeyIf, index_start, index_end);
+                var (success_if, index_if)     = FindOperator(keys, InkOperator.KeyIf,     index_start, index_end);
                 //找到第一个[ ;]
                 var (success_semi, index_semi) = FindOperator(keys, InkOperator.Semicolon, index_start, index_end);
 
@@ -134,7 +137,7 @@
                 break;
             }
 
-            for (var i = 0; i < keys.Count; i++)
+            for (var i = 0 ; i < keys.Count ; i++)
             {
                 if (keys.CastOther[i] is InkValue { IsReturner: true } value)
                 {
@@ -168,7 +171,7 @@
             // Locate the [(condition){ operation }] operation
             var (operationStart, operationEnd)
                 = GetMatchOperator(keys, InkOperator.BraceLeft, InkOperator.BraceRight, conditionEnd + 1,
-                    keys.Count - 1);
+                                   keys.Count                                                        - 1);
 
             if (operationStart == -1)
             {
@@ -176,8 +179,8 @@
             }
 
             var ifCondition = false;
-            var currentEnd = operationEnd;
-            var index_end = keys.Count - 1;
+            var currentEnd  = operationEnd;
+            var index_end   = keys.Count - 1;
 
             var condition = ProcessList(keys, conditionStart + 1, conditionEnd - 1);
 
@@ -197,7 +200,7 @@
             {
                 // Check the position relationship between the next else and if, and then enumerate all cases based on their relationship (very elegant)
                 var (success_else, index_else) = FindOperator(keys, InkOperator.KeyElse, currentEnd + 1, index_end);
-                var (success_if, index_if) = FindOperator(keys, InkOperator.KeyIf, currentEnd + 1, index_end);
+                var (success_if, index_if)     = FindOperator(keys, InkOperator.KeyIf,   currentEnd + 1, index_end);
 
                 // 1. 如果没有找到 else 和 if , 直接退出If 结算           , 说明后面再也没有 If 语句了 , 交给下一个循环即可
                 // 2. 如果找到了 if   , 没找到 else                     , 说明这是一个 if 语句      , 交给下一个循环即可
@@ -207,10 +210,10 @@
 
                 switch (success_else, success_if, index_if - index_else)
                 {
-                    case (false, false, _): return currentEnd;
-                    case (false, true, _): return currentEnd;
-                    case (true, false, _):
-                    case (true, true, > 1):
+                    case (false, false, _) : return currentEnd;
+                    case (false, true, _) :  return currentEnd;
+                    case (true, false, _) :
+                    case (true, true, > 1) :
                     {
                         var temp_start = index_else + 1;
 
@@ -218,7 +221,7 @@
 
                         var (opElseStart, opElseEnd)
                             = GetMatchOperator(keys, InkOperator.BraceLeft, InkOperator.BraceRight, temp_start,
-                                keys.Count - 1);
+                                               keys.Count - 1);
 
                         if (!ifCondition)
                         {
@@ -234,17 +237,17 @@
 
                         return currentEnd;
                     }
-                    case (true, true, 1): // else if
+                    case (true, true, 1) : // else if
                     {
                         // 匹配 else if (condition) 后的条件
                         var (cdsStart, cdsEnd)
-                            = GetMatchOperator(keys, InkOperator.ParenthesisLeft, InkOperator.ParenthesisRight,
-                                index_if + 1, index_end);
+                            = GetMatchOperator(keys,         InkOperator.ParenthesisLeft, InkOperator.ParenthesisRight,
+                                               index_if + 1, index_end);
 
                         // 计算 else if 条件后的操作
                         var (opElseStart, opElseEnd)
                             = GetMatchOperator(keys, InkOperator.BraceLeft, InkOperator.BraceRight, cdsEnd + 1,
-                                index_end);
+                                               index_end);
 
 
                         // 计算 else if 后的条件
@@ -296,8 +299,8 @@
         public static object ExecuteProcess_IfStatement(InkSyntaxList keys)
         {
             var res = InputIsScript_IfStatement(keys)
-                ? ProcessList_ScriptsWithIfStatement(keys)
-                : ProcessList(keys, 0, keys.Count - 1);
+                          ? ProcessList_ScriptsWithIfStatement(keys)
+                          : ProcessList(keys, 0, keys.Count - 1);
 
             return res;
         }
@@ -343,13 +346,10 @@
 
 
     // Part: Support for UniInk : StringBuilder
-    public partial class UniInk
-    {
-    }
+    public partial class UniInk { }
 
 
     // Part: Support for UniInk : Span<Char>
-    public partial class UniInk
-    {
-    }
+    public partial class UniInk { }
+
 }

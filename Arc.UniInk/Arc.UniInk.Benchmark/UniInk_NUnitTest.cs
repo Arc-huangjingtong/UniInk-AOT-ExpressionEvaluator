@@ -11,6 +11,7 @@
     *  📦 State    :  [Developing] [0GC]                                                                              *
     /*******************************************************************************************************************/
 
+    // ReSharper disable EqualExpressionComparison
     // ReSharper disable RedundantLogicalConditionalExpressionOperand
     // ReSharper disable PartialTypeWithSinglePart
     using Arc.UniInk;
@@ -166,7 +167,7 @@
         [TestCase("9 * (-5) ",               ExpectedResult = 9  * -5)] // support
         public static int Test_Arithmetic_Int(string input)
         {
-            var res    = (InkValue)Ink.Evaluate(input);
+            var res    = Ink.Evaluate(input);
             var result = res!.ValueInt;
             InkValue.Release(res);
 
@@ -174,19 +175,15 @@
         }
 
         [Repeat(10000)]
-        [TestCase("   999999.9999f + 999999.9999f     ", ExpectedResult = 999999.9999f + 999999.9999f)]
-        [TestCase("9.9f*((1.1f+(1.1f+1.1f)+(1.1f+1.1f))+1.1f+1.1f)",
-                     ExpectedResult = 9.9f * ((1.1f + (1.1f + 1.1f) + (1.1f + 1.1f)) + 1.1f + 1.1f))]
-        [TestCase("+123456789.987654321f  ", ExpectedResult = 123456789.987654321f)]
-        [TestCase("+123456789.987654321f + 987654321.123456789f",
-                     ExpectedResult = 123456789.987654321f + 987654321.123456789f)]
-        [TestCase("111.111f * 111.111f * 3.3f /3.3f*3.3f/3.3f",
-                     ExpectedResult = 111.111f * 111.111f * 3.3f / 3.3f * 3.3f / 3.3f)]
-        [TestCase("3333333.3333333f-3.3f+3.3f+  3.3f - 3.3f",
-                     ExpectedResult = 3333333.3333333f - 3.3f + 3.3f + 3.3f - 3.3f)]
+        [TestCase("   999999.9999f + 999999.9999f     ",             ExpectedResult = 999999.9999f + 999999.9999f)]
+        [TestCase("9.9f*((1.1f+(1.1f+1.1f)+(1.1f+1.1f))+1.1f+1.1f)", ExpectedResult = 9.9f * ((1.1f + (1.1f + 1.1f) + (1.1f + 1.1f)) + 1.1f + 1.1f))]
+        [TestCase("+123456789.987654321f  ",                         ExpectedResult = 123456789.987654321f)]
+        [TestCase("+123456789.987654321f + 987654321.123456789f",    ExpectedResult = 123456789.987654321f + 987654321.123456789f)]
+        [TestCase("111.111f * 111.111f * 3.3f /3.3f*3.3f/3.3f",      ExpectedResult = 111.111f * 111.111f * 3.3f / 3.3f * 3.3f / 3.3f)]
+        [TestCase("3333333.3333333f-3.3f+3.3f+  3.3f - 3.3f",        ExpectedResult = 3333333.3333333f - 3.3f + 3.3f + 3.3f - 3.3f)]
         public static float Test_Arithmetic_Float(string input)
         {
-            var res    = (InkValue)Ink.Evaluate(input);
+            var res    = Ink.Evaluate(input);
             var result = res!.ValueFloat;
             InkValue.Release(res);
 
@@ -195,17 +192,15 @@
 
 
         [Repeat(10000)]
-        [TestCase("   999999.999d + 999999.999d     ", ExpectedResult = 999999.999 + 999999.999)]
-        [TestCase("9.9*((1.1+(1.1+1.1)+(1.1+1.1))+1.1+1.1)",
-                     ExpectedResult = 9.9 * ((1.1 + (1.1 + 1.1) + (1.1 + 1.1)) + 1.1 + 1.1))]
-        [TestCase("+123456789.987654321d  ", ExpectedResult = 123456789.987654321)]
-        [TestCase("+123456789.987654321d + 987654321.123456789d",
-                     ExpectedResult = 123456789.987654321 + 987654321.123456789)]
-        [TestCase("111.111 * 111.111 * 3.3 /3.3*3.3/3.3", ExpectedResult = 111.111 * 111.111 * 3.3 / 3.3 * 3.3 / 3.3)]
-        [TestCase("3333333.3333333-3.3+3.3+  3.3 - 3.3",  ExpectedResult = 3333333.3333333 - 3.3 + 3.3 + 3.3 - 3.3)]
+        [TestCase("   999999.999d + 999999.999d     ",            ExpectedResult = 999999.999 + 999999.999)]
+        [TestCase("9.9*((1.1+(1.1+1.1)+(1.1+1.1))+1.1+1.1)",      ExpectedResult = 9.9 * ((1.1 + (1.1 + 1.1) + (1.1 + 1.1)) + 1.1 + 1.1))]
+        [TestCase("+123456789.987654321d  ",                      ExpectedResult = 123456789.987654321)]
+        [TestCase("+123456789.987654321d + 987654321.123456789d", ExpectedResult = 123456789.987654321 + 987654321.123456789)]
+        [TestCase("111.111 * 111.111 * 3.3 /3.3*3.3/3.3",         ExpectedResult = 111.111 * 111.111 * 3.3 / 3.3 * 3.3 / 3.3)]
+        [TestCase("3333333.3333333-3.3+3.3+  3.3 - 3.3",          ExpectedResult = 3333333.3333333 - 3.3 + 3.3 + 3.3 - 3.3)]
         public static double Test_Arithmetic_Double(string input)
         {
-            var res    = (InkValue)Ink.Evaluate(input);
+            var res    = Ink.Evaluate(input);
             var result = res!.ValueDouble;
             InkValue.Release(res);
 
@@ -225,7 +220,7 @@
         [TestCase("true && false || True && 1+1==1+1",  ExpectedResult = true && false || true && 1 + 1 == 1 + 1)]
         public static bool Test_Arithmetic_Bool(string input)
         {
-            var res    = (InkValue)Ink.Evaluate(input);
+            var res    = Ink.Evaluate(input);
             var result = res!.ValueBool;
             InkValue.Release(res);
             return result;
@@ -249,16 +244,16 @@
         [TestCase("((1+2)*3)",          ExpectedResult = (1 + 2) * 3)]
         [TestCase("(-5)",               ExpectedResult = -5)]
         [TestCase("(0-5)",              ExpectedResult = 0 - 5)]
-        [TestCase("(8/2)/2",            ExpectedResult = (8 / 2) / 2)]
+        [TestCase("(8/2)/2",            ExpectedResult = (8     / 2) / 2)]
         [TestCase("(1+(2*3))",          ExpectedResult = 1 + (2 * 3))]
         [TestCase("(1+1)*((2+2))",      ExpectedResult = (1 + 1) * (2 + 2))]
         [TestCase("(1+2)-3",            ExpectedResult = (1 + 2) - 3)]
-        [TestCase("var a = (1+2); a",   ExpectedResult = 1 + 2)]
-        [TestCase("4; (1+2)",           ExpectedResult = 1 + 2)]
+        [TestCase("var a = (1+2); a",   ExpectedResult = 1       + 2)]
+        [TestCase("4; (1+2)",           ExpectedResult = 1       + 2)]
         [TestCase("(1+2); 4",           ExpectedResult = 4)]
-        [TestCase("(1+2)*(3)",          ExpectedResult = (1 + 2) * 3)]
+        [TestCase("(1+2)*(3)",          ExpectedResult = (1  + 2) * 3)]
         [TestCase("-(1+2)",             ExpectedResult = -(1 + 2))]
-        [TestCase("(1+2) + SUM(1,2,3)", ExpectedResult = (1 + 2) + (1 + 2 + 3))]
+        [TestCase("(1+2) + SUM(1,2,3)", ExpectedResult = (1  + 2) + (1 + 2 + 3))]
         public static int Test_Expression_Parentheses(string input)
         {
             var res = Ink.Evaluate(input);
@@ -274,9 +269,9 @@
 
 
         [Repeat(1000)]
-        [TestCase("(1+2) > 2",    ExpectedResult = (1 + 2) > 2)]
-        [TestCase("(1+2) == 3",   ExpectedResult = (1 + 2) == 3)]
-        [TestCase("((1) < (2))",  ExpectedResult = 1 < 2)]
+        [TestCase("(1+2) > 2",   ExpectedResult = (1 + 2) > 2)]
+        [TestCase("(1+2) == 3",  ExpectedResult = (1 + 2) == 3)]
+        [TestCase("((1) < (2))", ExpectedResult = 1       < 2)]
         public static bool Test_Expression_Parentheses_Bool(string input)
         {
             var res = Ink.Evaluate(input);
@@ -298,50 +293,50 @@
 
 
         [Repeat(1000)]
-        [TestCase("1 < 2",             ExpectedResult = 1 < 2)]
-        [TestCase("2 < 1",             ExpectedResult = 2 < 1)]
-        [TestCase("1 <= 2",            ExpectedResult = 1 <= 2)]
-        [TestCase("2 <= 1",            ExpectedResult = 2 <= 1)]
-        [TestCase("1 <= 1",            ExpectedResult = 1 <= 1)]
-        [TestCase("1 >= 2",            ExpectedResult = 1 >= 2)]
-        [TestCase("2 >= 1",            ExpectedResult = 2 >= 1)]
-        [TestCase("1 >= 1",            ExpectedResult = 1 >= 1)]
-        [TestCase("1 == 1",            ExpectedResult = 1 == 1)]
-        [TestCase("1 == 2",            ExpectedResult = 1 == 2)]
-        [TestCase("1 != 1",            ExpectedResult = 1 != 1)]
-        [TestCase("1 != 2",            ExpectedResult = 1 != 2)]
-        [TestCase("1.5 < 2.5",         ExpectedResult = 1.5 < 2.5)]
-        [TestCase("2.5 < 1.5",         ExpectedResult = 2.5 < 1.5)]
-        [TestCase("1.5 <= 2.5",        ExpectedResult = 1.5 <= 2.5)]
-        [TestCase("2.5 <= 1.5",        ExpectedResult = 2.5 <= 1.5)]
-        [TestCase("1.5 >= 2.5",        ExpectedResult = 1.5 >= 2.5)]
-        [TestCase("2.5 >= 2.5",        ExpectedResult = 2.5 >= 2.5)]
-        [TestCase("1.5 == 1.5",        ExpectedResult = 1.5 == 1.5)]
-        [TestCase("1.5 == 2.5",        ExpectedResult = 1.5 == 2.5)]
-        [TestCase("1.5 != 2.5",        ExpectedResult = 1.5 != 2.5)]
-        [TestCase("1.5f < 2.5f",       ExpectedResult = 1.5f < 2.5f)]
-        [TestCase("2.5f < 1.5f",       ExpectedResult = 2.5f < 1.5f)]
-        [TestCase("1.5f <= 2.5f",      ExpectedResult = 1.5f <= 2.5f)]
-        [TestCase("2.5f <= 1.5f",      ExpectedResult = 2.5f <= 1.5f)]
-        [TestCase("1.5f >= 1.5f",      ExpectedResult = 1.5f >= 1.5f)]
-        [TestCase("1.5f >= 2.5f",      ExpectedResult = 1.5f >= 2.5f)]
-        [TestCase("1.5f == 1.5f",      ExpectedResult = 1.5f == 1.5f)]
-        [TestCase("1.5f == 2.5f",      ExpectedResult = 1.5f == 2.5f)]
-        [TestCase("1.5f != 1.5f",      ExpectedResult = 1.5f != 1.5f)]
-        [TestCase("true == true",      ExpectedResult = true == true)]
-        [TestCase("true == false",     ExpectedResult = true == false)]
-        [TestCase("false == false",    ExpectedResult = false == false)]
-        [TestCase("true != false",     ExpectedResult = true != false)]
-        [TestCase("true != true",      ExpectedResult = true != true)]
-        [TestCase("'a' == 'a'",        ExpectedResult = 'a' == 'a')]
-        [TestCase("'a' == 'b'",        ExpectedResult = 'a' == 'b')]
-        [TestCase("'a' != 'b'",        ExpectedResult = 'a' != 'b')]
-        [TestCase("'a' < 'b'",         ExpectedResult = 'a' < 'b')]
-        [TestCase("'b' > 'a'",         ExpectedResult = 'b' > 'a')]
-        [TestCase("'a'=='a'",          ExpectedResult = 'a' == 'a')]
-        [TestCase("'a'!='a'",          ExpectedResult = 'a' != 'a')]
-        [TestCase("'a'=='b'",          ExpectedResult = 'a' == 'b')]
-        [TestCase("\"ab\" == \"ab\"", ExpectedResult = true)]  // string == is not a C# constant expression
+        [TestCase("1 < 2",            ExpectedResult = 1     < 2)]
+        [TestCase("2 < 1",            ExpectedResult = 2     < 1)]
+        [TestCase("1 <= 2",           ExpectedResult = 1     <= 2)]
+        [TestCase("2 <= 1",           ExpectedResult = 2     <= 1)]
+        [TestCase("1 <= 1",           ExpectedResult = 1     <= 1)]
+        [TestCase("1 >= 2",           ExpectedResult = 1     >= 2)]
+        [TestCase("2 >= 1",           ExpectedResult = 2     >= 1)]
+        [TestCase("1 >= 1",           ExpectedResult = 1     >= 1)]
+        [TestCase("1 == 1",           ExpectedResult = 1     == 1)]
+        [TestCase("1 == 2",           ExpectedResult = 1     == 2)]
+        [TestCase("1 != 1",           ExpectedResult = 1     != 1)]
+        [TestCase("1 != 2",           ExpectedResult = 1     != 2)]
+        [TestCase("1.5 < 2.5",        ExpectedResult = 1.5   < 2.5)]
+        [TestCase("2.5 < 1.5",        ExpectedResult = 2.5   < 1.5)]
+        [TestCase("1.5 <= 2.5",       ExpectedResult = 1.5   <= 2.5)]
+        [TestCase("2.5 <= 1.5",       ExpectedResult = 2.5   <= 1.5)]
+        [TestCase("1.5 >= 2.5",       ExpectedResult = 1.5   >= 2.5)]
+        [TestCase("2.5 >= 2.5",       ExpectedResult = 2.5   >= 2.5)]
+        [TestCase("1.5 == 1.5",       ExpectedResult = 1.5   == 1.5)]
+        [TestCase("1.5 == 2.5",       ExpectedResult = 1.5   == 2.5)]
+        [TestCase("1.5 != 2.5",       ExpectedResult = 1.5   != 2.5)]
+        [TestCase("1.5f < 2.5f",      ExpectedResult = 1.5f  < 2.5f)]
+        [TestCase("2.5f < 1.5f",      ExpectedResult = 2.5f  < 1.5f)]
+        [TestCase("1.5f <= 2.5f",     ExpectedResult = 1.5f  <= 2.5f)]
+        [TestCase("2.5f <= 1.5f",     ExpectedResult = 2.5f  <= 1.5f)]
+        [TestCase("1.5f >= 1.5f",     ExpectedResult = 1.5f  >= 1.5f)]
+        [TestCase("1.5f >= 2.5f",     ExpectedResult = 1.5f  >= 2.5f)]
+        [TestCase("1.5f == 1.5f",     ExpectedResult = 1.5f  == 1.5f)]
+        [TestCase("1.5f == 2.5f",     ExpectedResult = 1.5f  == 2.5f)]
+        [TestCase("1.5f != 1.5f",     ExpectedResult = 1.5f  != 1.5f)]
+        [TestCase("true == true",     ExpectedResult = true  == true)]
+        [TestCase("true == false",    ExpectedResult = true  == false)]
+        [TestCase("false == false",   ExpectedResult = false == false)]
+        [TestCase("true != false",    ExpectedResult = true  != false)]
+        [TestCase("true != true",     ExpectedResult = true  != true)]
+        [TestCase("'a' == 'a'",       ExpectedResult = 'a'   == 'a')]
+        [TestCase("'a' == 'b'",       ExpectedResult = 'a'   == 'b')]
+        [TestCase("'a' != 'b'",       ExpectedResult = 'a'   != 'b')]
+        [TestCase("'a' < 'b'",        ExpectedResult = 'a'   < 'b')]
+        [TestCase("'b' > 'a'",        ExpectedResult = 'b'   > 'a')]
+        [TestCase("'a'=='a'",         ExpectedResult = 'a'   == 'a')]
+        [TestCase("'a'!='a'",         ExpectedResult = 'a'   != 'a')]
+        [TestCase("'a'=='b'",         ExpectedResult = 'a'   == 'b')]
+        [TestCase("\"ab\" == \"ab\"", ExpectedResult = true)] // string == is not a C# constant expression
         [TestCase("\"ab\" == \"ac\"", ExpectedResult = false)]
         [TestCase("\"ab\" != \"ac\"", ExpectedResult = true)]
         public static bool Test_Comparison_Bool(string input)
@@ -575,11 +570,11 @@
 
 
         [Repeat(10000)]
-        [TestCase(" ",  ExpectedResult = null)]
-        [TestCase("",   ExpectedResult = null)] // string.Empty
-        [TestCase(";;", ExpectedResult = null)]
-        [TestCase(";",  ExpectedResult = null)]
-        [TestCase("()", ExpectedResult = null)]
+        [TestCase(" ",   ExpectedResult = null)]
+        [TestCase("",    ExpectedResult = null)] // string.Empty
+        [TestCase(";;",  ExpectedResult = null)]
+        [TestCase(";",   ExpectedResult = null)]
+        [TestCase("()",  ExpectedResult = null)]
         [TestCase("( )", ExpectedResult = null)]
         //[TestCase(null, ExpectedResult = null)] // null will throw exception
         public static object Test_Expression_SP(string input)
@@ -679,7 +674,7 @@
                 var ink = new UniInk();
                 var rnd = new Random(thread);
 
-                for (var i = 0; i < ROUNDS; i++)
+                for (var i = 0 ; i < ROUNDS ; i++)
                 {
                     var a = rnd.Next(100);
                     var b = rnd.Next(100);
@@ -716,7 +711,7 @@
             shared.RegisterVariable("Cards",  InkValue.GetObjectValue(cards));
             shared.RegisterVariable("Rarity", InkValue.GetIntValue(5));
             shared.RegisterFunction("SUM", new InkFunction(prms => InkValue.GetIntValue(
-                (int)(InkValue)prms[0] + (int)(InkValue)prms[1] + (int)(InkValue)prms[2])));
+                                                                                        (int)(InkValue)prms[0] + (int)(InkValue)prms[1] + (int)(InkValue)prms[2])));
             shared.RegisterFunction("GET", new InkFunction(prms => InkValue.GetIntValue(((Card)((InkValue)prms[0]).ValueObject).Rarity)));
             shared.RegisterFunction("FLT", new InkFunction(prms =>
             {
@@ -739,7 +734,7 @@
             {
                 var rnd = new Random(thread);
 
-                for (var i = 0; i < ROUNDS; i++)
+                for (var i = 0 ; i < ROUNDS ; i++)
                 {
                     var a = rnd.Next(100);
                     var b = rnd.Next(100);
@@ -781,7 +776,7 @@
             // the char literals used to swallow the following token , so "if('a'<'b')" could not be parsed at all
             var result = Ink.Evaluate_IfStatement("if('a'<'b'){return 1}else{return 2}") as InkValue;
 
-            Assert.That(result is null, Is.False, "the if statement should return a value");
+            Assert.That(result is null,   Is.False, "the if statement should return a value");
             Assert.That(result!.ValueInt, Is.EqualTo(1));
 
             InkValue.Release(result);
