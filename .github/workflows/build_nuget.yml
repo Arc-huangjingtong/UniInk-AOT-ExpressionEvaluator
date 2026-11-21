@@ -29,7 +29,10 @@ jobs:
       - name: 🔧 设置 .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          # 必须是 10.x : Arc.UniInk.Benchmark 目标 net10.0
+          dotnet-version: '10.0.x'
+          cache: true
+          cache-dependency-path: '**/*.csproj'
 
       - name: 📝 提取版本号
         id: get_version
@@ -60,14 +63,11 @@ jobs:
       - name: 🏗️ 构建项目
         run: dotnet build Arc.UniInk/Arc.UniInk.sln -c Release --no-restore
 
-      - name: 🧪 运行测试（如果有）
-        run: |
-          if [ -d "Arc.UniInk/Arc.UniInk.Tests" ]; then
-            dotnet test Arc.UniInk/Arc.UniInk.sln -c Release --no-build --verbosity normal
-          else
-            echo "⚠️ 未找到测试项目，跳过测试"
-          fi
-        continue-on-error: true
+      - name: 🧪 运行测试 (Release)
+        run: dotnet test Arc.UniInk/Arc.UniInk.sln -c Release --no-build --verbosity normal
+
+      - name: 🧪 运行测试 (Debug , 开启池契约断言)
+        run: dotnet test Arc.UniInk/Arc.UniInk.Benchmark/Arc.UniInk.Benchmark.csproj -c Debug --verbosity normal
 
       - name: 📦 打包 NuGet
         run: dotnet pack Arc.UniInk/Arc.UniInk/Arc.UniInk.csproj -c Release --no-build -o ./artifacts
@@ -76,6 +76,7 @@ jobs:
         run: |
           echo "📦 生成的 NuGet 包:"
           ls -lh ./artifacts/
+          unzip -l ./artifacts/*.nupkg
 
       - name: 🔐 NuGet 登录 (OIDC → 临时 API Key)
         uses: NuGet/login@v1
