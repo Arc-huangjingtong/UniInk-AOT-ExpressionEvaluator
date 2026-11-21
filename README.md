@@ -2,21 +2,23 @@
   <img src="MarkDown_Assets/UniInk_ReadmeHeader.jpg" alt="UniInk Header" style="width:100%;height:auto;"/>
 </div>
 
-# ✒️ UniInk - AOT C# Interpreter
+# ✒️ UniInk - AOT Expression Evaluator
 
-![Stars Num](https://img.shields.io/github/stars/Arc-huangjingtong/UniInk-CSharpInterpreter4AOT?style=social&logo=github)
-![Forks Num](https://img.shields.io/github/forks/Arc-huangjingtong/UniInk-CSharpInterpreter4AOT?style=social&logo=github)
+> AOT-friendly, zero-allocation C#-style **expression & mini-script evaluator** for Unity IL2CPP and .NET.
+
+![Stars Num](https://img.shields.io/github/stars/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator?style=social&logo=github)
+![Forks Num](https://img.shields.io/github/forks/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator?style=social&logo=github)
 ![License  ](https://img.shields.io/badge/license-MIT-yellow)
 ![Version  ](https://img.shields.io/badge/version-1.0.0-green)
-![C#       ](https://img.shields.io/badge/CSharp-8.0%20+%20-blue)
+![C#       ](https://img.shields.io/badge/CSharp-9.0%2B-blue)
 ![Platforms](https://img.shields.io/badge/platforms-Android%20|%20Windows%20|%20(ios)-lightgrey)
 ---
 
 # 😀Start
 
-### Download [UniInk.cs](https://github.com/Arc-huangjingtong/UniInk-CSharpInterpreter4AOT/blob/main/Arc.UniInk/Arc.UniInk/UniInk.cs) is Enough !
+### Download [UniInk.cs](https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/blob/main/Arc.UniInk/Arc.UniInk/UniInk.cs) is Enough !
 
-> Optional : also grab [UniInk.Extensions.cs](https://github.com/Arc-huangjingtong/UniInk-CSharpInterpreter4AOT/blob/main/Arc.UniInk/Arc.UniInk/UniInk.Extensions.cs) if you need the `if` statement support (or want to extend the interpreter yourself).
+> Optional : also grab [UniInk.Extensions.cs](https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/blob/main/Arc.UniInk/Arc.UniInk/UniInk.Extensions.cs) if you need the `if` statement support (or want to extend the interpreter yourself).
 
 Both files live in the `Arc.UniInk` namespace, so remember to add `using Arc.UniInk;`.
 
@@ -256,7 +258,7 @@ Console.WriteLine(res.ValueInt); // 456
 # 💬Support
 
 If you have any questions, suggestions, or need assistance, please feel free
-to [open an issue](https://github.com/Arc-huangjingtong/UniInk-CSharpInterpreter4AOT/issues) on the UniInk repository.
+to [open an issue](https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/issues) on the UniInk repository.
 We're here to help! 😊
 
 Let's script with UniInk and unlock the full potential of your projects! 🚀💡🌟

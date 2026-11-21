@@ -21,11 +21,13 @@
 
     <PropertyGroup>
         <PackageId>Arc.UniInk</PackageId>
+        <Title>UniInk - AOT Expression Evaluator</Title>
         <Version>0.1.0</Version>
         <Authors>Arc-huangjingtong</Authors>
-        <Description>UniInk C# Interpreter for AOT environments.</Description>
-        <PackageProjectUrl>https://github.com/Arc-huangjingtong/UniInk-CSharpInterpreter4AOT</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/Arc-huangjingtong/UniInk-CSharpInterpreter4AOT.git</RepositoryUrl>
+        <Description>UniInk - an AOT-friendly, zero-allocation C# expression and mini-script evaluator for Unity IL2CPP and .NET. No reflection and no boxing on the common path; supports variables, functions, lambdas and if/else.</Description>
+        <PackageTags>unity;il2cpp;aot;expression-evaluator;script;zero-allocation;no-reflection</PackageTags>
+        <PackageProjectUrl>https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator.git</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>

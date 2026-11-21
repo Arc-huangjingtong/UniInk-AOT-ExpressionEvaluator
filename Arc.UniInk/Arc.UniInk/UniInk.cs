@@ -8,11 +8,11 @@
 
 
     /* ================================================== SUMMARY  ================================================== */
-    /* Title    :  UniInk_Speed (https://github.com/Arc-huangjingtong/UniInk-CSharpInterpreter4Unity)                 */
+    /* Title    :  UniInk (https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator)                       */
     /* Author   :  Arc (https://github.com/Arc-huangjingtong)                                                         */
     /* Version  :  1.1.0 (Increase readability)                                                                       */
-    /* Licence  :  MIT (https://github.com/Arc-huangjingtong/UniInk-CSharpInterpreter4Unity/blob/main/LICENSE)        */
-    /* Support  :  [.NET Framework 4+] [C# 9.0+] [IL2CPP Support]                                                     */
+    /* Licence  :  MIT (https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/blob/main/LICENSE)        */
+    /* Support  :  [.NET Standard 2.1] [C# 9.0+] [IL2CPP Support]                                                     */
     /* Feature  :  [Easy-use] [High performance] [zero box & unbox] [zero GC!] [zero reflection runtime]              */
     /* ============================================================================================================== */
 

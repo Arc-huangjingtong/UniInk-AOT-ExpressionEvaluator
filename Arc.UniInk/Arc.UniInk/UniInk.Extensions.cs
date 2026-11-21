@@ -2,7 +2,7 @@
 {
 
     /* ================================================== SUMMARY  ================================================== */
-    /* Title    :  UniInk_Extensions (https://github.com/Arc-huangjingtong/UniInk-CSharpInterpreter4Unity)            */
+    /* Title    :  UniInk_Extensions (https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator)            */
     /* Authors  :  Arc (https://github.com/Arc-huangjingtong)                                                         */
     /* Version  :  1.1.0                                                                                              */
     /* Desc     :  Provide commonly used string-related processing tools                                              */
