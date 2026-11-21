@@ -309,13 +309,31 @@
         /// <returns>The result of the evaluation</returns>
         public object Evaluate_IfStatement(string expression, int startIndex, int endIndex)
         {
-            var keys = CompileLexerAndFill(expression, startIndex, endIndex);
+            var context = InkEvalContext.Current;
 
-            var result = ExecuteProcess_IfStatement(keys);
+            context.PushFrame();
 
-            RecoverResources(keys);
+            InkSyntaxList keys = null;
 
-            return result;
+            try
+            {
+                keys = CompileLexerAndFill(expression, startIndex, endIndex);
+
+                return ExecuteProcess_IfStatement(keys);
+            }
+            finally
+            {
+                if (keys is not null)
+                {
+                    InkSyntaxList.ReleaseAll(keys);
+                }
+
+                InkSyntaxList.ReleaseTemp();
+
+                ReleaseTempVariables();
+
+                context.PopFrame();
+            }
         }
 
         /// <summary> Evaluate the expression with if statement support </summary>

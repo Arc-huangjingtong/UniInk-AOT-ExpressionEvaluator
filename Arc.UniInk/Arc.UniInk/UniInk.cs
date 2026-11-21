@@ -165,18 +165,32 @@
                 return null;
             }
 
-            var keys = CompileLexerAndFill(expression, startIndex, endIndex);
+            var context = InkEvalContext.Current;
 
-            var result = ExecuteProcess(keys);
+            context.PushFrame();
 
-            RecoverResources(keys);
+            InkSyntaxList keys = null;
 
-            if (result is InkValue inkValue)
+            try
             {
-                return inkValue;
-            }
+                keys = CompileLexerAndFill(expression, startIndex, endIndex);
 
-            return null;
+                return ExecuteProcess(keys) as InkValue;
+            }
+            finally
+            {
+                // release even when the parsing throws , otherwise the pools silently shrink on every syntax error
+                if (keys is not null)
+                {
+                    InkSyntaxList.ReleaseAll(keys);
+                }
+
+                InkSyntaxList.ReleaseTemp();
+
+                ReleaseTempVariables();
+
+                context.PopFrame();
+            }
         }
 
 
@@ -596,16 +610,18 @@
             }
         }
 
-        /// <summary> Release the temp variables in UniInk </summary>
+        /// <summary> Release the temp variables of the running evaluation frame </summary>
         protected void ReleaseTempVariables()
         {
-            foreach (var variable in DicVariablesTemp)
+            var variables = InkEvalContext.Current.TempVariables;
+
+            foreach (var variable in variables)
             {
                 variable.Value.DontRelease = false;
                 InkValue.Release(variable.Value);
             }
 
-            DicVariablesTemp.Clear();
+            variables.Clear();
         }
 
         /*************************************************  Mapping  **************************************************/
@@ -658,9 +674,6 @@
 
         /// <summary> Some local variables mapping </summary>
         protected readonly Dictionary<int, InkValue> DicVariables = new(VARIABLE_CAPACITY);
-
-        /// <summary> Some temp  variables mapping </summary>
-        protected readonly Dictionary<int, InkValue> DicVariablesTemp = new(VARIABLE_TEMP_CAPACITY);
 
 
         /*************************************************  Parsing  **************************************************/
@@ -805,6 +818,8 @@
         /// <returns> the evaluate is success or not </returns>
         protected bool EvaluateVariable(string expression, InkSyntaxList keys, ref int i)
         {
+            var tempVariables = InkEvalContext.Current.TempVariables;
+
             if (keys.Count > 0 && keys[keys.Count - 1] is InkOperator operatorValue && Equals(operatorValue, InkOperator.KeyVar))
             {
                 var startIndex = i;
@@ -826,12 +841,12 @@
                 var inkValue = InkValue.Get();
                 inkValue.ValueType   = TypeCode.DBNull;
                 inkValue.DontRelease = true;
-                DicVariablesTemp.Add(keyHash, inkValue);
+                tempVariables.Add(keyHash, inkValue);
 
 
                 keys.SetDirty(keys.Count - 1); // the keyVar
 
-                keys.Add(DicVariablesTemp[keyHash]);
+                keys.Add(tempVariables[keyHash]);
 
                 return true;
             }
@@ -842,7 +857,7 @@
                 if (i + len >= expression.Length) continue; // long=>short, || first than |, so we need to check the length
 
                 var varHash = GetStringSliceHashCode(expression, i, i + len);
-                if (DicVariablesTemp.TryGetValue(varHash, out var variable))
+                if (tempVariables.TryGetValue(varHash, out var variable))
                 {
                     keys.Add(variable);
                     i += len;
@@ -1787,11 +1802,89 @@
     }
 
 
+    /// <summary> UniInk evaluation context : the pools of the calling thread and the state of the running evaluation </summary>
+    /// <remarks>
+    /// One context exists per thread ( created lazily ) , so several UniInk instances can be evaluated on different
+    /// threads . A context keeps a stack of frames , so a registered function may call Evaluate again ( reentrancy )
+    /// without releasing the temp objects of the outer call .
+    /// An evaluation never mutates the UniInk instance itself , so one instance can also be shared by several threads ,
+    /// as long as no function / variable is registered while an evaluation is running .
+    /// </remarks>
+    public sealed class InkEvalContext
+    {
+        [ThreadStatic] private static InkEvalContext current;
+
+        /// <summary> The context of the calling thread </summary>
+        public static InkEvalContext Current => current ??= new InkEvalContext();
+
+        /// <summary> The InkValue instances available for reuse on this thread </summary>
+        public readonly Queue<InkValue> ValuePool = new(UniInk.INK_VALUE_POOL_CAPACITY);
+
+        /// <summary> The InkSyntaxList instances available for reuse on this thread </summary>
+        public readonly Queue<InkSyntaxList> SyntaxPool = new(UniInk.INK_SYNTAX_POOL_CAPACITY);
+
+        /// <summary> The temp syntax lists created by the running evaluation ( the lambda cache ) </summary>
+        public readonly List<InkSyntaxList> TempLists = new(UniInk.INK_SYNTAX_POOL_CAPACITY);
+
+        private sealed class Frame
+        {
+            public readonly Dictionary<int, InkValue> TempVariables = new(UniInk.VARIABLE_TEMP_CAPACITY);
+            public          int                       TempListMark;
+        }
+
+        private readonly List<Frame>  frames     = new(4) { new Frame() }; // [0] is the root frame
+        private readonly Stack<Frame> freeFrames = new(4);
+
+        /// <summary> The temp variables of the running evaluation frame </summary>
+        public Dictionary<int, InkValue> TempVariables => frames[frames.Count - 1].TempVariables;
+
+        /// <summary> The number of temp syntax lists owned by the outer frames </summary>
+        internal int TempListMark => frames[frames.Count - 1].TempListMark;
+
+        /// <summary> Begin an evaluation frame </summary>
+        public void PushFrame()
+        {
+            var frame = freeFrames.Count > 0 ? freeFrames.Pop() : new Frame();
+
+            frame.TempListMark = TempLists.Count;
+
+            frames.Add(frame);
+        }
+
+        /// <summary> End the running evaluation frame and return its temp objects to the pools </summary>
+        public void PopFrame()
+        {
+            if (frames.Count <= 1) return; // the root frame serves the manual API ( CompileLexerAndFill / ExecuteProcess )
+
+            var frame = frames[frames.Count - 1];
+
+            frames.RemoveAt(frames.Count - 1);
+
+            foreach (var variable in frame.TempVariables)
+            {
+                variable.Value.DontRelease = false;
+                InkValue.Release(variable.Value);
+            }
+
+            frame.TempVariables.Clear();
+
+            for (var i = TempLists.Count - 1 ; i >= frame.TempListMark ; i--)
+            {
+                InkSyntaxList.ReleaseAll(TempLists[i]);
+
+                TempLists.RemoveAt(i);
+            }
+
+            freeFrames.Push(frame);
+        }
+    }
+
+
     /// <summary> In UniInk , every valueType is Object , No Boxing! </summary>
     public partial class InkValue
     {
-        /// <summary> Object pool for InkValue instances to reduce allocations </summary>
-        private static readonly Queue<InkValue> pool = new(UniInk.INK_VALUE_POOL_CAPACITY);
+        /// <summary> The object pool of the calling thread , see <see cref="InkEvalContext"/> </summary>
+        private static Queue<InkValue> Pool => InkEvalContext.Current.ValuePool;
 
         /// <summary> Gets an InkValue instance from the pool or creates a new one </summary>
         /// <returns>An InkValue instance ready for use</returns>
@@ -1801,7 +1894,7 @@
             GetTime++;
 #endif
 
-            var value = pool.Count > 0 ? pool.Dequeue() : new();
+            var value = Pool.Count > 0 ? Pool.Dequeue() : new();
 
 #if DEBUG
             value.isReleased = false;
@@ -1811,7 +1904,7 @@
         }
 
         /// <summary> Clears the InkValue pool, releasing all cached instances </summary>
-        public static void ReleasePool() => pool.Clear();
+        public static void ReleasePool() => Pool.Clear();
 
 #if DEBUG
         /// <summary> DEBUG only : how many times Get() has been called </summary>
@@ -1959,7 +2052,7 @@
             value.ValueDouble = 0;
             value.ValueObject = null;
 
-            pool.Enqueue(value);
+            Pool.Enqueue(value);
         }
 
         /// <summary> Integer value storage </summary>
@@ -2571,11 +2664,11 @@
     /// <summary> InkSyntaxList is a list of object, it can be used to store the syntax object </summary>
     public partial class InkSyntaxList
     {
-        /// <summary> Object pool for InkSyntaxList instances to reduce allocations </summary>
-        public static readonly Queue<InkSyntaxList> Pool = new(UniInk.INK_SYNTAX_POOL_CAPACITY);
+        /// <summary> Object pool for InkSyntaxList instances of the calling thread , see <see cref="InkEvalContext"/> </summary>
+        public static Queue<InkSyntaxList> Pool => InkEvalContext.Current.SyntaxPool;
 
-        /// <summary> Cache for lambda expressions </summary>
-        public static readonly List<InkSyntaxList> LambdaCache = new(UniInk.INK_SYNTAX_POOL_CAPACITY);
+        /// <summary> Cache for the temp syntax lists of the running evaluation </summary>
+        public static List<InkSyntaxList> LambdaCache => InkEvalContext.Current.TempLists;
 
         /// <summary> Gets an InkSyntaxList instance from the pool or creates a new one </summary>
         /// <returns>An InkSyntaxList instance ready for use</returns>
@@ -2620,15 +2713,17 @@
             Pool.Enqueue(value);
         }
 
-        /// <summary> Releases all temporary InkSyntaxList instances from the lambda cache </summary>
+        /// <summary> Releases the temporary InkSyntaxList instances created by the running evaluation frame </summary>
         public static void ReleaseTemp()
         {
-            foreach (var inkSyntaxList in LambdaCache)
-            {
-                ReleaseAll(inkSyntaxList);
-            }
+            var context = InkEvalContext.Current;
 
-            LambdaCache.Clear();
+            for (var i = context.TempLists.Count - 1 ; i >= context.TempListMark ; i--)
+            {
+                ReleaseAll(context.TempLists[i]);
+
+                context.TempLists.RemoveAt(i);
+            }
         }
 
         /// <summary> Recover the InkSyntaxList without releasing the objects </summary>

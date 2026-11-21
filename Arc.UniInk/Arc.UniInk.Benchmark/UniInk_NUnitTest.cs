@@ -16,6 +16,8 @@
     using Arc.UniInk;
     using System;
     using System.Collections.Generic;
+    using System.Threading;
+    using System.Threading.Tasks;
     using NUnit.Framework;
 
 
@@ -628,6 +630,131 @@
 
 
         #endregion
+
+        #region 6.Threading : reentrancy and parallel evaluation
+
+
+        [Test]
+        public static void Test_Reentrancy_NestedEvaluate()
+        {
+            // a registered function may evaluate again on the same instance : the inner call must not release the
+            // temp objects of the outer call
+            var ink = new UniInk();
+
+            ink.RegisterFunction("NEST", new InkFunction(_ => ink.Evaluate("1 + 1")));
+
+            Assert.That(ink.Evaluate("NEST(1) + 3").GetResult_Int(), Is.EqualTo(5));
+
+            // the temp variable of the outer call must survive the nested evaluation ( it used to be released and reset )
+            Assert.That(ink.Evaluate("var a = 10; NEST(1) + a").GetResult_Int(), Is.EqualTo(12));
+        }
+
+
+        [Test]
+        public static void Test_ThreadSafety_PerThreadInstances()
+        {
+            const int THREADS = 8;
+            const int ROUNDS  = 500;
+
+            var failures = 0;
+
+            Parallel.For(0, THREADS, thread =>
+            {
+                var ink = new UniInk();
+                var rnd = new Random(thread);
+
+                for (var i = 0; i < ROUNDS; i++)
+                {
+                    var a = rnd.Next(100);
+                    var b = rnd.Next(100);
+
+                    try
+                    {
+                        if (ink.Evaluate($"{a} * {b} + {a}").GetResult_Int() != a * b + a)
+                        {
+                            Interlocked.Increment(ref failures);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        Interlocked.Increment(ref failures);
+                    }
+                }
+            });
+
+            Assert.That(failures, Is.Zero, "every thread must be able to evaluate with its own instance");
+        }
+
+
+        [Test]
+        public static void Test_ThreadSafety_SharedInstance()
+        {
+            const int THREADS = 8;
+            const int ROUNDS  = 500;
+
+            var shared   = new UniInk();
+            var failures = 0;
+
+            var cards = new List<Card> { new() { ID = 1, Rarity = 2 }, new() { ID = 2, Rarity = 5 }, new() { ID = 3, Rarity = 2 } };
+
+            shared.RegisterVariable("Cards",  InkValue.GetObjectValue(cards));
+            shared.RegisterVariable("Rarity", InkValue.GetIntValue(5));
+            shared.RegisterFunction("SUM", new InkFunction(prms => InkValue.GetIntValue(
+                (int)(InkValue)prms[0] + (int)(InkValue)prms[1] + (int)(InkValue)prms[2])));
+            shared.RegisterFunction("GET", new InkFunction(prms => InkValue.GetIntValue(((Card)((InkValue)prms[0]).ValueObject).Rarity)));
+            shared.RegisterFunction("FLT", new InkFunction(prms =>
+            {
+                var source = (List<Card>)((InkValue)prms[0]).ValueObject;
+                var filter = (Predicate<object>)((InkValue)prms[1]).ValueObject;
+                var list   = new List<Card>();
+
+                foreach (var card in source)
+                {
+                    if (filter(card))
+                    {
+                        list.Add(card);
+                    }
+                }
+
+                return list;
+            }));
+
+            Parallel.For(0, THREADS, thread =>
+            {
+                var rnd = new Random(thread);
+
+                for (var i = 0; i < ROUNDS; i++)
+                {
+                    var a = rnd.Next(100);
+                    var b = rnd.Next(100);
+
+                    try
+                    {
+                        var sum  = shared.Evaluate($"SUM({a}, {b}, 1) + {a}").GetResult_Int();
+                        var temp = shared.Evaluate("var x = 5; x * 2").GetResult_Int();
+                        var flt  = shared.Evaluate("FLT(Cards, var c => GET(c, Rarity) == 2)");
+                        var hits = ((List<Card>)flt.ValueObject).Count;
+
+                        InkValue.Release(flt);
+
+                        if (sum != a + b + 1 + a || temp != 10 || hits != 2)
+                        {
+                            Interlocked.Increment(ref failures);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        Interlocked.Increment(ref failures);
+                    }
+                }
+            });
+
+            Assert.That(failures, Is.Zero, "the instances must not share mutable evaluation state");
+        }
+
+
+        #endregion
+
 
         ///////////////////////////////////////////////  Extension Test ////////////////////////////////////////////////
 

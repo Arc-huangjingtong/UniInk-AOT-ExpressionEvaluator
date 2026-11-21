@@ -46,6 +46,38 @@ Both files live in the `Arc.UniInk` namespace, so remember to add `using Arc.Uni
 
 summary : UniInk is fast , and UniInk support more features. would you like to try it?
 
+## 🧵 Threading
+
+- ### Each thread owns its own evaluation context ( object pools + temp state ) , threads never share mutable runtime state
+- ### Both models are supported
+```csharp
+// A. one interpreter per thread
+Parallel.For(0, 8, _ =>
+{
+    var ink = new UniInk();
+    ink.Evaluate("1 + 2 * 3");
+});
+
+// B. one interpreter shared by several threads
+var shared = new UniInk();
+shared.RegisterFunction("SUM", new InkFunction(prms => InkValue.GetIntValue(
+    (int)(InkValue)prms[0] + (int)(InkValue)prms[1] + (int)(InkValue)prms[2])));
+
+Parallel.For(0, 8, _ => shared.Evaluate("SUM(1, 2, 3) + 1"));
+```
+- ### Constraints
+  - Register functions / variables **before** evaluating : registration itself is not synchronized
+  - A registered getter / setter , and any plain `object` you store in an `InkValue` , stay your own responsibility
+  - `var` variables ( `var a = 1` ) live for one `Evaluate` call only
+- ### A registered function may evaluate again ( reentrant call ) on the same instance
+```csharp
+ink.RegisterFunction("NEST", new InkFunction(_ => ink.Evaluate("1 + 1")));
+ink.Evaluate("NEST(1) + 3"); // 5
+```
+- ### `UniInk.ClearCache()` clears the pools of the **calling thread**
+- ### The `InkValue` returned by `Evaluate` must still be released ( `GetResult_*` does it for you )
+
+
 ## Evaluate Expression
 
 - ### ✨Support Arithmetic Operations ( Easy extend Operator )
