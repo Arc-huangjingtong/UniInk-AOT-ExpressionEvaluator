@@ -541,61 +541,65 @@
 
                 if (!hasArrow) break;
 
-                var (hasBalance, endIndex) = FindNoBalanceOperator(keys,                         InkOperator.ParenthesisLeft,
-                                                                   InkOperator.ParenthesisRight, arrowIndex, paramEnd);
+                ProcessList_LambdaExpression(keys, arrowIndex, paramEnd);
+            }
+        }
 
-                if (!hasBalance) throw new InkSyntaxException("Parenthesis is not balance!");
+        /// <summary> UniInk SyntaxList : Process one lambda expression </summary>
+        /// <remarks> The closure lives here , so it is only allocated when an arrow was really found </remarks>
+        protected static void ProcessList_LambdaExpression(InkSyntaxList keys, int arrowIndex, int paramEnd)
+        {
+            var (hasBalance, endIndex) = FindNoBalanceOperator(keys, InkOperator.ParenthesisLeft, InkOperator.ParenthesisRight, arrowIndex, paramEnd);
 
+            if (!hasBalance) throw new InkSyntaxException("Parenthesis is not balance!");
 
-                //var c => GET(c, Rarity) == 2)
-                var startIndex = arrowIndex - 1;
+            //var c => GET(c, Rarity) == 2)
+            var startIndex = arrowIndex - 1;
 
-                var lambdaData = InkSyntaxList.GetTemp();
+            var lambdaData = InkSyntaxList.GetTemp();
 
+            for (var i = arrowIndex + 1 ; i <= endIndex - 1 ; i++)
+            {
+                object current;
 
-                for (var i = arrowIndex + 1 ; i <= endIndex - 1 ; i++)
+                if (keys.IndexDirty[i])
                 {
-                    object current;
+                    if (keys.CastOther[i] == null) continue;
 
-                    if (keys.IndexDirty[i])
+                    current = keys.CastOther[i];
+
+                    keys.CastOther[i] = null;
+                }
+                else
+                {
+                    if (keys[i] is InkValue { ValueType: not (TypeCode.Object or TypeCode.DBNull) } inkValue)
                     {
-                        if (keys.CastOther[i] == null) continue;
-
-                        current = keys.CastOther[i];
-
-                        keys.CastOther[i] = null;
+                        current = inkValue.Clone();
                     }
                     else
                     {
-                        if (keys[i] is InkValue { ValueType: not (TypeCode.Object or TypeCode.DBNull) } inkValue)
-                        {
-                            current = inkValue.Clone();
-                        }
-                        else
-                        {
-                            current = keys[i];
-                        }
+                        current = keys[i];
                     }
-
-                    lambdaData.Add(current);
                 }
 
-                var variable = keys[startIndex] as InkValue;
-
-                var lambda = new Predicate<object>(o =>
-                {
-                    // this section has GC 🙂
-                    InkOperator.InkOperator_Assign(variable, o);
-                    var result = (bool)(InkValue)ProcessList(lambdaData, 0, lambdaData.Count - 1);
-                    InkSyntaxList.Recover(lambdaData);
-
-                    return result;
-                });
-
-                var inkObject = InkValue.GetObjectValue(lambda);
-
-                keys.SetDirty(inkObject, startIndex, endIndex - 1);
+                lambdaData.Add(current);
             }
+
+            var variable = keys[startIndex] as InkValue;
+
+            var lambda = new Predicate<object>(o =>
+            {
+                // this section has GC 🙂
+                InkOperator.InkOperator_Assign(variable, o);
+                var result = (bool)(InkValue)ProcessList(lambdaData, 0, lambdaData.Count - 1);
+                InkSyntaxList.Recover(lambdaData);
+
+                return result;
+            });
+
+            var inkObject = InkValue.GetObjectValue(lambda);
+
+            keys.SetDirty(inkObject, startIndex, endIndex - 1);
         }
 
         /// <summary> Release the temp variables of the running evaluation frame </summary>
@@ -1040,7 +1044,7 @@
             return false;
         }
 
-        /// <summary> Find <paramref name="input"/> is whether start with bool from <paramref name="startIndex"/>       </summary>
+        /// <summary> Find <paramref name="input"/> is whether start with bool from <paramref name="startIndex"/> </summary>
         protected static bool StartsWithBoolFromIndex(string input, int startIndex, out InkValue value, out int len)
         {
             const string TRUE_STR01  = "true";
@@ -1790,7 +1794,8 @@
     /// </remarks>
     public sealed class InkEvalContext
     {
-        [ThreadStatic] private static InkEvalContext current;
+        [ThreadStatic]
+        private static InkEvalContext current;
 
         /// <summary> The context of the calling thread </summary>
         public static InkEvalContext Current => current ??= new InkEvalContext();
@@ -2538,9 +2543,9 @@
 
             switch (left.ValueType, right.ValueType)
             {
-                case (TypeCode.Int32, TypeCode.Int32) :     answer.ValueBool = left.ValueInt  == right.ValueInt; break;
-                case (TypeCode.Boolean, TypeCode.Boolean) : answer.ValueBool = left.ValueBool == right.ValueBool; break;
-                case (TypeCode.Char, TypeCode.Char) :       answer.ValueBool = left.ValueChar == right.ValueChar; break;
+                case (TypeCode.Int32, TypeCode.Int32) :     answer.ValueBool = left.ValueInt                                  == right.ValueInt; break;
+                case (TypeCode.Boolean, TypeCode.Boolean) : answer.ValueBool = left.ValueBool                                 == right.ValueBool; break;
+                case (TypeCode.Char, TypeCode.Char) :       answer.ValueBool = left.ValueChar                                 == right.ValueChar; break;
                 case (TypeCode.Single, TypeCode.Single) :   answer.ValueBool = Math.Abs(left.ValueFloat  - right.ValueFloat)  < UniInk.EPSILON_FLOAT; break;
                 case (TypeCode.Double, TypeCode.Double) :   answer.ValueBool = Math.Abs(left.ValueDouble - right.ValueDouble) < UniInk.EPSILON_DOUBLE; break;
                 case (TypeCode.String, TypeCode.String) :
