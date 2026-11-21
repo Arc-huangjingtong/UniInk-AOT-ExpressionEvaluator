@@ -233,6 +233,65 @@
         #endregion
 
 
+        #region 1.1 Parentheses: an expression may start with [ ( ]
+
+
+        [Repeat(1000)]
+        [TestCase("(1)",                ExpectedResult = 1)]
+        [TestCase("(1+2)",              ExpectedResult = 1 + 2)]
+        [TestCase("((1))",              ExpectedResult = 1)]
+        [TestCase("(((1)))",            ExpectedResult = 1)]
+        [TestCase("(1+2)*3",            ExpectedResult = (1 + 2) * 3)]
+        [TestCase("(2+3)*(4+5)",        ExpectedResult = (2 + 3) * (4 + 5))]
+        [TestCase("(1+2)+(3+4)",        ExpectedResult = (1 + 2) + (3 + 4))]
+        [TestCase("((1+2)*3)",          ExpectedResult = (1 + 2) * 3)]
+        [TestCase("(-5)",               ExpectedResult = -5)]
+        [TestCase("(0-5)",              ExpectedResult = 0 - 5)]
+        [TestCase("(8/2)/2",            ExpectedResult = (8 / 2) / 2)]
+        [TestCase("(1+(2*3))",          ExpectedResult = 1 + (2 * 3))]
+        [TestCase("(1+1)*((2+2))",      ExpectedResult = (1 + 1) * (2 + 2))]
+        [TestCase("(1+2)-3",            ExpectedResult = (1 + 2) - 3)]
+        [TestCase("var a = (1+2); a",   ExpectedResult = 1 + 2)]
+        [TestCase("4; (1+2)",           ExpectedResult = 1 + 2)]
+        [TestCase("(1+2); 4",           ExpectedResult = 4)]
+        [TestCase("(1+2)*(3)",          ExpectedResult = (1 + 2) * 3)]
+        [TestCase("-(1+2)",             ExpectedResult = -(1 + 2))]
+        [TestCase("(1+2) + SUM(1,2,3)", ExpectedResult = (1 + 2) + (1 + 2 + 3))]
+        public static int Test_Expression_Parentheses(string input)
+        {
+            var res = Ink.Evaluate(input);
+
+            Assert.That(res is null, Is.False, $"the expression [{input}] should not be evaluated to null");
+
+            var result = res!.ValueInt;
+
+            InkValue.Release(res);
+
+            return result;
+        }
+
+
+        [Repeat(1000)]
+        [TestCase("(1+2) > 2",    ExpectedResult = (1 + 2) > 2)]
+        [TestCase("(1+2) == 3",   ExpectedResult = (1 + 2) == 3)]
+        [TestCase("((1) < (2))",  ExpectedResult = 1 < 2)]
+        public static bool Test_Expression_Parentheses_Bool(string input)
+        {
+            var res = Ink.Evaluate(input);
+
+            Assert.That(res is null, Is.False, $"the expression [{input}] should not be evaluated to null");
+
+            var result = res!.ValueBool;
+
+            InkValue.Release(res);
+
+            return result;
+        }
+
+
+        #endregion
+
+
         #region 2.Complex: variable declaration and assignment
 
 
@@ -427,6 +486,8 @@
         [TestCase("",   ExpectedResult = null)] // string.Empty
         [TestCase(";;", ExpectedResult = null)]
         [TestCase(";",  ExpectedResult = null)]
+        [TestCase("()", ExpectedResult = null)]
+        [TestCase("( )", ExpectedResult = null)]
         //[TestCase(null, ExpectedResult = null)] // null will throw exception
         public static object Test_Expression_SP(string input)
         {

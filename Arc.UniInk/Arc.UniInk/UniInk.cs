@@ -332,6 +332,8 @@
 
                 if (!hasParentheses) continue;
 
+                object result = null;
+
                 if (startIndex > 0 && keys[startIndex - 1] is InkFunction)
                 {
                     ProcessList_Functions(keys, startIndex, endIndex);
@@ -339,10 +341,17 @@
                 else
                 {
                     ProcessList_Operators(keys, startIndex + 1, endIndex - 1);
+
+                    // move the section result into the [ ( ] slot , that's where ProcessList reads the result
+                    if (startIndex + 1 <= endIndex - 1)
+                    {
+                        result = keys.CastOther[startIndex + 1];
+
+                        keys.CastOther[startIndex + 1] = null; // the [ ( ] slot owns the value from now on
+                    }
                 }
 
-                keys.SetDirty(startIndex);
-                keys.SetDirty(endIndex);
+                keys.SetDirty(result, startIndex, endIndex);
             }
         }
 
