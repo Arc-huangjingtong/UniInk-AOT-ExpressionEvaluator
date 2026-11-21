@@ -767,6 +767,30 @@
         #endregion
 
 
+        #region 7.Value : null safety and identity semantics
+
+
+        [Test]
+        public static void Test_Value_NullComparison_DoesNotThrow()
+        {
+            // "value == null" is a legal C# pattern , it must not call Calculate on a null instance
+            var value = InkValue.GetIntValue(5);
+
+            Assert.That((bool)(value == null), Is.False);
+            Assert.That((bool)(value != null), Is.True);
+
+            InkValue.Release(value);
+
+            InkValue left  = null;
+            InkValue right = null;
+
+            Assert.That((bool)(left == right), Is.True);
+            Assert.That((bool)(left != right), Is.False);
+        }
+        
+        #endregion
+
+
         ///////////////////////////////////////////////  Extension Test ////////////////////////////////////////////////
 
 

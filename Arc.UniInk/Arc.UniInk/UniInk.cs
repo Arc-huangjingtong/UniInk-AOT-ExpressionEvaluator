@@ -2219,13 +2219,14 @@
             }
         }
 
-        /// <summary> Override GetHashCode Method to provide a hash code based on the ValueMeta </summary>
-        /// <returns>A hash code representing the InkValue</returns>
+        /// <summary> Override GetHashCode Method to provide the hash code of the ValueMeta instance </summary>
+        /// <remarks> The hash code is based on identity , not on the value ; use the == operator to compare values </remarks>
+        /// <returns>A hash code representing this InkValue instance </returns>
         public override int GetHashCode() => ValueMeta.GetHashCode();
 
-        /// <summary> Override Equals Method to compare two InkValue instances based on their ValueMeta </summary>
+        /// <summary> Override Equals Method : an InkValue is only equal to itself </summary>
         /// <param name="obj">The other object to compare</param>
-        /// <returns>True if the two InkValue instances are equal, otherwise false</returns>
+        /// <returns>True only when both references point at the same InkValue instance , otherwise false</returns>
         public override bool Equals(object obj) => obj is InkValue value && ValueMeta == value.ValueMeta;
 
         /// <summary> Get the result of the value as an int, and auto release the value from pool. </summary>
@@ -2535,9 +2536,14 @@
         /// <param name="left">Left operand</param>
         /// <param name="right">Right operand</param>
         public static InkValue operator ==(InkValue left, InkValue right)
-        {
-            left!.Calculate();
-            right!.Calculate();
+        { 
+            if (left is null || right is null)
+            {
+                return GetBoolValue(left is null && right is null);
+            }
+
+            left.Calculate();
+            right.Calculate();
 
             var answer = GetBoolValue(false);
 
