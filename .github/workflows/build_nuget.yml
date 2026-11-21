@@ -3,7 +3,8 @@ name: Build and Publish NuGet (OIDC)
 on:
   push:
     tags:
-      - 'v*.*.*'  # 当推送 v 开头的标签时触发，如 v0.1.0, v1.0.0
+      - 'v*.*.*'   # v1.2.0
+      - 'ver*.*'   # ver1.2 ( the project's own tag style )
   workflow_dispatch:  # 允许手动触发
     inputs:
       version:
@@ -41,8 +42,10 @@ jobs:
             VERSION="${{ inputs.version }}"
             echo "使用手动输入的版本号: $VERSION"
           elif [ "${{ github.event_name }}" == "push" ] && [ -n "${{ github.ref }}" ]; then
-            VERSION=${GITHUB_REF#refs/tags/v}
-            echo "从 Git 标签提取版本号: $VERSION"
+            TAG=${GITHUB_REF#refs/tags/}
+            VERSION=${TAG#v}
+            VERSION=${VERSION#er}  # ver1.2 -> 1.2
+            echo "从 Git 标签提取版本号: $VERSION ( tag: $TAG )"
           else
             VERSION=$(grep -oP '<Version>\K[^<]+' Arc.UniInk/Arc.UniInk/Arc.UniInk.csproj | head -1)
             echo "从 csproj 文件提取版本号: $VERSION"

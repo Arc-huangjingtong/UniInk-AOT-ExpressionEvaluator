@@ -9,12 +9,14 @@
 ![Stars Num](https://img.shields.io/github/stars/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator?style=social&logo=github)
 ![Forks Num](https://img.shields.io/github/forks/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator?style=social&logo=github)
 ![License  ](https://img.shields.io/badge/license-MIT-yellow)
-![Version  ](https://img.shields.io/badge/version-1.0.0-green)
+![Version  ](https://img.shields.io/badge/version-1.2.0-green)
 ![C#       ](https://img.shields.io/badge/CSharp-9.0%2B-blue)
 ![Platforms](https://img.shields.io/badge/platforms-Android%20|%20Windows%20|%20(ios)-lightgrey)
 ---
 
 # 😀Start
+
+> Targets `netstandard2.0` and `netstandard2.1` — one package , consumed by .NET Framework 4.6.1+ , .NET Core 3.0+ / .NET 5-10 , and Unity ( the 2.0 build also covers Unity versions older than 2021.2 ) .
 
 ### Download [UniInk.cs](https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/blob/main/Arc.UniInk/Arc.UniInk/UniInk.cs) is Enough !
 
