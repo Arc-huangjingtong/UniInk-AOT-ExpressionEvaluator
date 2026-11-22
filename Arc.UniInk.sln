@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arc.UniInk", "UniInk\Arc.UniInk.csproj", "{F969106D-BD96-4E8F-A217-4B90D2975179}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arc.UniInk", "Arc.UniInk\Arc.UniInk.csproj", "{F969106D-BD96-4E8F-A217-4B90D2975179}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arc.UniInk.Benchmark", "Benchmark\Arc.UniInk.Benchmark.csproj", "{1BA70864-1706-44D0-9D58-669FD5703A14}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arc.UniInk.Benchmark", "Arc.UniInk.Benchmark\Arc.UniInk.Benchmark.csproj", "{1BA70864-1706-44D0-9D58-669FD5703A14}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -18,7 +18,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\UniInk\Arc.UniInk.csproj"/>
+        <ProjectReference Include="..\Arc.UniInk\Arc.UniInk.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

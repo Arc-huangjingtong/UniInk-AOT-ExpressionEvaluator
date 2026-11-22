@@ -37,10 +37,10 @@ jobs:
         run: dotnet test Arc.UniInk.sln -c Release --no-build --verbosity normal
 
       - name: 🧪 测试 (Debug , 开启池契约断言)
-        run: dotnet test Benchmark/Arc.UniInk.Benchmark.csproj -c Debug --verbosity normal
+        run: dotnet test Arc.UniInk.Benchmark/Arc.UniInk.Benchmark.csproj -c Debug --verbosity normal
 
       - name: 📦 打包自检
-        run: dotnet pack UniInk/Arc.UniInk.csproj -c Release --no-build -o ./artifacts
+        run: dotnet pack Arc.UniInk/Arc.UniInk.csproj -c Release --no-build -o ./artifacts
 
       - name: 📋 包内容
         run: unzip -l ./artifacts/*.nupkg

@@ -18,9 +18,9 @@
 
 > Targets `netstandard2.0` and `netstandard2.1` — one package , consumed by .NET Framework 4.6.1+ , .NET Core 3.0+ / .NET 5-10 , and Unity ( the 2.0 build also covers Unity versions older than 2021.2 ) .
 
-### Download [UniInk.cs](https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/blob/main/UniInk/UniInk.cs) is Enough !
+### Download [UniInk.cs](https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/blob/main/Arc.UniInk/UniInk.cs) is Enough !
 
-> Optional : also grab [UniInk.Extensions.cs](https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/blob/main/UniInk/UniInk.Extensions.cs) if you need the `if` statement support (or want to extend the interpreter yourself).
+> Optional : also grab [UniInk.Extensions.cs](https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/blob/main/Arc.UniInk/UniInk.Extensions.cs) if you need the `if` statement support (or want to extend the interpreter yourself).
 
 Both files live in the `Arc.UniInk` namespace, so remember to add `using Arc.UniInk;`.
 
@@ -36,7 +36,7 @@ Both files live in the `Arc.UniInk` namespace, so remember to add `using Arc.Uni
 
 # ✨Features
 
-- ### [UniInk.cs](UniInk/UniInk.cs) is a single file, you can download/copy the file and put it in your project.
+- ### [UniInk.cs](Arc.UniInk/UniInk.cs) is a single file, you can download/copy the file and put it in your project.
 - ### You can easy to extend the operator and function and more,because the code is clear and simple( only about 2600 lines )
 - ### The performance is very good, the GC is 0 and the boxing is 0.
 
@@ -273,7 +273,7 @@ var script= @" if ( 1 > 2 )
                  return 666      
                }                 ";
 
-// you should copy the UniInk.Extensions.cs (UniInk/UniInk.Extensions.cs) to your project
+// you should copy the UniInk.Extensions.cs (Arc.UniInk/UniInk.Extensions.cs) to your project
 // it provides Evaluate_IfStatement / EvaluateInt / EvaluateBool , and may enlighten you to write the custom extension
 var res = ink.Evaluate_IfStatement(script) as InkValue;
 Console.WriteLine(res.ValueInt); // 456
