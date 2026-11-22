@@ -47,7 +47,7 @@ jobs:
             VERSION=${VERSION#er}  # ver1.2 -> 1.2
             echo "从 Git 标签提取版本号: $VERSION ( tag: $TAG )"
           else
-            VERSION=$(grep -oP '<Version>\K[^<]+' Arc.UniInk/Arc.UniInk/Arc.UniInk.csproj | head -1)
+            VERSION=$(grep -oP '<Version>\K[^<]+' UniInk/Arc.UniInk.csproj | head -1)
             echo "从 csproj 文件提取版本号: $VERSION"
           fi
           echo "version=$VERSION" >> $GITHUB_OUTPUT
@@ -57,23 +57,23 @@ jobs:
         if: steps.get_version.outputs.version != ''
         run: |
           VERSION="${{ steps.get_version.outputs.version }}"
-          sed -i "s|<Version>.*</Version>|<Version>$VERSION</Version>|g" Arc.UniInk/Arc.UniInk/Arc.UniInk.csproj
+          sed -i "s|<Version>.*</Version>|<Version>$VERSION</Version>|g" UniInk/Arc.UniInk.csproj
           echo "✅ 已更新版本号到 $VERSION"
 
       - name: 🔍 还原依赖
-        run: dotnet restore Arc.UniInk/Arc.UniInk.sln
+        run: dotnet restore Arc.UniInk.sln
 
       - name: 🏗️ 构建项目
-        run: dotnet build Arc.UniInk/Arc.UniInk.sln -c Release --no-restore
+        run: dotnet build Arc.UniInk.sln -c Release --no-restore
 
       - name: 🧪 运行测试 (Release)
-        run: dotnet test Arc.UniInk/Arc.UniInk.sln -c Release --no-build --verbosity normal
+        run: dotnet test Arc.UniInk.sln -c Release --no-build --verbosity normal
 
       - name: 🧪 运行测试 (Debug , 开启池契约断言)
-        run: dotnet test Arc.UniInk/Arc.UniInk.Benchmark/Arc.UniInk.Benchmark.csproj -c Debug --verbosity normal
+        run: dotnet test Benchmark/Arc.UniInk.Benchmark.csproj -c Debug --verbosity normal
 
       - name: 📦 打包 NuGet
-        run: dotnet pack Arc.UniInk/Arc.UniInk/Arc.UniInk.csproj -c Release --no-build -o ./artifacts
+        run: dotnet pack UniInk/Arc.UniInk.csproj -c Release --no-build -o ./artifacts
 
       - name: 📋 列出生成的包
         run: |

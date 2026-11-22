@@ -28,19 +28,19 @@ jobs:
           cache-dependency-path: '**/*.csproj'
 
       - name: 🔍 还原依赖
-        run: dotnet restore Arc.UniInk/Arc.UniInk.sln
+        run: dotnet restore Arc.UniInk.sln
 
       - name: 🏗️ 构建 (Release)
-        run: dotnet build Arc.UniInk/Arc.UniInk.sln -c Release --no-restore
+        run: dotnet build Arc.UniInk.sln -c Release --no-restore
 
       - name: 🧪 测试 (Release)
-        run: dotnet test Arc.UniInk/Arc.UniInk.sln -c Release --no-build --verbosity normal
+        run: dotnet test Arc.UniInk.sln -c Release --no-build --verbosity normal
 
       - name: 🧪 测试 (Debug , 开启池契约断言)
-        run: dotnet test Arc.UniInk/Arc.UniInk.Benchmark/Arc.UniInk.Benchmark.csproj -c Debug --verbosity normal
+        run: dotnet test Benchmark/Arc.UniInk.Benchmark.csproj -c Debug --verbosity normal
 
       - name: 📦 打包自检
-        run: dotnet pack Arc.UniInk/Arc.UniInk/Arc.UniInk.csproj -c Release --no-build -o ./artifacts
+        run: dotnet pack UniInk/Arc.UniInk.csproj -c Release --no-build -o ./artifacts
 
       - name: 📋 包内容
         run: unzip -l ./artifacts/*.nupkg
