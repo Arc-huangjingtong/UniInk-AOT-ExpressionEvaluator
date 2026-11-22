@@ -1,5 +1,5 @@
 <div style="text-align:center">
-  <img src="MarkDown_Assets/UniInk_ReadmeHeader.jpg" alt="UniInk Header" style="width:100%;height:auto;"/>
+  <img src="README.Assets/UniInk_ReadmeHeader.jpg" alt="UniInk Header" style="width:100%;height:auto;"/>
 </div>
 
 # ✒️ UniInk - AOT Expression Evaluator
