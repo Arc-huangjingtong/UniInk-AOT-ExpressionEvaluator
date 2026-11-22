@@ -26,13 +26,29 @@ Both files live in the `Arc.UniInk` namespace, so remember to add `using Arc.Uni
 
 # 📝RoadMap
 
-- [ ] Support more features.
-- [ ] Nuget Package Support.
-- [ ] Unity Package Support.
-- [ ] Write more test cases.
-- [ ] Serializable function? Maybe interesting?
-- [ ] improve the readability.
-- [ ] thread safe support (or provide a thread safe way to execute many expression).
+> The items below come from suggestions in the issues — open one if you miss something.
+
+**Done**
+
+- [x] Readable single-file implementation , 200+ test cases and CI
+- [x] Thread-safe evaluation ( per-thread context , no shared runtime state )
+- [x] NuGet package ( `Arc.UniInk` ) , `netstandard2.0` + `netstandard2.1`
+- [x] C# style numeric promotion , one `InkSyntaxException` with the failing position
+- [x] `if / else` statement support ( `UniInk.Extensions.cs` )
+- [x] Zero boxing and zero allocation on the common path
+
+**Next**
+
+- [ ] Zero-allocation regression tests in CI
+- [ ] Move the tests out of `Arc.UniInk.Benchmark` into their own project
+- [ ] Unity package ( UPM ) support
+
+**Maybe**
+
+- [ ] `while` loops , arrays / indexers , string interpolation
+- [ ] Serializable functions
+- [ ] More numeric types ( `decimal` )
+
 
 # ✨Features
 
@@ -40,13 +56,14 @@ Both files live in the `Arc.UniInk` namespace, so remember to add `using Arc.Uni
 - ### You can easy to extend the operator and function and more,because the code is clear and simple( only about 2600 lines )
 - ### The performance is very good, the GC is 0 and the boxing is 0.
 
-| Method                                |            Mean |         Error |         StdDev |          Median |     Gen0 |    Gen1 | Allocated |
-|---------------------------------------|----------------:|--------------:|---------------:|----------------:|---------:|--------:|----------:|
-| TEST_Arithmetic__UniInkSpeed          |   293,666.10 ns |    333.563 ns |     260.424 ns |   293,632.98 ns |        - |       - |      68 B |
-| TEST_Arithmetic__UniInkSpeed_Compiled |   175,568.29 ns |  3,454.616 ns |   5,063.732 ns |   176,105.37 ns |        - |       - |     658 B |
-| TEST_Arithmetic__ExpressionEvaluator  | 2,622,376.28 ns | 10,903.378 ns |  10,199.026 ns | 2,623,418.75 ns | 390.6250 | 11.7188 | 2068334 B |
-| TEST_Arithmetic__Sprache              | 2,797,690.07 ns | 91,953.442 ns | 265,306.706 ns | 2,677,421.88 ns | 535.1563 | 19.5313 | 2817177 B |
-| TEST_Arithmetic__ParsecSharp          | 1,114,429.92 ns | 21,943.809 ns |  27,751.892 ns | 1,113,960.74 ns | 162.1094 |       - |  851830 B |
+| Method                               | Mean         | Error      | StdDev     | Ratio | RatioSD | Gen0     | Gen1    | Allocated | Alloc Ratio |
+|------------------------------------- |-------------:|-----------:|-----------:|------:|--------:|---------:|--------:|----------:|------------:|
+| TEST_Arithmetic__UniInk              |   121.798 us |  2.3316 us |  2.0669 us |  1.00 |    0.00 |        - |       - |         - |          NA |
+| TEST_Arithmetic__UniInk_Compiled     |    85.862 us |  1.0163 us |  0.8487 us |  0.71 |    0.01 |        - |       - |         - |          NA |
+| TEST_Arithmetic__ExpressionEvaluator |   767.686 us | 13.8328 us | 17.4941 us |  6.35 |    0.20 | 259.7656 |  3.9063 | 2175126 B |          NA |
+| TEST_Arithmetic__Sprache             | 1,222.876 us | 24.1360 us | 32.2209 us | 10.02 |    0.25 | 529.2969 | 95.7031 | 4423511 B |          NA |
+| TEST_Arithmetic__ParsecSharp         |   340.351 us |  4.7187 us |  4.4139 us |  2.79 |    0.05 | 201.6602 |  0.9766 | 1686897 B |          NA |
+| TEST_IfStatement__UniInk             |     4.001 us |  0.0797 us |  0.1924 us |  0.03 |    0.00 |        - |       - |         - |          NA |
 
 summary : UniInk is fast , and UniInk support more features. would you like to try it?
 
