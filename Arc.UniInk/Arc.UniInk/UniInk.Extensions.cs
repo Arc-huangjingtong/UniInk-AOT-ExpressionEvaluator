@@ -124,6 +124,11 @@
                 {
                     var current = ProcessList_IfStatement(keys, index_if);
 
+                    if (current <= index_if) // no progress : never spin on a malformed if statement
+                    {
+                        throw new InkSyntaxException("the if statement is malformed", keys.PositionAt(index_if), InkEvalContext.Current.Source);
+                    }
+
                     keys.SetDirty(null, index_start, current);
                     index_start = current + 1;
                     continue;
@@ -165,7 +170,7 @@
             // Check if the condition is correct, if not, throw an exception directly
             if (conditionStart == -1 || start + 1 != conditionStart)
             {
-                throw new InkSyntaxException("The if statement is wronging");
+                throw new InkSyntaxException("the if statement is malformed ( expected 'if ( condition ) { ... } else { ... }' )");
             }
 
             // Locate the [(condition){ operation }] operation
@@ -175,7 +180,7 @@
 
             if (operationStart == -1)
             {
-                throw new InkSyntaxException("The if statement is wronging");
+                throw new InkSyntaxException("the if statement is malformed ( expected 'if ( condition ) { ... } else { ... }' )");
             }
 
             var ifCondition = false;
@@ -219,9 +224,12 @@
 
                         if (success_if) temp_start++;
 
-                        var (opElseStart, opElseEnd)
-                            = GetMatchOperator(keys, InkOperator.BraceLeft, InkOperator.BraceRight, temp_start,
-                                               keys.Count - 1);
+                        var (opElseStart, opElseEnd) = GetMatchOperator(keys, InkOperator.BraceLeft, InkOperator.BraceRight, temp_start, keys.Count - 1);
+
+                        if (opElseStart < 0 || opElseEnd < 0)
+                        {
+                            throw new InkSyntaxException("the else branch is missing '{ ... }'", keys.PositionAt(index_else), InkEvalContext.Current.Source);
+                        }
 
                         if (!ifCondition)
                         {
@@ -244,10 +252,20 @@
                             = GetMatchOperator(keys,         InkOperator.ParenthesisLeft, InkOperator.ParenthesisRight,
                                                index_if + 1, index_end);
 
+                        if (cdsStart < 0 || cdsEnd < 0)
+                        {
+                            throw new InkSyntaxException("the else if condition is missing '( ... )'", keys.PositionAt(index_if), InkEvalContext.Current.Source);
+                        }
+
                         // 计算 else if 条件后的操作
                         var (opElseStart, opElseEnd)
                             = GetMatchOperator(keys, InkOperator.BraceLeft, InkOperator.BraceRight, cdsEnd + 1,
                                                index_end);
+
+                        if (opElseStart < 0 || opElseEnd < 0)
+                        {
+                            throw new InkSyntaxException("the else if branch is missing '{ ... }'", keys.PositionAt(index_if), InkEvalContext.Current.Source);
+                        }
 
 
                         // 计算 else if 后的条件
@@ -314,7 +332,7 @@
         {
             var context = InkEvalContext.Current;
 
-            context.PushFrame();
+            context.PushFrame(expression);
 
             InkSyntaxList keys = null;
 
@@ -323,6 +341,10 @@
                 keys = CompileLexerAndFill(expression, startIndex, endIndex);
 
                 return ExecuteProcess_IfStatement(keys);
+            }
+            catch (InkSyntaxException exception) when (exception.Expression is null)
+            {
+                throw exception.WithLocation(-1, expression); // attach the expression when no frame knew it
             }
             finally
             {

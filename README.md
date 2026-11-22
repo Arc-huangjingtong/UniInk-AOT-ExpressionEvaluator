@@ -105,6 +105,33 @@ ink.Evaluate("7 / 2.0");       // double 3.5
   - integer overflow is not checked ( the arithmetic is the runtime one )
 
 
+## ❗ Errors
+
+Every syntax or evaluation failure throws `InkSyntaxException`, and the exception carries where it happened :
+
+```csharp
+try
+{
+    ink.Evaluate("1 + true");
+}
+catch (InkSyntaxException exception)
+{
+    Console.WriteLine(exception.Message);  // operator [+] is not defined for [Int32] and [Boolean] at 2 in "1 + true"
+    Console.WriteLine(exception.Position); // 2   ( zero based character index , -1 when unknown )
+    Console.WriteLine(exception.Expression); // 1 + true
+}
+```
+
+`exception.ToString()` prints the message , the expression , and a caret under the failing character :
+
+```
+InkSyntaxException: operator [+] is not defined for [Int32] and [Boolean] at 2 in "1 + true"
+1 + true
+  ^
+```
+
+Division by zero , an unknown identifier , a duplicate variable declaration , a malformed `if` statement and every other evaluation failure use the same type .
+
 ## Evaluate Expression
 
 - ### ✨Support Arithmetic Operations ( Easy extend Operator )

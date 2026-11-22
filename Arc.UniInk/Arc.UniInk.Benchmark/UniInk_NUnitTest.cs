@@ -907,6 +907,86 @@
         #endregion
 
 
+        #region 9.Errors : one exception type , with the expression and a caret
+
+
+        [Test]
+        public static void Test_Error_DivideByZero_IsInkSyntaxException_WithPosition()
+        {
+            var exception = Assert.Throws<InkSyntaxException>(() => Ink.Evaluate("1 / 0"));
+
+            Assert.That(exception.Message, Does.Contain("division by zero"));
+            Assert.That(exception.Position, Is.EqualTo(2), "the position must point at the / operator");
+            Assert.That(exception.Expression, Is.EqualTo("1 / 0"));
+            Assert.That(exception.ToString(), Does.Contain("^"));
+        }
+
+
+        [Test]
+        public static void Test_Error_ModuloByZero_IsInkSyntaxException()
+        {
+            var exception = Assert.Throws<InkSyntaxException>(() => Ink.Evaluate("1 % 0"));
+
+            Assert.That(exception.Message, Does.Contain("division by zero"));
+            Assert.That(exception.Position, Is.EqualTo(2));
+        }
+
+
+        [Test]
+        public static void Test_Error_DuplicateVariable_IsInkSyntaxException()
+        {
+            var exception = Assert.Throws<InkSyntaxException>(() => Ink.Evaluate("var a = 1; var a = 2; a"));
+
+            Assert.That(exception.Message, Does.Contain("already declared"));
+            Assert.That(exception.Position, Is.GreaterThanOrEqualTo(0));
+            Assert.That(exception.Expression, Is.EqualTo("var a = 1; var a = 2; a"));
+        }
+
+
+        [Test]
+        public static void Test_Error_UnknownIdentifier_IsInkSyntaxException()
+        {
+            var exception = Assert.Throws<InkSyntaxException>(() => Ink.Evaluate("1 + nope"));
+
+            Assert.That(exception.Message, Does.Contain("unknown identifier [nope]"));
+            Assert.That(exception.Position, Is.EqualTo(4));
+        }
+
+
+        [Test]
+        public static void Test_Error_UnsupportedOperand_ReportsTheOperatorPosition()
+        {
+            var exception = Assert.Throws<InkSyntaxException>(() => Ink.Evaluate("1 + true"));
+
+            Assert.That(exception.Position, Is.EqualTo(2), "the position must point at the + operator");
+            Assert.That(exception.Expression, Is.EqualTo("1 + true"));
+            Assert.That(exception.ToString(), Does.Contain("^"));
+        }
+
+
+        [Test]
+        public static void Test_Error_PositionInsideNestedExpression()
+        {
+            var exception = Assert.Throws<InkSyntaxException>(() => Ink.Evaluate("1 + (2 / 0)"));
+
+            Assert.That(exception.Position, Is.EqualTo(7), "the / inside the parenthesis");
+            Assert.That(exception.ToString(), Does.Contain("^"));
+        }
+
+
+        [Test]
+        public static void Test_Error_IfStatement_IsInkSyntaxException()
+        {
+            var exception = Assert.Throws<InkSyntaxException>(() => Ink.Evaluate_IfStatement("if ( 1 > 2 ) { return 1 } else"));
+
+            Assert.That(exception.Message, Does.Contain("else branch is missing"));
+            Assert.That(exception.Position, Is.EqualTo(26), "the position of the dangling else");
+        }
+
+
+        #endregion
+
+
         ///////////////////////////////////////////////  Extension Test ////////////////////////////////////////////////
 
 

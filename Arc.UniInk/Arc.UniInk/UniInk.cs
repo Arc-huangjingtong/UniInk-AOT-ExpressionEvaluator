@@ -166,7 +166,7 @@
 
             var context = InkEvalContext.Current;
 
-            context.PushFrame();
+            context.PushFrame(expression);
 
             InkSyntaxList keys = null;
 
@@ -175,6 +175,10 @@
                 keys = CompileLexerAndFill(expression, startIndex, endIndex);
 
                 return ExecuteProcess(keys) as InkValue;
+            }
+            catch (InkSyntaxException exception) when (exception.Expression is null)
+            {
+                throw exception.WithLocation(-1, expression); // attach the expression when no frame knew it
             }
             finally
             {
@@ -222,7 +226,8 @@
             {
                 if (char.IsWhiteSpace(expression[i])) continue;
 
-                var any = false;
+                var any        = false;
+                var tokenIndex = i;
 
                 foreach (var parsingMethod in ParsingMethods)
                 {
@@ -233,20 +238,51 @@
                     }
                 }
 
-                if (any) continue;
+                if (!any)
+                {
+                    throw UnknownToken(expression, tokenIndex);
+                }
 
-                throw new InkSyntaxException($"Invalid character : [{expression[i]}] at [{i}  {expression}] ");
+                keys.PositionList.Add(tokenIndex);
             }
 
-            if (Equals(keys[keys.Count - 1], InkOperator.Semicolon))
+            if (keys.Count > 0 && Equals(keys[keys.Count - 1], InkOperator.Semicolon))
             {
                 keys.ObjectList.RemoveAt(keys.Count - 1);
+
+                if (keys.PositionList.Count > 0)
+                {
+                    keys.PositionList.RemoveAt(keys.PositionList.Count - 1);
+                }
             }
 
             return keys;
         }
 
-        /// <summary> UniInk Parser : Execute the SyntaxList and return the result object </summary>
+        /// <summary> Build the error for a character that no lexer rule accepts </summary>
+        private static InkSyntaxException UnknownToken(string expression, int index)
+        {
+            var c = expression[index];
+
+            if (!char.IsLetter(c) && c != '_')
+            {
+                return new InkSyntaxException($"unexpected character [{c}]", index, expression);
+            }
+
+            var end = index + 1;
+
+            while (end < expression.Length && (char.IsLetterOrDigit(expression[end]) || expression[end] == '_'))
+            {
+                end++;
+            }
+
+            var name = expression.Substring(index, end - index);
+
+            return new InkSyntaxException($"unknown identifier [{name}] : register the variable or function first", index, expression);
+        }
+
+        /// <summary> UniInk process the compiled SyntaxList </summary>
+        /// <remarks> The returned object is an InkValue owned by the caller : release it ( or use GetResult_* ) </remarks>
         public static object ExecuteProcess(InkSyntaxList keys)
         {
             var res = InputIsScript(keys) ? ProcessList_Scripts(keys) : ProcessList(keys, 0, keys.Count - 1);
@@ -436,8 +472,23 @@
 
                 if (DicOperatorsFunc.TryGetValue(curOperator, out var func))
                 {
-                    var result = func(left, right);
+                    object    result = null;
+                    Exception error  = null;
 
+                    try
+                    {
+                        result = func(left, right);
+                    }
+                    catch (InkSyntaxException exception)
+                    {
+                        error = exception.WithLocation(keys.PositionAt(index), InkEvalContext.Current.Source);
+                    }
+                    catch (DivideByZeroException)
+                    {
+                        error = new InkSyntaxException($"division by zero with [{curOperator.Name}]", keys.PositionAt(index), InkEvalContext.Current.Source);
+                    }
+
+                    // return the operands to the pool on both paths , otherwise every error drains it
                     if (lNeedRelease && left is InkValue inkValueL)
                     {
                         InkValue.Release(inkValueL);
@@ -448,11 +499,16 @@
                         InkValue.Release(inkValueR);
                     }
 
+                    if (error is not null)
+                    {
+                        throw error;
+                    }
+
                     keys.SetDirty(result, startIndex, endIndex);
                 }
                 else
                 {
-                    throw new InkSyntaxException($"Unknown Operator : {curOperator},index : {index}");
+                    throw new InkSyntaxException($"unknown operator [{curOperator.Name}]", keys.PositionAt(index), InkEvalContext.Current.Source);
                 }
             }
 
@@ -551,7 +607,10 @@
         {
             var (hasBalance, endIndex) = FindNoBalanceOperator(keys, InkOperator.ParenthesisLeft, InkOperator.ParenthesisRight, arrowIndex, paramEnd);
 
-            if (!hasBalance) throw new InkSyntaxException("Parenthesis is not balance!");
+            if (!hasBalance)
+            {
+                throw new InkSyntaxException("the parenthesis is not balanced", keys.PositionAt(arrowIndex), InkEvalContext.Current.Source);
+            }
 
             //var c => GET(c, Rarity) == 2)
             var startIndex = arrowIndex - 1;
@@ -814,10 +873,16 @@
                 i--;
 
                 var keyHash = GetStringSliceHashCode(expression, startIndex, i);
+                var name    = expression.Substring(startIndex, i - startIndex + 1);
 
                 if (DicVariables.TryGetValue(keyHash, out _))
                 {
-                    throw new InkSyntaxException($"the variable[{expression.Substring(startIndex, i - startIndex)}] is already exist!");
+                    throw new InkSyntaxException($"the variable [{name}] is already registered", startIndex, expression);
+                }
+
+                if (tempVariables.ContainsKey(keyHash))
+                {
+                    throw new InkSyntaxException($"the variable [{name}] is already declared in this expression", startIndex, expression);
                 }
 
                 var inkValue = InkValue.Get();
@@ -1117,7 +1182,7 @@
 
             if (startIndex > endIndex)
             {
-                throw new InkSyntaxException($"Missing match {sctEnd}");
+                throw new InkSyntaxException($"missing the matching [{sctEnd.Name}]", keys.PositionAt(start), InkEvalContext.Current.Source);
             }
 
             return (startIndex != -1 && endIndex != -1, startIndex, endIndex);
@@ -1573,11 +1638,11 @@
                         return null;
                     }
 
-                    default : throw new InkSyntaxException($"worrying operator using!");
+                    default : throw new InkSyntaxException("the right side of the assignment is not supported");
                 }
             }
 
-            throw new InkSyntaxException($"the left value is not a variable!");
+            throw new InkSyntaxException("the left side of the assignment must be a variable");
         }
 
         /// <summary> Return statement implementation </summary>
@@ -1592,7 +1657,7 @@
                     result.IsReturner = true;
                     return result;
                 }
-                default : throw new InkSyntaxException($"unknown type{left}--{right}");
+                default : throw new InkSyntaxException("the return statement needs a value");
             }
         }
     }
@@ -1641,6 +1706,7 @@
         {
             public readonly Dictionary<int, InkValue> TempVariables = new(UniInk.VARIABLE_TEMP_CAPACITY);
             public          int                       TempListMark;
+            public          string                    Source;
         }
 
         private readonly List<Frame>  frames     = new(4) { new Frame() }; // [0] is the root frame
@@ -1649,15 +1715,20 @@
         /// <summary> The temp variables of the running evaluation frame </summary>
         public Dictionary<int, InkValue> TempVariables => frames[frames.Count - 1].TempVariables;
 
+        /// <summary> The expression of the running evaluation frame , used by the error messages </summary>
+        public string Source => frames[frames.Count - 1].Source;
+
         /// <summary> The number of temp syntax lists owned by the outer frames </summary>
         internal int TempListMark => frames[frames.Count - 1].TempListMark;
 
         /// <summary> Begin an evaluation frame </summary>
-        public void PushFrame()
+        /// <param name="source"> the expression that is being evaluated , used by the error messages </param>
+        public void PushFrame(string source = null)
         {
             var frame = freeFrames.Count > 0 ? freeFrames.Pop() : new Frame();
 
             frame.TempListMark = TempLists.Count;
+            frame.Source       = source;
 
             frames.Add(frame);
         }
@@ -1686,6 +1757,8 @@
             }
 
             frame.TempVariables.Clear();
+
+            frame.Source = null;
 
             freeFrames.Push(frame);
         }
@@ -2085,7 +2158,7 @@
 
             if (ValueType != expected)
             {
-                throw new InkSyntaxException($"The value type is not {expected}, but {ValueType}");
+                throw new InkSyntaxException($"the value type is not [{expected}] but [{ValueType}]");
             }
 
             var result = read(this);
@@ -2163,6 +2236,15 @@
 
         /***********************************************  Dispatch  ***************************************************/
 
+        /// <summary> A short operand description for the error messages </summary>
+        private static string Describe(object operand) => operand switch
+        {
+            null           => "null",
+            InkValue value => value.ValueType.ToString(),
+            InkOperator op => $"operator {op.Name}",
+            _              => operand.GetType().Name
+        };
+
         /// <summary> Apply a built-in operator to the raw operands of the syntax list </summary>
         /// <remarks> left is null for the unary form ( +x , -x , !x ) </remarks>
         internal static object Apply(InkOperator op, object left, object right)
@@ -2171,13 +2253,13 @@
 
             if (left is InkValue leftValue && right is InkValue rightValue) return Binary(op, leftValue, rightValue);
 
-            throw new InkSyntaxException($"unknown type{left}--{right}");
+            throw new InkSyntaxException($"operator [{op.Name}] is not defined for [{Describe(left)}] and [{Describe(right)}]");
         }
 
         /// <summary> Apply the unary form of a built-in operator </summary>
         private static object ApplyUnary(InkOperator op, object right)
         {
-            if (right is not InkValue rightValue) throw new InkSyntaxException($"unknown type{null}--{right}");
+            if (right is not InkValue rightValue) throw new InkSyntaxException($"operator [{op.Name}] is not defined for [{Describe(right)}]");
 
             switch (op.Name)
             {
@@ -2210,7 +2292,7 @@
                 case ">=" :
                 case "!=" :
                 case "||" : return right;
-                default :   throw new InkSyntaxException($"unknown type{null}--{right}");
+                default :   throw new InkSyntaxException($"operator [{op.Name}] is not defined for [{Describe(right)}]");
             }
         }
 
@@ -2260,7 +2342,7 @@
                 {
                     if (!TryGetPromotedType(left, right, out var promoted))
                     {
-                        throw new InkSyntaxException("worrying operator using!");
+                        throw new InkSyntaxException($"operator [{op.Name}] is not defined for [{left.ValueType}] and [{right.ValueType}]");
                     }
 
                     answer.ValueType = promoted;
@@ -2335,7 +2417,7 @@
                 {
                     if (!TryGetPromotedType(left, right, out _))
                     {
-                        throw new InkSyntaxException("worrying operator using!");
+                        throw new InkSyntaxException($"operator [{op.Name}] cannot compare [{left.ValueType}] and [{right.ValueType}]");
                     }
 
                     answer.ValueBool = op.Name == ">" ? ToDouble(left) > ToDouble(right) : ToDouble(left) < ToDouble(right);
@@ -2355,7 +2437,7 @@
                 return GetBoolValue(op.Name == "&&" ? left.ValueBool && right.ValueBool : left.ValueBool || right.ValueBool);
             }
 
-            throw new InkSyntaxException($"unknown type{left}--{right}");
+            throw new InkSyntaxException($"operator [{op.Name}] needs two bool operands, got [{left.ValueType}] and [{right.ValueType}]");
         }
 
         private static int IntMath(InkOperator op, int left, int right) => op.Name[0] switch
@@ -2541,6 +2623,7 @@
             value.ObjectList.Clear();
             value.CastOther.Clear();
             value.IndexDirty.Clear();
+            value.PositionList.Clear();
 
             Pool.Enqueue(value);
         }
@@ -2588,6 +2671,12 @@
         /// <summary> The index dirty flags </summary>
         public readonly List<bool> IndexDirty = new(UniInk.EXPRESS_ELEMENT_MAX_LEN);
 
+        /// <summary> The character index in the source expression of every token , filled by the lexer </summary>
+        public readonly List<int> PositionList = new();
+
+        /// <summary> The character index in the source expression of the token at <paramref name="index"/> , -1 when unknown </summary>
+        public int PositionAt(int index) => (uint)index < (uint)PositionList.Count ? PositionList[index] : -1;
+
         /// <summary> Add an object to the list </summary>
         public void Add(object value)
         {
@@ -2625,9 +2714,61 @@
     /// <summary> InkSyntaxException throw when the syntax is wrong  </summary>
     public class InkSyntaxException : Exception
     {
+        private readonly string rawMessage;
+
+        /// <summary> The zero based character index in the expression , -1 when unknown </summary>
+        public int Position { get; } = -1;
+
+        /// <summary> The expression that failed , null when unknown </summary>
+        public string Expression { get; }
+
         /// <summary> Constructor </summary>
         /// <param name="message"> the exception message </param>
-        public InkSyntaxException(string message) : base(message) { }
+        public InkSyntaxException(string message) : base(message)
+        {
+            rawMessage = message;
+        }
+
+        /// <summary> Constructor with the location of the failure </summary>
+        /// <param name="message"> the reason </param>
+        /// <param name="position"> the zero based character index , -1 when unknown </param>
+        /// <param name="expression"> the expression that failed </param>
+        public InkSyntaxException(string message, int position, string expression) : base(Format(message, position, expression))
+        {
+            rawMessage = message;
+            Position   = position;
+            Expression = expression;
+        }
+
+        /// <summary> Return this exception , or a copy with the location filled in </summary>
+        public InkSyntaxException WithLocation(int position, string expression)
+        {
+            if (Expression is not null) return this;
+
+            return new InkSyntaxException(rawMessage, position, expression);
+        }
+
+        /// <summary> The message plus the expression and a caret under the failing character </summary>
+        public override string ToString()
+        {
+            if (string.IsNullOrEmpty(Expression)) return base.ToString();
+
+            if (Position < 0) return $"{base.ToString()}{Environment.NewLine}{Expression}";
+
+            var index     = Math.Min(Position, Expression.Length - 1);
+            var lineStart = Expression.LastIndexOf('\n', index) + 1;
+            var lineEnd   = Expression.IndexOf('\n', lineStart);
+            var line      = lineEnd < 0 ? Expression.Substring(lineStart) : Expression.Substring(lineStart, lineEnd - lineStart);
+
+            return $"{base.ToString()}{Environment.NewLine}{line}{Environment.NewLine}{new string(' ', index - lineStart)}^";
+        }
+
+        private static string Format(string message, int position, string expression)
+        {
+            if (string.IsNullOrEmpty(expression)) return message;
+
+            return position < 0 ? $"{message} in \"{expression}\"" : $"{message} at {position} in \"{expression}\"";
+        }
     }
 
 }
