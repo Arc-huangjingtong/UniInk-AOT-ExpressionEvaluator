@@ -64,6 +64,15 @@
                                                         return 666      
                                                       }                 ";
 
+        private static readonly InkSyntaxList compiledTestInputArithmeticInt01 = UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_01, 0, TEST_INPUT_ARITHMETIC_INT_01.Length - 1);
+
+        private static readonly InkSyntaxList compiledTestInputArithmeticInt02 = UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_02, 0, TEST_INPUT_ARITHMETIC_INT_02.Length - 1);
+
+        private static readonly InkSyntaxList compiledTestInputArithmeticInt03 = UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_03, 0, TEST_INPUT_ARITHMETIC_INT_03.Length - 1);
+
+        private static readonly InkSyntaxList compiledTestInputArithmeticInt04 = UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_04, 0, TEST_INPUT_ARITHMETIC_INT_04.Length - 1);
+
+
 
         [OneTimeSetUp]
         public void TEST_INITIATION() => new UniInkNUnitTest().Test_Initiation();
@@ -71,7 +80,7 @@
 
         [Benchmark(Baseline = true)]
         [Test]
-        public void TEST_Arithmetic__UniInkSpeed()
+        public void TEST_Arithmetic__UniInk()
         {
             var result1 = UniInkNUnitTest.Test_Arithmetic_Int(TEST_INPUT_ARITHMETIC_INT_01);
             var result2 = UniInkNUnitTest.Test_Arithmetic_Int(TEST_INPUT_ARITHMETIC_INT_02);
@@ -83,16 +92,26 @@
 #endif
         }
 
+
         [Benchmark]
         [Test]
-        public void TEST_IfStatement__UniInkSpeed()
+        public void TEST_Arithmetic__UniInk_Compiled()
         {
-            var ink  = UniInkNUnitTest.Ink;
-            var test = ink.Evaluate_IfStatement(TEST_INPUT_IF_STATEMENT);
-            if (test is InkValue value)
-            {
-                InkValue.Release(value);
-            }
+            // ExecuteProcess hands out an InkValue that the caller owns : read it with GetResult_Int ,
+            // which releases the instance back to the pool ( otherwise the benchmark allocates 4 x 392 B per op )
+            var result1 = ((InkValue)UniInk.ExecuteProcess(compiledTestInputArithmeticInt01)).GetResult_Int();
+            var result2 = ((InkValue)UniInk.ExecuteProcess(compiledTestInputArithmeticInt02)).GetResult_Int();
+            var result3 = ((InkValue)UniInk.ExecuteProcess(compiledTestInputArithmeticInt03)).GetResult_Int();
+            var result4 = ((InkValue)UniInk.ExecuteProcess(compiledTestInputArithmeticInt04)).GetResult_Int();
+
+            InkSyntaxList.Recover(compiledTestInputArithmeticInt01);
+            InkSyntaxList.Recover(compiledTestInputArithmeticInt02);
+            InkSyntaxList.Recover(compiledTestInputArithmeticInt03);
+            InkSyntaxList.Recover(compiledTestInputArithmeticInt04);
+
+#if DEBUG
+            Console.WriteLine(result1 + "|" + result2 + "|" + result3 + "|" + result4);
+#endif
         }
 
 
@@ -142,58 +161,17 @@
         }
 
 
-        private static readonly InkSyntaxList compiledTestInputArithmeticInt01 = UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_01, 0, TEST_INPUT_ARITHMETIC_INT_01.Length - 1);
-
-        private static readonly InkSyntaxList compiledTestInputArithmeticInt02 = UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_02, 0, TEST_INPUT_ARITHMETIC_INT_02.Length - 1);
-
-        private static readonly InkSyntaxList compiledTestInputArithmeticInt03 = UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_03, 0, TEST_INPUT_ARITHMETIC_INT_03.Length - 1);
-
-        private static readonly InkSyntaxList compiledTestInputArithmeticInt04 = UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_04, 0, TEST_INPUT_ARITHMETIC_INT_04.Length - 1);
-
 
         [Benchmark]
         [Test]
-        [Repeat(100)]
-        public void TEST_Arithmetic__UniInkSpeed_Compiled()
+        public void TEST_IfStatement__UniInk()
         {
-            var result1 = UniInk.ExecuteProcess(compiledTestInputArithmeticInt01);
-            var result2 = UniInk.ExecuteProcess(compiledTestInputArithmeticInt02);
-            var result3 = UniInk.ExecuteProcess(compiledTestInputArithmeticInt03);
-            var result4 = UniInk.ExecuteProcess(compiledTestInputArithmeticInt04);
-
-            InkSyntaxList.Recover(compiledTestInputArithmeticInt01);
-            InkSyntaxList.Recover(compiledTestInputArithmeticInt02);
-            InkSyntaxList.Recover(compiledTestInputArithmeticInt03);
-            InkSyntaxList.Recover(compiledTestInputArithmeticInt04);
-
-#if DEBUG
-            Console.WriteLine(result1 + "|" + result2 + "|" + result3 + "|" + result4);
-#endif
-        }
-
-        private static readonly Func<double> compiledTestInputArithmeticInt01Sprache = Calculator.ParseExpression(TEST_INPUT_ARITHMETIC_INT_01).Compile();
-
-        private static readonly Func<double> compiledTestInputArithmeticInt02Sprache = Calculator.ParseExpression(TEST_INPUT_ARITHMETIC_INT_02).Compile();
-
-        private static readonly Func<double> compiledTestInputArithmeticInt03Sprache = Calculator.ParseExpression(TEST_INPUT_ARITHMETIC_INT_03).Compile();
-
-        private static readonly Func<double> compiledTestInputArithmeticInt04Sprache = Calculator.ParseExpression(TEST_INPUT_ARITHMETIC_INT_04).Compile();
-
-        // [Benchmark] [TestCase(ExpectedResult = 362881)] [Repeat(100)]
-        // Debate : The Compiled Sprache is very fast, but the test answer is static and not dynamic.
-        //| TEST_Arithmetic_Compiled__Sprache     |        14.94 ns |      0.286 ns |       0.267 ns |        14.95 ns |        - |       - |         - |
-        public double TEST_Arithmetic__Sprache__Compiled()
-        {
-            var result1 = compiledTestInputArithmeticInt01Sprache();
-            var result2 = compiledTestInputArithmeticInt02Sprache();
-            var result3 = compiledTestInputArithmeticInt03Sprache();
-            var result4 = compiledTestInputArithmeticInt04Sprache();
-
-#if DEBUG
-            Console.WriteLine(result1 + "|" + result2 + "|" + result3 + "|" + result4);
-#endif
-
-            return result1 + result2 + result3 + result4;
+            var ink  = UniInkNUnitTest.Ink;
+            var test = ink.Evaluate_IfStatement(TEST_INPUT_IF_STATEMENT);
+            if (test is InkValue value)
+            {
+                InkValue.Release(value);
+            }
         }
     }
 
