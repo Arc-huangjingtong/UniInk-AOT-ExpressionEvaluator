@@ -301,6 +301,10 @@ Console.WriteLine(res.ValueInt); // 456
 ```
 
 
+# 📋Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for the released versions.
+
 # 💬Support
 
 If you have any questions, suggestions, or need assistance, please feel free

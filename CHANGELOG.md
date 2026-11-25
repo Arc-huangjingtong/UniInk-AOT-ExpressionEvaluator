@@ -1,0 +1,63 @@
+# Changelog
+
+All notable changes to **UniInk** are documented here.
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+
+- `Arc.UniInk.Tests` project, NUnit based, separate from the benchmark project
+- Tests for the literal scanner, the script path, `if` / `else if` / `else` and the `EvaluateInt` / `EvaluateBool` helpers
+- `CHANGELOG.md`
+
+### Changed
+
+- `InkSyntaxList` keeps the source position of every token, so evaluation errors point at the operator
+- `InkValue.IsCalculate` , `DontRelease` , `IsGetter` , `IsIsSetter` and `IsReturner` are now read-only outside the assembly
+- `InkOperator.MaxOperatorLen` is internal
+- `AssemblyVersion` and `FileVersion` follow `<Version>`
+- The solution is flat : `Arc.UniInk/` , `Arc.UniInk.Benchmark/` , `Arc.UniInk.Tests/` and `Arc.UniInk.Assets/` at the repository root
+- Comments are English only
+
+### Fixed
+
+- Evaluating a malformed `if` statement ( an `else` without `{ ... }` ) looped forever
+- `ExecuteProcess` results leaked the pooled `InkValue` when the caller never released them ( the benchmark allocated 1568 B per operation )
+- `RegexOptions.Compiled` in `UniInk.Extensions` broke AOT builds, IL2CPP cannot generate code at runtime
+
+## [1.2.0] - 2025-11-22
+
+### Added
+
+- Implicit numeric promotion, C# style : `int` -> `single` -> `double` , and `char` promotes to `int`
+- `InkEvalContext` : one evaluation context per thread ( object pools , temp state , frame stack )
+- `InkSyntaxException.Position` and `InkSyntaxException.Expression` , plus a caret in `ToString()`
+- `netstandard2.0` in addition to `netstandard2.1`
+
+### Changed
+
+- **Breaking** : the global function table is gone, `RegisterGlobalFunction` was removed . Functions belong to the instance that registered them
+- **Breaking** : `InkValue.Equals` keeps identity semantics ( documented ), `operator ==` is null safe
+- The operator dispatch collapsed into a single core (`Apply` -> `Binary` -> `Arithmetic` / `Equality` / `Relational` / `Logical` )
+- Every evaluation failure throws `InkSyntaxException`, with the failing expression and character index
+
+### Fixed
+
+- `(1 + 2)` evaluated to `null` when the expression started with a parenthesis
+- Comparison operators failed for `bool` , `float` , `double` and `char` , and `<=` compared the wrong way
+- A char literal swallowed the token that followed it ( `'a'=='a'` returned `null` )
+- Concurrent evaluation corrupted the shared pools ( 15,932 exceptions over 16,000 evaluations with 8 threads )
+- A registered function that called `Evaluate` again wiped the temp variables of the outer call
+- The lambda path allocated a closure even when the expression had no lambda ( 32 B per evaluation )
+
+## [0.1.3] - 2024-06
+
+### Added
+
+- NuGet packaging and the first published workflow
+
+[Unreleased]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/ver1.2...HEAD
+[1.2.0]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/v0.1.3...ver1.2
+[0.1.3]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/releases/tag/v0.1.3
