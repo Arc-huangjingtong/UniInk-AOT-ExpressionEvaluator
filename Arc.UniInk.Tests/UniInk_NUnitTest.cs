@@ -1083,11 +1083,11 @@
             {
                 num = num > 0 ? num : 0;
                 //  @this.FoodNum -= num;
-                //Console.WriteLine(" 支付成功 支付了" + num + "元");
+                //Console.WriteLine(" paid " + num);
             }
 
             //  @this.FoodNum -= num;
-            //Console.WriteLine(" 支付成功 支付了" + num + "元");
+            //Console.WriteLine(" paid " + num);
         }
 
         public static void GET(Card card, int id)

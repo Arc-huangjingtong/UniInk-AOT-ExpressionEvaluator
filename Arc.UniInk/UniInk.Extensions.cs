@@ -107,9 +107,9 @@
 
             while (true)
             {
-                //找到第一个[if]
+                // the first [if]
                 var (success_if, index_if)     = FindOperator(keys, InkOperator.KeyIf,     index_start, index_end);
-                //找到第一个[ ;]
+                // the first [;]
                 var (success_semi, index_semi) = FindOperator(keys, InkOperator.Semicolon, index_start, index_end);
 
 
@@ -208,11 +208,12 @@
                 var (success_else, index_else) = FindOperator(keys, InkOperator.KeyElse, currentEnd + 1, index_end);
                 var (success_if, index_if)     = FindOperator(keys, InkOperator.KeyIf,   currentEnd + 1, index_end);
 
-                // 1. 如果没有找到 else 和 if , 直接退出If 结算           , 说明后面再也没有 If 语句了 , 交给下一个循环即可
-                // 2. 如果找到了 if   , 没找到 else                     , 说明这是一个 if 语句      , 交给下一个循环即可
-                // 3. 如果找到了 else , 没找到 if                       , 说明这是一个 else 语句
-                // 4. 如果找到了 else , 找到 if 且 if 在 else 之后(大于1) , 说明这是一个 else 语句 , 虽然后面还有 IF, 但是交给下一次循环即可
-                // 5. 如果找到了 else , 找到 if 且 if 在 else 之前(等于1) , 说明这是一个 else if 语句
+                // The difference of the two indexes tells which form came next :
+                // 1. no else , no if      -> the if statement ends here
+                // 2. if , no else         -> a new if statement , handle it in the next round
+                // 3. else , no if         -> a plain else branch
+                // 4. else before if (> 1) -> a plain else branch , the if belongs to the next round
+                // 5. if right after else  -> an else if branch
 
                 switch (success_else, success_if, index_if - index_else)
                 {
@@ -248,7 +249,7 @@
                     }
                     case (true, true, 1) : // else if
                     {
-                        // 匹配 else if (condition) 后的条件
+                        // the ( condition ) of the else if
                         var (cdsStart, cdsEnd)
                             = GetMatchOperator(keys,         InkOperator.ParenthesisLeft, InkOperator.ParenthesisRight,
                                                index_if + 1, index_end);
@@ -258,7 +259,7 @@
                             throw new InkSyntaxException("the else if condition is missing '( ... )'", keys.PositionAt(index_if), InkEvalContext.Current.Source);
                         }
 
-                        // 计算 else if 条件后的操作
+                        // the { ... } of the else if
                         var (opElseStart, opElseEnd)
                             = GetMatchOperator(keys, InkOperator.BraceLeft, InkOperator.BraceRight, cdsEnd + 1,
                                                index_end);
@@ -269,7 +270,7 @@
                         }
 
 
-                        // 计算 else if 后的条件
+                        // evaluate the else if condition
                         var condition_elseif = ProcessList(keys, cdsStart + 1, cdsEnd - 1);
 
                         if (condition_elseif is InkValue conditionValue_elseif)
