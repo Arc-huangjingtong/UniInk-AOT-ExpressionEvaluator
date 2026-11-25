@@ -1116,6 +1116,139 @@
         public Card CRE(int id, int rarity) => new() { ID = id, Rarity = rarity };
 
 
+        #region 10.Lexer : numbers , strings , escapes and comments
+
+
+        [TestCase("42",           ExpectedResult = 42)]
+        [TestCase("-42",          ExpectedResult = -42)]
+        [TestCase("1 + 2 * 3",    ExpectedResult = 7)]
+        [TestCase("2 * 3 + 1",    ExpectedResult = 7)]
+        [TestCase("10 - 2 - 3",   ExpectedResult = 5)]
+        [TestCase("100 / 10 / 5", ExpectedResult = 2)]
+        public static int Test_Lexer_Integer(string input)
+        {
+            var value = Ink.Evaluate(input);
+
+            var result = value!.ValueInt;
+
+            InkValue.Release(value);
+
+            return result;
+        }
+
+
+        [TestCase("1.5f + 1.5f",  ExpectedResult = 3f)]
+        [TestCase("2.5f * 2",     ExpectedResult = 5f)]
+        public static float Test_Lexer_Single(string input)
+        {
+            var value = Ink.Evaluate(input);
+
+            var result = value!.ValueFloat;
+
+            InkValue.Release(value);
+
+            return result;
+        }
+
+
+        [TestCase("'a'",      ExpectedResult = 'a')]
+        [TestCase("'\\n'",   ExpectedResult = '\n')]
+        [TestCase("'\\''",   ExpectedResult = '\'')]
+        public static char Test_Lexer_Char(string input)
+        {
+            var value = Ink.Evaluate(input);
+
+            var result = value!.ValueChar;
+
+            InkValue.Release(value);
+
+            return result;
+        }
+
+
+        [TestCase(@"""hello""",        ExpectedResult = "hello")]
+        [TestCase(@"""a"" + ""b""",     ExpectedResult = "ab")]
+        public static string Test_Lexer_String(string input)
+        {
+            var value = Ink.Evaluate(input);
+
+            var result = value!.ValueString;
+
+            InkValue.Release(value);
+
+            return result;
+        }
+
+
+        [Test]
+        public static void Test_Lexer_RemoveComments()
+        {
+            const string script = @"var a = 1; // the first comment
+                                    /* and a block
+                                       comment */
+                                    a";
+
+            Assert.That(UniInkExtensions.RemoveComments(script), Does.Not.Contain("comment"));
+        }
+
+
+        [Test]
+        public static void Test_Lexer_RemoveComments_KeepsStringLiterals()
+        {
+            Assert.That(UniInkExtensions.RemoveComments(@"""// not a comment"""), Is.EqualTo(@"""// not a comment"""));
+        }
+
+
+        [Test]
+        public static void Test_Script_VariableAndSemicolon()
+        {
+            var value = Ink.Evaluate("var a = 1; var b = 2; a + b");
+
+            Assert.That(value!.ValueInt, Is.EqualTo(3));
+
+            InkValue.Release(value);
+        }
+
+
+        [TestCase("if ( 1 < 2 ) { return 1 } else { return 2 }", ExpectedResult = 1)]
+        [TestCase("if ( 1 > 2 ) { return 1 } else { return 2 }", ExpectedResult = 2)]
+        [TestCase("if ( 1 > 2 ) { return 1 } else if ( 3 < 4 ) { return 3 } else { return 4 }", ExpectedResult = 3)]
+        [TestCase("if ( 1 > 2 ) { return 1 } else if ( 3 > 4 ) { return 3 } else { return 4 }", ExpectedResult = 4)]
+        public static int Test_Script_IfStatement(string input)
+        {
+            var result = Ink.Evaluate_IfStatement(input);
+
+            if (result is InkValue value)
+            {
+                var answer = value.ValueInt;
+
+                InkValue.Release(value);
+
+                return answer;
+            }
+
+            return -1;
+        }
+
+
+        [Test]
+        public static void Test_Extension_EvaluateInt_ReleasesTheValue()
+        {
+            Assert.That(Ink.EvaluateInt("1 + 2"), Is.EqualTo(3));
+        }
+
+
+        [Test]
+        public static void Test_Extension_EvaluateBool()
+        {
+            Assert.That(Ink.EvaluateBool("1 < 2"), Is.True);
+            Assert.That(Ink.EvaluateBool("1 > 2"), Is.False);
+        }
+
+
+        #endregion
+
+
         public List<Card> Config = new()
         {
             new Card() { ID = 1, Rarity = 2 } //
