@@ -9,7 +9,7 @@
     /* ================================================== SUMMARY  ================================================== */
     /* Title    :  UniInk (https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator)                       */
     /* Author   :  Arc (https://github.com/Arc-huangjingtong)                                                         */
-    /* Version  :  1.3.0 (AOT expression evaluator)                                                                    */
+    /* Version  :  1.3.5 (AOT expression evaluator)                                                                    */
     /* Licence  :  MIT (https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/blob/main/LICENSE)        */
     /* Support  :  [netstandard2.0 / 2.1] [C# 9.0+] [IL2CPP Support]                                                   */
     /* Feature  :  [Easy-use] [High performance] [zero box & unbox] [zero GC!] [zero reflection runtime]              */

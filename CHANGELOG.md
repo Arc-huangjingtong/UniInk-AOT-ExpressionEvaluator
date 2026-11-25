@@ -6,8 +6,17 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [1.3.5] - 2026-11-25
+
 ### Added
 
+- Unity Package Manager package (`com.arc.uniink`) : sources , asmdef , a Basic Evaluation sample , `.meta` files
+  and a package README — install it with
+  `https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator.git?path=Unity/Packages/com.arc.uniink`
+- `Tools/sync-unity-package.sh` copies the sources into the Unity package , keeps `package.json` in step with
+  `<Version>` and owns the `.meta` files ; `--check` fails the CI on drift
 - Regression tests for the pool contract : a malformed unary operator and a function that returns its own argument
   must not hand the same pooled `InkValue` to two computations , plus tests for the still supported unary forms
 
@@ -19,13 +28,13 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
   `InvalidOperationException` from `InkValue.Release` . Those forms throw `InkSyntaxException` now
 - A registered function that returned one of its own arguments released that argument twice ( the temporary parameter
   list and the caller both owned it ) ; the result is copied when the parameter list still owns it
+- Unity refused to load `package.json` , `README.md` and `CHANGELOG.md` of the package ( "no meta file , but it is in
+  an immutable folder" ) ; every file in the package has a `.meta` now and the script creates one when missing
 
-## [1.3.0] - 2025-11-25
+## [1.3.0] - 2026-11-25
 
 ### Added
 
-- Unity Package Manager package (`com.arc.uniink`) : sources , asmdef , a Basic Evaluation sample and `.meta` files
-- `Tools/sync-unity-package.sh` keeps the Unity sources and version in step with the library ; CI fails on drift
 - `Arc.UniInk.Tests` project, NUnit based, separate from the benchmark project
 - Tests for the literal scanner, the script path, `if` / `else if` / `else` and the `EvaluateInt` / `EvaluateBool` helpers
 - `CHANGELOG.md`
@@ -48,7 +57,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 - `ExecuteProcess` results leaked the pooled `InkValue` when the caller never released them ( the benchmark allocated 1568 B per operation )
 - `RegexOptions.Compiled` in `UniInk.Extensions` broke AOT builds, IL2CPP cannot generate code at runtime
 
-## [1.2.0] - 2025-11-22
+## [1.2.0] - 2026-11-22
 
 ### Added
 
@@ -79,7 +88,8 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 - NuGet packaging and the first published workflow
 
-[Unreleased]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/ver1.3...HEAD
+[Unreleased]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/ver1.3.5...HEAD
+[1.3.5]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/ver1.3...ver1.3.5
 [1.3.0]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/ver1.2...ver1.3
 [1.2.0]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/v0.1.3...ver1.2
 [0.1.3]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/releases/tag/v0.1.3
