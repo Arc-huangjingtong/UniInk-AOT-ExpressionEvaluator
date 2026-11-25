@@ -6,7 +6,6 @@
     using System;
     using System.Collections.Generic;
 
-
     /* ================================================== SUMMARY  ================================================== */
     /* Title    :  UniInk (https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator)                       */
     /* Author   :  Arc (https://github.com/Arc-huangjingtong)                                                         */
@@ -15,7 +14,6 @@
     /* Support  :  [netstandard2.0 / 2.1] [C# 9.0+] [IL2CPP Support]                                                   */
     /* Feature  :  [Easy-use] [High performance] [zero box & unbox] [zero GC!] [zero reflection runtime]              */
     /* ============================================================================================================== */
-
 
     /*===================================================  GUIDE  ====================================================*/
     /* 1. Quickly Start :                                                                                             */
@@ -97,7 +95,6 @@
     /*                                                                                                                */
     /*================================================================================================================*/
 
-
     /// <summary> The C# Evaluator easy to use : you can execute simple expression or scripts with a string </summary>
     /// <remarks> If you want to custom your own rules , you should read the code easily and modify it ! </remarks>
     public partial class UniInk
@@ -156,7 +153,7 @@
         /// <returns> return the result object , when valueType , will be replaced to a InkValue </returns>
         /// <param name="expression"> the expression to Evaluate </param>
         /// <param name="startIndex"> The start index of the expression(contain the start index) </param>
-        /// <param name= "endIndex" > The  end  index of the expression(contain the  end  index) </param>
+        /// <param name="endIndex"> The end index of the expression(contain the end index) </param>
         public InkValue Evaluate(string expression, int startIndex, int endIndex)
         {
             if (string.IsNullOrWhiteSpace(expression))
@@ -191,7 +188,6 @@
                 context.PopFrame(); // releases the temp lists and temp variables of this frame
             }
         }
-
 
         /// <summary> Register a local function </summary>
         public void RegisterFunction(string fucName, InkFunction inkFunc)
@@ -298,7 +294,6 @@
 
             ReleaseTempVariables();
         }
-
 
         /// <summary> Clear the cache in UniInk anytime , Internal cache pool will be clear </summary>
         /// <remarks> Most of the time you don't need to call </remarks>
@@ -416,7 +411,6 @@
 
                 var startIndex = index;
                 var endIndex   = index;
-
 
                 for (var i = index - 1 ; i >= start ; i--) // Left
                 {
@@ -561,7 +555,6 @@
                 }
 
                 if (current == null) continue;
-
 
                 if (Equals(current, InkOperator.Comma))
                 {
@@ -723,16 +716,13 @@
         /// <summary> Some local variables mapping </summary>
         protected readonly Dictionary<int, InkValue> DicVariables = new(VARIABLE_CAPACITY);
 
-
-        /*************************************************  Parsing  **************************************************/
-
+        /**************************************************  Lexer  ***************************************************/
 
         /// <summary> The delegate of Parsing Methods for <see cref="ParsingMethods"/> </summary>
         /// <param name="expression"> the expression to Evaluate </param>
         /// <param name="stack"> the object stack to push or pop </param>
         /// <param name="i"> the <paramref name="expression"/> start index </param>
         protected delegate bool ParsingMethodDelegate(string expression, InkSyntaxList stack, ref int i);
-
 
         /// <summary> The Parsing Methods for <see cref="CompileLexerAndFill"/> </summary>
         protected readonly List<ParsingMethodDelegate> ParsingMethods;
@@ -890,14 +880,12 @@
                 inkValue.DontRelease = true;
                 tempVariables.Add(keyHash, inkValue);
 
-
                 keys.SetDirty(keys.Count - 1); // the keyVar
 
                 keys.Add(tempVariables[keyHash]);
 
                 return true;
             }
-
 
             for (var len = VARI_NAME_MAX_LEN ; len >= 0 ; len--)
             {
@@ -927,10 +915,9 @@
             return false;
         }
 
+        // ---- lexer character helpers ----
 
-        /**************************************************  Helper  **************************************************/
-
-        /// <summary> Match <paramref name="value"/> from <paramref name="input"/> 's  <paramref name="startIndex"/> </summary>
+        /// <summary> Match <paramref name="value"/> from <paramref name="input"/> 's <paramref name="startIndex"/> </summary>
         protected static bool StartsWithInputStrFromIndex(string input, string value, int startIndex, bool ignoreFirstCase = false)
         {
             if (input.Length - startIndex < value.Length)
@@ -1021,7 +1008,6 @@
                             break;
                     }
 
-
                     return true;
                 }
             }
@@ -1058,7 +1044,6 @@
                     len = i - startIndex + 1;
                     return true;
                 }
-
 
                 throw new InkSyntaxException($"Illegal character[{i}] : too many characters in a character literal");
             }
@@ -1150,10 +1135,12 @@
             return false;
         }
 
+        /**************************************************  Helper  **************************************************/
+
         /// <summary> Find the innermost section between <paramref name="sctStart"/> and <paramref name="sctEnd"/> </summary>
         /// <param name="keys"> the keys to find section in </param>
-        /// <param name="sctStart"> the start section key : the last  find before <paramref name="sctEnd"/> </param>
-        /// <param name="sctEnd"> the end   section key : the first find after  <paramref name="sctStart"/> </param>
+        /// <param name="sctStart"> the start section key : the last find before <paramref name="sctEnd"/> </param>
+        /// <param name="sctEnd"> the end section key : the first find after <paramref name="sctStart"/> </param>
         /// <param name="start"> the start index to search from </param>
         /// <param name="end"> the end index to search to </param>
         /// <returns> the result is success or not , the start index and end index of the section </returns>
@@ -1364,9 +1351,7 @@
         public static int GetStringSliceHashCode(string str) => GetStringSliceHashCode(str, 0, str.Length - 1);
     }
 
-
     /*************************************************  Helper Class  *************************************************/
-
 
     /// <summary> UniInk Operator : Custom your own Operator! </summary>
     public partial class InkOperator
@@ -1495,7 +1480,6 @@
 
         /// <summary> Preprocessor Directive "#" (don't support , it's reserved) </summary>
         public static readonly InkOperator Hash = new("#", -1);
-
 
         /// <summary> Keyword "if" - Conditional Statement </summary>
         public static readonly InkOperator KeyIf = new("if", 20);
@@ -1662,7 +1646,6 @@
         }
     }
 
-
     /// <summary> UniInk Function : Custom your own Function! </summary>
     public partial class InkFunction
     {
@@ -1675,7 +1658,6 @@
         /// <summary> The function delegate that will be invoked </summary>
         public readonly Func<List<object>, object> FuncDelegate;
     }
-
 
     /// <summary> UniInk evaluation context : the pools of the calling thread and the state of the running evaluation </summary>
     /// <remarks>
@@ -1763,7 +1745,6 @@
             freeFrames.Push(frame);
         }
     }
-
 
     /// <summary> In UniInk , every valueType is Object , No Boxing! </summary>
     public partial class InkValue
@@ -1961,7 +1942,6 @@
         /// <summary> String value computed from Value_Meta </summary>
         public string ValueString => string.Concat(ValueMeta);
 
-
         /// <summary> The type code of the stored value </summary>
         public TypeCode ValueType;
 
@@ -1993,7 +1973,6 @@
 
         /// <summary> Getter action for this value </summary>
         public Action<InkValue> Getter;
-
 
         /// <summary> Calculate the value </summary>
         public void Calculate()
@@ -2560,7 +2539,6 @@
         /// <returns>The string value</returns>
         public static implicit operator string(InkValue st) => st.ValueString;
 
-
         /// <summary> Negates the boolean value of this InkValue </summary>
         /// <returns>This InkValue with negated boolean value</returns>
         protected InkValue Negate()
@@ -2573,7 +2551,6 @@
             return this;
         }
     }
-
 
     /// <summary> InkSyntaxList is a list of object, it can be used to store the syntax object </summary>
     public partial class InkSyntaxList
@@ -2709,7 +2686,6 @@
         /// <summary> Set the index dirty </summary>
         public void SetDirty(int index) => IndexDirty[index] = true;
     }
-
 
     /// <summary> InkSyntaxException throw when the syntax is wrong  </summary>
     public class InkSyntaxException : Exception
