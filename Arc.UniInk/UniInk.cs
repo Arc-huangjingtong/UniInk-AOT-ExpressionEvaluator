@@ -1517,8 +1517,8 @@
         /// <summary> Empty Placeholder Operator with Maximum Priority </summary>
         public static readonly InkOperator Empty = new("😊", short.MaxValue);
 
-        /// <summary> the max length of all operators </summary>
-        public static short MaxOperatorLen;
+        /// <summary> the max length of all operators , filled by the constructors below </summary>
+        internal static short MaxOperatorLen;
 
         /// <summary> Constructor of <see cref="InkOperator"/> </summary>
         /// <param name="name"> the name of the operator </param>
