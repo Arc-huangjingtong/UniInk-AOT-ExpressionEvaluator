@@ -43,6 +43,7 @@ jobs:
         run: |
           bash Tools/sync-unity-package.sh --check
           python3 -c "import json; json.load(open('Unity/Packages/com.arc.uniink/package.json')); json.load(open('Unity/Packages/com.arc.uniink/Runtime/Arc.UniInk.asmdef')); print('package.json / asmdef are valid JSON')"
+          cd Unity/Packages/com.arc.uniink && npm pack --dry-run
 
       - name: 📦 打包自检
         run: dotnet pack Arc.UniInk/Arc.UniInk.csproj -c Release --no-build -o ./artifacts

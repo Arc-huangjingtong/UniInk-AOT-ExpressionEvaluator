@@ -34,6 +34,10 @@ https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator.git?path=Uni
 
 The package ships the sources ( not a dll ) plus a sample : **Window > Package Manager > UniInk > Samples > Import** .
 
+Offline / air-gapped ? Download `com.arc.uniink-<version>.tgz` from the
+[releases](https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/releases) and use
+`Window > Package Manager > + > Add package from tarball...` .
+
 ### Option C : Download [UniInk.cs](https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/blob/main/Arc.UniInk/UniInk.cs) is Enough !
 
 > Optional : also grab [UniInk.Extensions.cs](https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/blob/main/Arc.UniInk/UniInk.Extensions.cs) if you need the `if` statement support (or want to extend the interpreter yourself).

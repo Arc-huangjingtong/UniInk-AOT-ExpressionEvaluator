@@ -76,11 +76,18 @@ jobs:
       - name: 📦 打包 NuGet
         run: dotnet pack Arc.UniInk/Arc.UniInk.csproj -c Release --no-build -o ./artifacts
 
+      - name: 🧩 打包 Unity 包 ( UPM tarball )
+        run: |
+          # Unity 的 "Add package from tarball" 需要 npm pack 的 package/ 布局
+          cd Unity/Packages/com.arc.uniink
+          npm pack --pack-destination "$GITHUB_WORKSPACE/artifacts"
+
       - name: 📋 列出生成的包
         run: |
-          echo "📦 生成的 NuGet 包:"
+          echo "📦 生成的包:"
           ls -lh ./artifacts/
           unzip -l ./artifacts/*.nupkg
+          tar -tzf ./artifacts/*.tgz | head -30
 
       - name: 🔐 NuGet 登录 (OIDC → 临时 API Key)
         uses: NuGet/login@v1
@@ -98,15 +105,20 @@ jobs:
       - name: 📤 上传构建产物
         uses: actions/upload-artifact@v4
         with:
-          name: nuget-packages-${{ steps.get_version.outputs.version }}
-          path: ./artifacts/*.nupkg
+          name: packages-${{ steps.get_version.outputs.version }}
+          path: |
+            ./artifacts/*.nupkg
+            ./artifacts/*.snupkg
+            ./artifacts/*.tgz
           retention-days: 90
 
       - name: 🎉 创建 GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
-          files: ./artifacts/*.nupkg
+          files: |
+            ./artifacts/*.nupkg
+            ./artifacts/*.tgz
           generate_release_notes: true
           draft: false
           prerelease: ${{ contains(steps.get_version.outputs.version, '-') }}

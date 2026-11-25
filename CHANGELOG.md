@@ -6,7 +6,11 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- every release now attaches `com.arc.uniink-<version>.tgz` ( `npm pack` layout ) next to the nupkg , so the Unity
+  package can be installed offline with **Add package from tarball**
+- CI runs `npm pack --dry-run` to make sure the package still packs
 
 ## [1.3.5] - 2026-11-25
 
