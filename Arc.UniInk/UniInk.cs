@@ -1946,13 +1946,13 @@
         public TypeCode ValueType;
 
         /// <summary> Metadata storage for string and complex values </summary>
-        public readonly List<char> ValueMeta = new(UniInk.STRING_MAX_LEN);
+        internal readonly List<char> ValueMeta = new(UniInk.STRING_MAX_LEN);
 
         /// <summary> Indicates if the value has been calculated </summary>
-        public bool IsCalculate;
+        public bool IsCalculate { get; internal set; }
 
         /// <summary> Prevents the value from being released to the pool </summary>
-        public bool DontRelease;
+        public bool DontRelease { get; internal set; }
 
 #if DEBUG
         /// <summary> DEBUG only : the value is owned by the pool , releasing it again is a bug </summary>
@@ -1960,13 +1960,13 @@
 #endif
 
         /// <summary> Indicates if this value is a setter </summary>
-        public bool IsIsSetter;
+        public bool IsIsSetter { get; internal set; }
 
         /// <summary> Indicates if this value is a getter </summary>
-        public bool IsGetter;
+        public bool IsGetter { get; internal set; }
 
         /// <summary> Indicates if this value is a return value </summary>
-        public bool IsReturner;
+        public bool IsReturner { get; internal set; }
 
         /// <summary> Setter action for this value </summary>
         public Action<InkValue> Setter;
