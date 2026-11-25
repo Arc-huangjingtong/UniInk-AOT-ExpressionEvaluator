@@ -39,6 +39,11 @@ jobs:
       - name: 🧪 测试 (Debug , 开启池契约断言)
         run: dotnet test Arc.UniInk.Tests/Arc.UniInk.Tests.csproj -c Debug --verbosity normal
 
+      - name: 🧩 Unity 包一致性检查
+        run: |
+          bash Tools/sync-unity-package.sh --check
+          python3 -c "import json; json.load(open('Unity/Packages/com.arc.uniink/package.json')); json.load(open('Unity/Packages/com.arc.uniink/Runtime/Arc.UniInk.asmdef')); print('package.json / asmdef are valid JSON')"
+
       - name: 📦 打包自检
         run: dotnet pack Arc.UniInk/Arc.UniInk.csproj -c Release --no-build -o ./artifacts
 

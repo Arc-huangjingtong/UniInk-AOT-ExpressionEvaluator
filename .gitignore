@@ -91,3 +91,7 @@ nupkgs/
 # IDE personal settings
 .idea/
 *.DotSettings.user
+
+# The Unity package lives inside a Packages folder : keep it tracked
+!Unity/Packages/
+!Unity/Packages/**

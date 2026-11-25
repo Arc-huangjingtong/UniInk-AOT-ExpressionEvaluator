@@ -1,0 +1,16 @@
+{
+    "name": "Arc.UniInk.Samples",
+    "rootNamespace": "Arc.UniInk.Samples",
+    "references": [
+        "Arc.UniInk"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

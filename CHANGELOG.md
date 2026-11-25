@@ -24,6 +24,8 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ### Added
 
+- Unity Package Manager package (`com.arc.uniink`) : sources , asmdef , a Basic Evaluation sample and `.meta` files
+- `Tools/sync-unity-package.sh` keeps the Unity sources and version in step with the library ; CI fails on drift
 - `Arc.UniInk.Tests` project, NUnit based, separate from the benchmark project
 - Tests for the literal scanner, the script path, `if` / `else if` / `else` and the `EvaluateInt` / `EvaluateBool` helpers
 - `CHANGELOG.md`

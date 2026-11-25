@@ -18,7 +18,23 @@
 
 > Targets `netstandard2.0` and `netstandard2.1` — one package , consumed by .NET Framework 4.6.1+ , .NET Core 3.0+ / .NET 5-10 , and Unity ( the 2.0 build also covers Unity versions older than 2021.2 ) .
 
-### Download [UniInk.cs](https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/blob/main/Arc.UniInk/UniInk.cs) is Enough !
+### Option A : NuGet ( .NET )
+
+```bash
+dotnet add package Arc.UniInk
+```
+
+### Option B : Unity Package Manager ( Unity 2021.3+ )
+
+`Window > Package Manager > + > Add package from git URL` :
+
+```
+https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator.git?path=Unity/Packages/com.arc.uniink
+```
+
+The package ships the sources ( not a dll ) plus a sample : **Window > Package Manager > UniInk > Samples > Import** .
+
+### Option C : Download [UniInk.cs](https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/blob/main/Arc.UniInk/UniInk.cs) is Enough !
 
 > Optional : also grab [UniInk.Extensions.cs](https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/blob/main/Arc.UniInk/UniInk.Extensions.cs) if you need the `if` statement support (or want to extend the interpreter yourself).
 

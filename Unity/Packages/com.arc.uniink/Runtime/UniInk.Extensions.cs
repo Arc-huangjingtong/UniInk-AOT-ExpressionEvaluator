@@ -1,0 +1,379 @@
+﻿namespace Arc.UniInk
+{
+
+    /* ================================================== SUMMARY  ================================================== */
+    /* Title    :  UniInk_Extensions (https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator)            */
+    /* Authors  :  Arc (https://github.com/Arc-huangjingtong)                                                         */
+    /* Version  :  1.3.0                                                                                              */
+    /* Desc     :  Provide commonly used string-related processing tools                                              */
+    /* ============================================================================================================== */
+
+    using System.Text.RegularExpressions;
+    using System;
+
+
+    /// <summary> Provide commonly tools in <see cref="UniInk"/> </summary>
+    /// <remarks> [⚠]not assurance zero GC </remarks>
+    public static class UniInkExtensions
+    {
+        /// <summary> Get a Bool? Value with UniInk </summary>
+        /// <remarks> Automatically recycle the generated InkValue internally, and return null if the operation fails </remarks>
+        public static bool? EvaluateBool(this UniInk ink, string expression)
+        {
+            var result = ink.Evaluate_IfStatement(expression);
+
+            if (result is InkValue { ValueType: TypeCode.Boolean } inkValue)
+            {
+                var resultBool = inkValue.ValueBool;
+
+                InkValue.Release(inkValue);
+
+                return resultBool;
+            }
+
+            return null;
+        }
+
+        /// <summary> Get a Int32? Value with UniInk </summary>
+        /// <remarks> Automatically recycle the generated InkValue internally, and return null if the operation fails </remarks>
+        public static int? EvaluateInt(this UniInk ink, string expression)
+        {
+            var result = ink.Evaluate_IfStatement(expression);
+
+            if (result is InkValue { ValueType: TypeCode.Int32 } inkValue)
+            {
+                var resultInt = inkValue.ValueInt;
+
+                InkValue.Release(inkValue);
+
+                return resultInt;
+            }
+
+            return null;
+        }
+
+        #region Remove comments
+
+
+        //Base on : https://stackoverflow.com/questions/3524317/regex-to-strip-line-comments-from-c-sharp/3524689#3524689
+        // RegexOptions.Compiled is not used : it needs runtime code generation , which IL2CPP cannot do .
+        // The .NET regex cache already keeps the interpreted form warm .
+        private static readonly Regex removeCommentsRegex =
+            new($"{BLOCK_COMMENTS}|{LINE_COMMENTS}|{STRINGS_IGNORE}|{VERBATIM_STRINGS_IGNORE}", RegexOptions.Singleline);
+
+        private static readonly Regex newLineCharsRegex = new(@"\r\n|\r|\n");
+
+        private const string VERBATIM_STRINGS_IGNORE = @"@(""[^""]*"")+";           //language=regex
+        private const string STRINGS_IGNORE          = @"""((\\[^\n]|[^""\n])*)"""; //language=regex
+        private const string BLOCK_COMMENTS          = @"/\*(.*?)\*/";              //language=regex
+        private const string LINE_COMMENTS           = @"//[^\r\n]*";               //language=regex
+
+
+        /// <summary> Remove all line and block comments from the specified C# script </summary>
+        /// <returns> C# script without comments                                      </returns>
+        /// <param name="scriptWithComments"> C# script with comments                   </param>
+        public static string RemoveComments(string scriptWithComments)
+        {
+            return removeCommentsRegex.Replace(scriptWithComments, Evaluator);
+
+            string Evaluator(Match match)
+            {
+                if (match.Value.StartsWith("/"))
+                {
+                    var newLineCharsMatch = newLineCharsRegex.Match(match.Value);
+
+                    return match.Value.StartsWith("/*") && newLineCharsMatch.Success ? newLineCharsMatch.Value : " ";
+                }
+
+                return match.Value;
+            }
+        }
+
+
+        #endregion
+    }
+
+
+    // Part: Support for UniInk : If Statement
+    public partial class UniInk
+    {
+        /// <summary> Process the script with the if statement(or not) </summary>
+        /// <remarks> Not support Nested if statement </remarks>
+        protected static object ProcessList_ScriptsWithIfStatement(InkSyntaxList keys)
+        {
+            var    index_start = 0;
+            var    index_end   = keys.Count - 1;
+            object res         = null;
+
+            while (true)
+            {
+                // the first [if]
+                var (success_if, index_if)     = FindOperator(keys, InkOperator.KeyIf,     index_start, index_end);
+                // the first [;]
+                var (success_semi, index_semi) = FindOperator(keys, InkOperator.Semicolon, index_start, index_end);
+
+
+                if (success_semi && index_semi < index_if)
+                {
+                    ProcessList(keys, index_start, index_semi - 1);
+                    keys.SetDirty(index_semi);
+                    index_start = index_semi + 1;
+                    continue;
+                }
+
+                if (success_if && index_if < index_semi)
+                {
+                    var current = ProcessList_IfStatement(keys, index_if);
+
+                    if (current <= index_if) // no progress : never spin on a malformed if statement
+                    {
+                        throw new InkSyntaxException("the if statement is malformed", keys.PositionAt(index_if), InkEvalContext.Current.Source);
+                    }
+
+                    keys.SetDirty(null, index_start, current);
+                    index_start = current + 1;
+                    continue;
+                }
+
+                if (index_start < index_end)
+                {
+                    res = ProcessList(keys, index_start, index_semi); //index is the last index
+                }
+
+                break;
+            }
+
+            for (var i = 0 ; i < keys.Count ; i++)
+            {
+                if (keys.CastOther[i] is InkValue { IsReturner: true } value)
+                {
+                    res = value.Clone();
+                }
+            }
+
+            return res;
+        }
+
+        /// <summary> Process the if statement </summary>
+        /// <returns> Return the processed lasted operator [}]  </returns>
+        protected static int ProcessList_IfStatement(InkSyntaxList keys, int start)
+        {
+            // Begin : keyword [if] (condition) { operation }      Open : [if] flag
+            // Then  : keyword [else if] (condition) { operation } need : [if] flag
+            // End   : keyword [else] { operation }                need : [if] flag and close [if] flag
+
+            // This function will be called by the detection function, so there must be an If keyword at the beginning
+
+            // Locate the [If (condition)]'s condition
+            var (conditionStart, conditionEnd)
+                = GetMatchOperator(keys, InkOperator.ParenthesisLeft, InkOperator.ParenthesisRight, start, keys.Count - 1);
+
+            // Check if the condition is correct, if not, throw an exception directly
+            if (conditionStart == -1 || start + 1 != conditionStart)
+            {
+                throw new InkSyntaxException("the if statement is malformed ( expected 'if ( condition ) { ... } else { ... }' )");
+            }
+
+            // Locate the [(condition){ operation }] operation
+            var (operationStart, operationEnd)
+                = GetMatchOperator(keys, InkOperator.BraceLeft, InkOperator.BraceRight, conditionEnd + 1,
+                                   keys.Count                                                        - 1);
+
+            if (operationStart == -1)
+            {
+                throw new InkSyntaxException("the if statement is malformed ( expected 'if ( condition ) { ... } else { ... }' )");
+            }
+
+            var ifCondition = false;
+            var currentEnd  = operationEnd;
+            var index_end   = keys.Count - 1;
+
+            var condition = ProcessList(keys, conditionStart + 1, conditionEnd - 1);
+
+            if (condition is InkValue conditionValue)
+            {
+                if (conditionValue)
+                {
+                    ifCondition = true;
+                    ProcessList(keys, operationStart + 1, operationEnd - 1);
+                }
+
+                InkValue.Release(conditionValue);
+            }
+
+
+            while (true)
+            {
+                // Check the position relationship between the next else and if, and then enumerate all cases based on their relationship (very elegant)
+                var (success_else, index_else) = FindOperator(keys, InkOperator.KeyElse, currentEnd + 1, index_end);
+                var (success_if, index_if)     = FindOperator(keys, InkOperator.KeyIf,   currentEnd + 1, index_end);
+
+                // The difference of the two indexes tells which form came next :
+                // 1. no else , no if      -> the if statement ends here
+                // 2. if , no else         -> a new if statement , handle it in the next round
+                // 3. else , no if         -> a plain else branch
+                // 4. else before if (> 1) -> a plain else branch , the if belongs to the next round
+                // 5. if right after else  -> an else if branch
+
+                switch (success_else, success_if, index_if - index_else)
+                {
+                    case (false, false, _) : return currentEnd;
+                    case (false, true, _) :  return currentEnd;
+                    case (true, false, _) :
+                    case (true, true, > 1) :
+                    {
+                        var temp_start = index_else + 1;
+
+                        if (success_if) temp_start++;
+
+                        var (opElseStart, opElseEnd) = GetMatchOperator(keys, InkOperator.BraceLeft, InkOperator.BraceRight, temp_start, keys.Count - 1);
+
+                        if (opElseStart < 0 || opElseEnd < 0)
+                        {
+                            throw new InkSyntaxException("the else branch is missing '{ ... }'", keys.PositionAt(index_else), InkEvalContext.Current.Source);
+                        }
+
+                        if (!ifCondition)
+                        {
+                            var result = ProcessList(keys, opElseStart + 1, opElseEnd - 1);
+
+                            if (result is InkValue resultValue)
+                            {
+                                InkValue.Release(resultValue);
+                            }
+                        }
+
+                        currentEnd = opElseEnd;
+
+                        return currentEnd;
+                    }
+                    case (true, true, 1) : // else if
+                    {
+                        // the ( condition ) of the else if
+                        var (cdsStart, cdsEnd)
+                            = GetMatchOperator(keys,         InkOperator.ParenthesisLeft, InkOperator.ParenthesisRight,
+                                               index_if + 1, index_end);
+
+                        if (cdsStart < 0 || cdsEnd < 0)
+                        {
+                            throw new InkSyntaxException("the else if condition is missing '( ... )'", keys.PositionAt(index_if), InkEvalContext.Current.Source);
+                        }
+
+                        // the { ... } of the else if
+                        var (opElseStart, opElseEnd)
+                            = GetMatchOperator(keys, InkOperator.BraceLeft, InkOperator.BraceRight, cdsEnd + 1,
+                                               index_end);
+
+                        if (opElseStart < 0 || opElseEnd < 0)
+                        {
+                            throw new InkSyntaxException("the else if branch is missing '{ ... }'", keys.PositionAt(index_if), InkEvalContext.Current.Source);
+                        }
+
+
+                        // evaluate the else if condition
+                        var condition_elseif = ProcessList(keys, cdsStart + 1, cdsEnd - 1);
+
+                        if (condition_elseif is InkValue conditionValue_elseif)
+                        {
+                            if (conditionValue_elseif && ifCondition == false)
+                            {
+                                var result = ProcessList(keys, opElseStart + 1, opElseEnd - 1);
+
+                                if (result is InkValue resultValue)
+                                {
+                                    InkValue.Release(resultValue);
+                                }
+                            }
+
+                            ifCondition = conditionValue_elseif || ifCondition;
+
+                            InkValue.Release(conditionValue_elseif);
+                        }
+
+                        currentEnd = opElseEnd;
+                        break;
+                    }
+                }
+            }
+        }
+
+        /// <summary> Judge the input String is a Script or not (depend on the operator:[;] [{]) </summary>
+        protected static bool InputIsScript_IfStatement(InkSyntaxList keys)
+        {
+            foreach (var obj in keys.ObjectList)
+            {
+                //match [;] or [{]
+                if (obj is InkOperator op && (Equals(op, InkOperator.Semicolon) || Equals(op, InkOperator.BraceLeft)))
+                {
+                    return true;
+                }
+            }
+
+
+            return false;
+        }
+
+        /// <summary> Execute the process with if statement support </summary>
+        /// <param name="keys">The syntax list to process</param>
+        /// <returns>The result of the execution</returns>
+        public static object ExecuteProcess_IfStatement(InkSyntaxList keys)
+        {
+            var res = InputIsScript_IfStatement(keys)
+                          ? ProcessList_ScriptsWithIfStatement(keys)
+                          : ProcessList(keys, 0, keys.Count - 1);
+
+            return res;
+        }
+
+        /// <summary> Evaluate the expression with the if statement </summary>
+        /// <param name="expression">The expression string to evaluate</param>
+        /// <param name="startIndex">The start index of the expression</param>
+        /// <param name="endIndex">The end index of the expression</param>
+        /// <returns>The result of the evaluation</returns>
+        public object Evaluate_IfStatement(string expression, int startIndex, int endIndex)
+        {
+            var context = InkEvalContext.Current;
+
+            context.PushFrame(expression);
+
+            InkSyntaxList keys = null;
+
+            try
+            {
+                keys = CompileLexerAndFill(expression, startIndex, endIndex);
+
+                return ExecuteProcess_IfStatement(keys);
+            }
+            catch (InkSyntaxException exception) when (exception.Expression is null)
+            {
+                throw exception.WithLocation(-1, expression); // attach the expression when no frame knew it
+            }
+            finally
+            {
+                if (keys is not null)
+                {
+                    InkSyntaxList.ReleaseAll(keys);
+                }
+
+                context.PopFrame(); // releases the temp lists and temp variables of this frame
+            }
+        }
+
+        /// <summary> Evaluate the expression with if statement support </summary>
+        /// <param name="expression">The expression string to evaluate</param>
+        /// <returns>The result of the evaluation</returns>
+        public object Evaluate_IfStatement(string expression)
+        {
+            return Evaluate_IfStatement(expression, 0, expression.Length - 1);
+        }
+    }
+
+
+    // Part: Support for UniInk : StringBuilder
+    public partial class UniInk { }
+
+
+    // Part: Support for UniInk : Span<Char>
+    public partial class UniInk { }
+
+}

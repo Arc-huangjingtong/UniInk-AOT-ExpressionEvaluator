@@ -58,6 +58,7 @@ jobs:
         run: |
           VERSION="${{ steps.get_version.outputs.version }}"
           sed -i "s|<Version>.*</Version>|<Version>$VERSION</Version>|g" Arc.UniInk/Arc.UniInk.csproj
+          bash Tools/sync-unity-package.sh   # 同步 Unity 包的 package.json 与源码副本
           echo "✅ 已更新版本号到 $VERSION"
 
       - name: 🔍 还原依赖
