@@ -5,30 +5,25 @@
     using System;
     using BenchmarkDotNet.Attributes;
     using CodingSeb.ExpressionEvaluator;
-    using NUnit.Framework;
     using ParsecSharp.Examples;
     using Sprache.Calc;
 
-    /*
-     * | Method                                | Mean        | Error     | StdDev    | Ratio | RatioSD | Gen0     | Gen1    | Allocated | Alloc Ratio |
-     * |-------------------------------------- |------------:|----------:|----------:|------:|--------:|---------:|--------:|----------:|------------:|
-     * | TEST_Arithmetic__UniInkSpeed          |   296.06 us |  0.968 us |  0.905 us |  1.00 |    0.00 |        - |       - |      68 B |        1.00 |
-     * | TEST_IfStatement__UniInkSpeed         |    11.05 us |  0.043 us |  0.038 us |  0.04 |    0.00 |        - |       - |      64 B |        0.94 |
-     * | TEST_Arithmetic__ExpressionEvaluator  | 2,621.71 us | 50.110 us | 59.653 us |  8.87 |    0.23 | 390.6250 |  3.9063 | 2068334 B |   30,416.68 |
-     * | TEST_Arithmetic__Sprache              | 2,678.89 us | 21.823 us | 19.345 us |  9.05 |    0.07 | 535.1563 | 27.3438 | 2817145 B |   41,428.60 |
-     * | TEST_Arithmetic__ParsecSharp          | 1,063.70 us |  3.801 us |  3.555 us |  3.59 |    0.02 | 162.1094 |       - |  851830 B |   12,526.91 |
-     * | TEST_Arithmetic__UniInkSpeed_Compiled |   164.65 us |  0.610 us |  0.540 us |  0.56 |    0.00 |        - |       - |     658 B |        9.68 |
-     *
-     *
-     * summary : UniInkSpeed is fast , and UniInkSpeed support more features. would you like to try it?
-     */
 
-
-    [TestFixture]
     [MemoryDiagnoser]
     public class UniInkBenchmark
     {
-        public UniInkBenchmark() => TEST_INITIATION();
+        private static readonly UniInk Ink = new();
+
+        private static int EvaluateInt(string expression)
+        {
+            var value = Ink.Evaluate(expression);
+
+            var result = value!.ValueInt;
+
+            InkValue.Release(value);
+
+            return result;
+        }
 
 
         private const string TEST_INPUT_ARITHMETIC_INT_01 = "12345678+87654321-1*2*3*4*5*6*7*8*9+9*8*7*6*5*4*3*2*1+1*2*3*4*5*6*7*8*9-87654321-12345678";
@@ -64,28 +59,24 @@
                                                         return 666      
                                                       }                 ";
 
-        private static readonly InkSyntaxList compiledTestInputArithmeticInt01 = UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_01, 0, TEST_INPUT_ARITHMETIC_INT_01.Length - 1);
+        private static readonly InkSyntaxList compiledTestInputArithmeticInt01 = Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_01, 0, TEST_INPUT_ARITHMETIC_INT_01.Length - 1);
 
-        private static readonly InkSyntaxList compiledTestInputArithmeticInt02 = UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_02, 0, TEST_INPUT_ARITHMETIC_INT_02.Length - 1);
+        private static readonly InkSyntaxList compiledTestInputArithmeticInt02 = Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_02, 0, TEST_INPUT_ARITHMETIC_INT_02.Length - 1);
 
-        private static readonly InkSyntaxList compiledTestInputArithmeticInt03 = UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_03, 0, TEST_INPUT_ARITHMETIC_INT_03.Length - 1);
+        private static readonly InkSyntaxList compiledTestInputArithmeticInt03 = Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_03, 0, TEST_INPUT_ARITHMETIC_INT_03.Length - 1);
 
-        private static readonly InkSyntaxList compiledTestInputArithmeticInt04 = UniInkNUnitTest.Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_04, 0, TEST_INPUT_ARITHMETIC_INT_04.Length - 1);
+        private static readonly InkSyntaxList compiledTestInputArithmeticInt04 = Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_04, 0, TEST_INPUT_ARITHMETIC_INT_04.Length - 1);
 
 
-
-        [OneTimeSetUp]
-        public void TEST_INITIATION() => new UniInkNUnitTest().Test_Initiation();
 
 
         [Benchmark(Baseline = true)]
-        [Test]
         public void TEST_Arithmetic__UniInk()
         {
-            var result1 = UniInkNUnitTest.Test_Arithmetic_Int(TEST_INPUT_ARITHMETIC_INT_01);
-            var result2 = UniInkNUnitTest.Test_Arithmetic_Int(TEST_INPUT_ARITHMETIC_INT_02);
-            var result3 = UniInkNUnitTest.Test_Arithmetic_Int(TEST_INPUT_ARITHMETIC_INT_03);
-            var result4 = UniInkNUnitTest.Test_Arithmetic_Int(TEST_INPUT_ARITHMETIC_INT_04);
+            var result1 = EvaluateInt(TEST_INPUT_ARITHMETIC_INT_01);
+            var result2 = EvaluateInt(TEST_INPUT_ARITHMETIC_INT_02);
+            var result3 = EvaluateInt(TEST_INPUT_ARITHMETIC_INT_03);
+            var result4 = EvaluateInt(TEST_INPUT_ARITHMETIC_INT_04);
 
 #if DEBUG
             Console.WriteLine(result1 + "|" + result2 + "|" + result3 + "|" + result4);
@@ -94,7 +85,6 @@
 
 
         [Benchmark]
-        [Test]
         public void TEST_Arithmetic__UniInk_Compiled()
         {
             // ExecuteProcess hands out an InkValue that the caller owns : read it with GetResult_Int ,
@@ -118,7 +108,6 @@
         private static readonly ExpressionEvaluator expressionEvaluator = new ExpressionEvaluator();
 
         [Benchmark]
-        [Test]
         public void TEST_Arithmetic__ExpressionEvaluator()
         {
             var result1 = expressionEvaluator.Evaluate<int>(TEST_INPUT_ARITHMETIC_INT_01);
@@ -134,7 +123,6 @@
         private static SimpleCalculator Calculator { get; } = new SimpleCalculator();
 
         [Benchmark]
-        [Test]
         public void TEST_Arithmetic__Sprache()
         {
             var result1 = Calculator.ParseExpression(TEST_INPUT_ARITHMETIC_INT_01).Compile().Invoke();
@@ -147,7 +135,6 @@
         }
 
         [Benchmark]
-        [Test]
         public void TEST_Arithmetic__ParsecSharp()
         {
             var result1 = Integer.Parser.Parse(TEST_INPUT_ARITHMETIC_INT_01).Value.Value;
@@ -163,10 +150,9 @@
 
 
         [Benchmark]
-        [Test]
         public void TEST_IfStatement__UniInk()
         {
-            var ink  = UniInkNUnitTest.Ink;
+            var ink  = Ink;
             var test = ink.Evaluate_IfStatement(TEST_INPUT_IF_STATEMENT);
             if (test is InkValue value)
             {

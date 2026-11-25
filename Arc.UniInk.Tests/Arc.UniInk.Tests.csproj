@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <RootNamespace>Arc.UniInk.Tests</RootNamespace>
+        <AssemblyName>Arc.UniInk.Tests</AssemblyName>
+        <LangVersion>9</LangVersion>
+        <IsPackable>false</IsPackable>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\Arc.UniInk\Arc.UniInk.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="NUnit" Version="4.1.0" />
+        <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
+    </ItemGroup>
+
+</Project>

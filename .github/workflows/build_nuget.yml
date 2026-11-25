@@ -70,7 +70,7 @@ jobs:
         run: dotnet test Arc.UniInk.sln -c Release --no-build --verbosity normal
 
       - name: 🧪 运行测试 (Debug , 开启池契约断言)
-        run: dotnet test Arc.UniInk.Benchmark/Arc.UniInk.Benchmark.csproj -c Debug --verbosity normal
+        run: dotnet test Arc.UniInk.Tests/Arc.UniInk.Tests.csproj -c Debug --verbosity normal
 
       - name: 📦 打包 NuGet
         run: dotnet pack Arc.UniInk/Arc.UniInk.csproj -c Release --no-build -o ./artifacts
