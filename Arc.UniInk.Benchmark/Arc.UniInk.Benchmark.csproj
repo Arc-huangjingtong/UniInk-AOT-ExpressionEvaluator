@@ -12,8 +12,6 @@
         <AssemblyTitle>Arc.UniInk.Benchmark</AssemblyTitle>
         <Product>Arc.UniInk.Benchmark</Product>
         <Copyright>Copyright © 2024</Copyright>
-        <AssemblyVersion>1.0.0.0</AssemblyVersion>
-        <FileVersion>1.0.0.0</FileVersion>
         <Guid>1BA70864-1706-44D0-9D58-669FD5703A14</Guid>
     </PropertyGroup>
 

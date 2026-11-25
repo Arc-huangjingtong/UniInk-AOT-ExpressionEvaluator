@@ -9,8 +9,6 @@
         <!-- Assembly Information -->
         <AssemblyTitle>Arc.UniInk</AssemblyTitle>
         <Product>Arc.UniInk</Product>
-        <AssemblyVersion>1.0.0.0</AssemblyVersion>
-        <FileVersion>1.0.0.0</FileVersion>
         <Guid>F969106D-BD96-4E8F-A217-4B90D2975179</Guid>
 
         <!-- Generate XML documentation file -->
@@ -23,6 +21,9 @@
         <PackageId>Arc.UniInk</PackageId>
         <Title>UniInk - AOT Expression Evaluator</Title>
         <Version>1.2.0</Version>
+        <!-- the assembly and file version follow <Version> : one place to bump -->
+        <AssemblyVersion>$(Version)</AssemblyVersion>
+        <FileVersion>$(Version)</FileVersion>
         <Authors>Arc-huangjingtong</Authors>
         <Description>UniInk - an AOT-friendly, zero-allocation C# expression and mini-script evaluator for Unity IL2CPP and .NET. No reflection and no boxing on the common path; supports variables, functions, lambdas and if/else.</Description>
         <PackageTags>unity;il2cpp;aot;expression-evaluator;script;zero-allocation;no-reflection</PackageTags>
