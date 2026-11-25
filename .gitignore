@@ -84,3 +84,10 @@ artifacts/
 
 # Generated NuGet packages output
 nupkgs/
+
+# macOS metadata
+.DS_Store
+
+# IDE personal settings
+.idea/
+*.DotSettings.user
