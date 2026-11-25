@@ -6,7 +6,19 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- Regression tests for the pool contract : a malformed unary operator and a function that returns its own argument
+  must not hand the same pooled `InkValue` to two computations , plus tests for the still supported unary forms
+
+### Fixed
+
+- An operator without a unary meaning ( `*1` , `/1` , `==1` , `<1` , `>1` , `<=1` , `>=1` , `!=1` , `||1` ) returned its
+  operand , so the syntax list released the same `InkValue` twice : RELEASE builds then handed one instance to two
+  different computations ( a following `1 + 2 * 3` could evaluate to `0` ) and DEBUG builds threw
+  `InvalidOperationException` from `InkValue.Release` . Those forms throw `InkSyntaxException` now
+- A registered function that returned one of its own arguments released that argument twice ( the temporary parameter
+  list and the caller both owned it ) ; the result is copied when the parameter list still owns it
 
 ## [1.3.0] - 2025-11-25
 

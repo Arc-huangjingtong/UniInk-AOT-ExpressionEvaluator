@@ -572,7 +572,15 @@
             ObjectRemoveNull(paramList.CastOther);
             var result = func?.FuncDelegate.Invoke(paramList.CastOther);
 
-            if (result is InkValue) { }
+            // the function may return one of its own arguments : that instance is owned by the temporary
+            // parameter list and is released when the frame ends , so the caller must get a copy instead
+            if (result is InkValue returned)
+            {
+                if (IsOwnedBy(returned, paramList.CastOther))
+                {
+                    result = returned.Clone();
+                }
+            }
             else if (result is not null)
             {
                 result = InkValue.GetObjectValue(result);
@@ -1327,6 +1335,22 @@
                     i--;
                 }
             }
+        }
+
+        /// <summary> Whether <paramref name="value"/> is one of the <paramref name="objects"/> ( identity , no Equals ) </summary>
+        /// <param name="value"> the value to look for </param>
+        /// <param name="objects"> the objects that may own the value </param>
+        protected static bool IsOwnedBy(InkValue value, List<object> objects)
+        {
+            foreach (var other in objects)
+            {
+                if (ReferenceEquals(other, value))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary> Get the hash code of the string from <paramref name="startIndex"/> to <paramref name="endIndex"/> </summary>
@@ -2262,16 +2286,12 @@
                     return result;
                 }
                 case "!" : return !rightValue;
-                case "*" :
-                case "/" :
-                case "<" :
-                case ">" :
-                case "==" :
-                case "<=" :
-                case ">=" :
-                case "!=" :
-                case "||" : return right;
-                default :   throw new InkSyntaxException($"operator [{op.Name}] is not defined for [{Describe(right)}]");
+
+                // a binary-only operator has no unary meaning : returning the operand here would hand back an
+                // instance that the syntax list still owns , so releasing the list would release it twice
+                // ( once through ObjectList , once through CastOther ) and the pool would hand the same
+                // instance to two different computations
+                default : throw new InkSyntaxException($"operator [{op.Name}] is missing its left operand");
             }
         }
 

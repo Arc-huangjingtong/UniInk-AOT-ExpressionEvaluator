@@ -1249,6 +1249,123 @@
         #endregion
 
 
+        #region 11.Pool contract : a malformed unary operator must never release its operand twice
+
+
+        [TestCase("*1")]
+        [TestCase("/1")]
+        [TestCase("%1")]
+        [TestCase("==1")]
+        [TestCase("!=1")]
+        [TestCase("<1")]
+        [TestCase(">1")]
+        [TestCase("<=1")]
+        [TestCase(">=1")]
+        [TestCase("||1")]
+        [TestCase("&&1")]
+        public static void Test_Unary_MissingLeftOperand_IsReported(string input)
+        {
+            // these forms used to hand the operand back . The syntax list owns that instance , so it was
+            // released twice and the pool handed the same instance to two different computations
+            Assert.Throws<InkSyntaxException>(() => Ink.Evaluate(input));
+        }
+
+
+        [TestCase("+1",          ExpectedResult = 1)]
+        [TestCase("-1",          ExpectedResult = -1)]
+        [TestCase("-(-1)",       ExpectedResult = 1)]
+        [TestCase("+123456789",  ExpectedResult = 123456789)]
+        [TestCase("-1 * 2",      ExpectedResult = -2)]
+        [TestCase("(-1) * (-2)", ExpectedResult = 2)]
+        public static int Test_Unary_StillSupported(string input)
+        {
+            return Ink.Evaluate(input).GetResult_Int();
+        }
+
+
+        [TestCase("!true",    ExpectedResult = false)]
+        [TestCase("!false",   ExpectedResult = true)]
+        [TestCase("!(1 < 2)", ExpectedResult = false)]
+        public static bool Test_Unary_LogicalNot_StillSupported(string input)
+        {
+            return Ink.Evaluate(input).GetResult_Bool();
+        }
+
+
+        [Test]
+        public static void Test_Unary_MissingLeftOperand_DoesNotCorruptThePool()
+        {
+            var malformed = new[] { "*1", "/1", "==1", "<1", ">1", "<=1", ">=1", "!=1", "||1" };
+
+            for (var i = 0 ; i < 64 ; i++)
+            {
+                Assert.That(Ink.Evaluate("1 + 2 * 3").GetResult_Int(), Is.EqualTo(7));
+            }
+
+            for (var round = 0 ; round < 50 ; round++)
+            {
+                foreach (var input in malformed)
+                {
+                    Assert.Throws<InkSyntaxException>(() => Ink.Evaluate(input));
+
+                    // a failed evaluation must leave the pool usable
+                    Assert.That(Ink.Evaluate("1 + 2 * 3").GetResult_Int(), Is.EqualTo(7));
+                }
+            }
+
+            AssertPoolHasNoDuplicateInstances();
+        }
+
+
+        [Test]
+        public static void Test_Function_ReturningItsOwnArgument_DoesNotCorruptThePool()
+        {
+            var ink = new UniInk();
+
+            // a function that returns its argument unchanged : the result used to be released twice
+            ink.RegisterFunction("ID", new InkFunction(prms => prms[0]));
+
+            for (var i = 0 ; i < 100 ; i++)
+            {
+                Assert.That(ink.Evaluate("ID(7)").GetResult_Int(),                Is.EqualTo(7));
+                Assert.That(ink.Evaluate("ID(1) + 1").GetResult_Int(),            Is.EqualTo(2));
+                Assert.That(ink.Evaluate("ID(ID(3)) * 2").GetResult_Int(),        Is.EqualTo(6));
+                Assert.That(ink.Evaluate("var a = ID(5); a + 1").GetResult_Int(), Is.EqualTo(6));
+            }
+
+            AssertPoolHasNoDuplicateInstances();
+        }
+
+
+        /// <summary> Lease every pooled instance : the pool must never contain the same instance twice </summary>
+        private static void AssertPoolHasNoDuplicateInstances()
+        {
+            var pool   = InkEvalContext.Current.ValuePool;
+            var leased = new List<InkValue>(pool.Count);
+
+            while (pool.Count > 0)
+            {
+                var value = InkValue.Get();
+
+                foreach (var other in leased)
+                {
+                    Assert.That(ReferenceEquals(other, value), Is.False,
+                                "the pool must not hand out the same InkValue instance twice");
+                }
+
+                leased.Add(value);
+            }
+
+            foreach (var value in leased)
+            {
+                InkValue.Release(value);
+            }
+        }
+
+
+        #endregion
+
+
         public List<Card> Config = new()
         {
             new Card() { ID = 1, Rarity = 2 } //
