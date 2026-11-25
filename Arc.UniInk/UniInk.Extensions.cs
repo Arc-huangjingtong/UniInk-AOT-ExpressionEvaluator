@@ -56,11 +56,12 @@
 
 
         //Base on : https://stackoverflow.com/questions/3524317/regex-to-strip-line-comments-from-c-sharp/3524689#3524689
+        // RegexOptions.Compiled is not used : it needs runtime code generation , which IL2CPP cannot do .
+        // The .NET regex cache already keeps the interpreted form warm .
         private static readonly Regex removeCommentsRegex =
-            new($"{BLOCK_COMMENTS}|{LINE_COMMENTS}|{STRINGS_IGNORE}|{VERBATIM_STRINGS_IGNORE}",
-                RegexOptions.Singleline | RegexOptions.Compiled);
+            new($"{BLOCK_COMMENTS}|{LINE_COMMENTS}|{STRINGS_IGNORE}|{VERBATIM_STRINGS_IGNORE}", RegexOptions.Singleline);
 
-        private static readonly Regex newLineCharsRegex = new(@"\r\n|\r|\n", RegexOptions.Compiled);
+        private static readonly Regex newLineCharsRegex = new(@"\r\n|\r|\n");
 
         private const string VERBATIM_STRINGS_IGNORE = @"@(""[^""]*"")+";           //language=regex
         private const string STRINGS_IGNORE          = @"""((\\[^\n]|[^""\n])*)"""; //language=regex
