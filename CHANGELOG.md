@@ -6,6 +6,10 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [1.3.0] - 2025-11-25
+
 ### Added
 
 - `Arc.UniInk.Tests` project, NUnit based, separate from the benchmark project
@@ -14,7 +18,10 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ### Changed
 
-- `InkSyntaxList` keeps the source position of every token, so evaluation errors point at the operator
+- **Breaking** : division by zero and a duplicate `var` declaration throw `InkSyntaxException` now , not
+  `DivideByZeroException` / `ArgumentException`
+- `InkSyntaxException` gained `Position` and `Expression` , and `ToString()` adds a caret under the failing character ;
+  `InkSyntaxList` records the source position of every token so the caret also works inside nested expressions
 - `InkValue.IsCalculate` , `DontRelease` , `IsGetter` , `IsIsSetter` and `IsReturner` are now read-only outside the assembly
 - `InkOperator.MaxOperatorLen` is internal
 - `AssemblyVersion` and `FileVersion` follow `<Version>`
@@ -41,7 +48,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 - **Breaking** : the global function table is gone, `RegisterGlobalFunction` was removed . Functions belong to the instance that registered them
 - **Breaking** : `InkValue.Equals` keeps identity semantics ( documented ), `operator ==` is null safe
 - The operator dispatch collapsed into a single core (`Apply` -> `Binary` -> `Arithmetic` / `Equality` / `Relational` / `Logical` )
-- Every evaluation failure throws `InkSyntaxException`, with the failing expression and character index
+- Every evaluation failure throws `InkSyntaxException` instead of leaking the runtime exceptions
 
 ### Fixed
 
@@ -58,6 +65,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 - NuGet packaging and the first published workflow
 
-[Unreleased]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/ver1.2...HEAD
+[Unreleased]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/ver1.3...HEAD
+[1.3.0]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/ver1.2...ver1.3
 [1.2.0]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/v0.1.3...ver1.2
 [0.1.3]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/releases/tag/v0.1.3
