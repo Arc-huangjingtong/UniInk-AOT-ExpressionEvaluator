@@ -115,7 +115,13 @@
 
                 if (success_semi && index_semi < index_if)
                 {
-                    ProcessList(keys, index_start, index_semi - 1);
+                    var statement = ProcessList(keys, index_start, index_semi - 1);
+
+                    if (statement is InkValue statementValue)
+                    {
+                        InkValue.Release(statementValue);
+                    }
+
                     keys.SetDirty(index_semi);
                     index_start = index_semi + 1;
                     continue;
@@ -143,11 +149,14 @@
                 break;
             }
 
-            for (var i = 0 ; i < keys.Count ; i++)
+            // the last return wins : clone only that one , cloning every returner leaks the previous copies
+            for (var i = keys.Count - 1 ; i >= 0 ; i--)
             {
                 if (keys.CastOther[i] is InkValue { IsReturner: true } value)
                 {
                     res = value.Clone();
+
+                    break;
                 }
             }
 
@@ -195,7 +204,15 @@
                 if (conditionValue)
                 {
                     ifCondition = true;
-                    ProcessList(keys, operationStart + 1, operationEnd - 1);
+
+                    // ProcessList returns a copy owned by the caller : the branch body result is not needed
+                    // here ( the return value stays in the syntax list ) , so release the copy or the pool drains
+                    var body = ProcessList(keys, operationStart + 1, operationEnd - 1);
+
+                    if (body is InkValue bodyValue)
+                    {
+                        InkValue.Release(bodyValue);
+                    }
                 }
 
                 InkValue.Release(conditionValue);
