@@ -123,18 +123,6 @@
         /// <param name="variables"> Set variables can replace a key string with value object </param>
         public UniInk(IDictionary<string, InkValue> variables = null)
         {
-            const int PARSING_METHODS_CAPACITY = 7;
-            ParsingMethods = new List<ParsingMethodDelegate>(PARSING_METHODS_CAPACITY)
-            {
-                EvaluateOperators
-              , EvaluateFunction //
-              , EvaluateNumber   //
-              , EvaluateChar     //
-              , EvaluateString   //
-              , EvaluateBool     //
-              , EvaluateVariable //
-            };
-
             if (variables == null) return;
 
             foreach (var variable in variables)
@@ -234,19 +222,9 @@
             {
                 if (char.IsWhiteSpace(expression[i])) continue;
 
-                var any        = false;
                 var tokenIndex = i;
 
-                foreach (var parsingMethod in ParsingMethods)
-                {
-                    if (parsingMethod(expression, keys, ref i))
-                    {
-                        any = true;
-                        break;
-                    }
-                }
-
-                if (!any)
+                if (!LexToken(expression, keys, ref i))
                 {
                     throw UnknownToken(expression, tokenIndex);
                 }
@@ -265,6 +243,54 @@
             }
 
             return keys;
+        }
+
+        /// <summary> Lex the token that starts at <paramref name="i"/> , chosen by its first character </summary>
+        /// <remarks> The shapes are the grammar : digit -> number , quote -> char / string ,
+        /// letter -> word ( keyword , function , bool literal or variable ) , otherwise a symbol operator </remarks>
+        private bool LexToken(string expression, InkSyntaxList keys, ref int i)
+        {
+            var c = expression[i];
+
+            if (char.IsDigit(c))              return EvaluateNumber(expression, keys, ref i);
+            if (c == '\'')                    return EvaluateChar(expression, keys, ref i);
+            if (c == '"')                     return EvaluateString(expression, keys, ref i);
+            if (char.IsLetter(c) || c == '_') return EvaluateWord(expression, keys, ref i);
+            if (c >= 128)                     return EvaluateOperators(expression, keys, ref i); // the placeholders
+
+            return EvaluateSymbol(expression, keys, ref i);
+        }
+
+        /// <summary> A word : keyword / named operator , then function , then bool literal , then variable </summary>
+        private bool EvaluateWord(string expression, InkSyntaxList keys, ref int i)
+        {
+            if (EvaluateOperators(expression, keys, ref i)) return true;
+            if (DicFunctions.Count > 0 && EvaluateFunction(expression, keys, ref i)) return true;
+            if (EvaluateBool(expression, keys, ref i))     return true;
+
+            return EvaluateVariable(expression, keys, ref i);
+        }
+
+        /// <summary> A symbol : every ASCII symbol operator is one or two characters , the longer names are keywords </summary>
+        private static bool EvaluateSymbol(string expression, InkSyntaxList keys, ref int i)
+        {
+            if (i + 1 < expression.Length
+             && InkOperator.DicValues.TryGetValue(GetStringSliceHashCode(expression, i, i + 1), out var pair))
+            {
+                keys.Add(pair);
+                i += 1;
+
+                return true;
+            }
+
+            if (InkOperator.DicValues.TryGetValue(GetStringSliceHashCode(expression, i, i), out var single))
+            {
+                keys.Add(single);
+
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary> Build the error for a character that no lexer rule accepts </summary>
@@ -738,15 +764,6 @@
 
         /**************************************************  Lexer  ***************************************************/
 
-        /// <summary> The delegate of Parsing Methods for <see cref="ParsingMethods"/> </summary>
-        /// <param name="expression"> the expression to Evaluate </param>
-        /// <param name="stack"> the object stack to push or pop </param>
-        /// <param name="i"> the <paramref name="expression"/> start index </param>
-        protected delegate bool ParsingMethodDelegate(string expression, InkSyntaxList stack, ref int i);
-
-        /// <summary> The Parsing Methods for <see cref="CompileLexerAndFill"/> </summary>
-        protected readonly List<ParsingMethodDelegate> ParsingMethods;
-
         /// <summary> Evaluate Operators in<see cref="InkOperator"/> </summary>
         /// <param name="expression"> the expression to Evaluate </param>
         /// <param name="keys"> the object stack to push or pop </param>
@@ -795,14 +812,38 @@
         /// <returns> the evaluate is success or not </returns>
         protected static bool EvaluateBool(string expression, InkSyntaxList keys, ref int i)
         {
-            if (StartsWithBoolFromIndex(expression, i, out var boolMatch, out var len))
+            if (StartsWithOrdinal(expression, i, "true"))
             {
-                keys.Add(boolMatch);
-                i += len - 1;
+                keys.Add(InkValue.GetBoolValue(true));
+                i += 3;
+
+                return true;
+            }
+
+            if (StartsWithOrdinal(expression, i, "false"))
+            {
+                keys.Add(InkValue.GetBoolValue(false));
+                i += 4;
+
                 return true;
             }
 
             return false;
+        }
+
+        /// <summary> Does <paramref name="value"/> start at <paramref name="startIndex"/> ? </summary>
+        /// <remarks> The first character may be upper case , so <c>true</c> and <c>True</c> both match </remarks>
+        private static bool StartsWithOrdinal(string input, int startIndex, string value)
+        {
+            if (input.Length - startIndex < value.Length)           return false;
+            if (char.ToLowerInvariant(input[startIndex]) != value[0]) return false;
+
+            for (var offset = 1 ; offset < value.Length ; offset++)
+            {
+                if (input[startIndex + offset] != value[offset]) return false;
+            }
+
+            return true;
         }
 
         /// <summary> Evaluate Char or Escaped Char  _eg: 'a' '\d'          </summary>
@@ -937,39 +978,6 @@
 
         // ---- lexer character helpers ----
 
-        /// <summary> Match <paramref name="value"/> from <paramref name="input"/> 's <paramref name="startIndex"/> </summary>
-        protected static bool StartsWithInputStrFromIndex(string input, string value, int startIndex, bool ignoreFirstCase = false)
-        {
-            if (input.Length - startIndex < value.Length)
-            {
-                return false;
-            }
-
-            if (ignoreFirstCase)
-            {
-                if (char.ToLower(input[startIndex]) == char.ToLower(value[0]))
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                if (input[startIndex] != value[0])
-                {
-                    return false;
-                }
-            }
-
-            for (var i = 1 ; i < value.Length ; i++)
-            {
-                if (input[i + startIndex] != value[i])
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
 
         /// <summary> Find <paramref name="input"/> is whether start with numbers from <paramref name="startIndex"/> </summary>
         protected static bool StartsWithNumbersFromIndex(string input, int startIndex, out InkValue value, out int len)
@@ -1114,46 +1122,6 @@
             return false;
         }
 
-        /// <summary> Find <paramref name="input"/> is whether start with bool from <paramref name="startIndex"/> </summary>
-        protected static bool StartsWithBoolFromIndex(string input, int startIndex, out InkValue value, out int len)
-        {
-            const string TRUE_STR01  = "true";
-            const string TRUE_STR02  = "True";
-            const string FALSE_STR01 = "false";
-            const string FALSE_STR02 = "False";
-
-            if (StartsWithInputStrFromIndex(input, FALSE_STR01, startIndex))
-            {
-                len   = FALSE_STR01.Length;
-                value = InkValue.GetBoolValue(false);
-                return true;
-            }
-
-            if (StartsWithInputStrFromIndex(input, FALSE_STR02, startIndex))
-            {
-                len   = FALSE_STR02.Length;
-                value = InkValue.GetBoolValue(false);
-                return true;
-            }
-
-            if (StartsWithInputStrFromIndex(input, TRUE_STR01, startIndex))
-            {
-                len   = TRUE_STR01.Length;
-                value = InkValue.GetBoolValue(true);
-                return true;
-            }
-
-            if (StartsWithInputStrFromIndex(input, TRUE_STR02, startIndex))
-            {
-                len   = TRUE_STR02.Length;
-                value = InkValue.GetBoolValue(true);
-                return true;
-            }
-
-            len   = 0;
-            value = null;
-            return false;
-        }
 
         /**************************************************  Helper  **************************************************/
 
