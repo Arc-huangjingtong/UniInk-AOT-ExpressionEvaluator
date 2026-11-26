@@ -39,6 +39,14 @@ jobs:
       - name: 🧪 测试 (Debug , 开启池契约断言)
         run: dotnet test Arc.UniInk.Tests/Arc.UniInk.Tests.csproj -c Debug --verbosity normal
 
+      - name: 🧠 Agent Skill 校验
+        run: |
+          python3 Tools/check-skills.py
+          # the NuGet convention : skills/<name>/SKILL.md inside the package
+          dotnet pack Arc.UniInk/Arc.UniInk.csproj -c Release -o ./artifacts-skills
+          unzip -l ./artifacts-skills/*.nupkg | grep -q "skills/uniink/SKILL.md"
+          echo "skills/uniink/SKILL.md is packed"
+
       - name: 🧩 Unity 包一致性检查
         run: |
           bash Tools/sync-unity-package.sh --check

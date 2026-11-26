@@ -89,8 +89,8 @@ jobs:
         run: |
           echo "📦 生成的包:"
           ls -lh ./artifacts/
-          unzip -l ./artifacts/*.nupkg
-          tar -tzf ./artifacts/*.tgz | head -30
+          unzip -l ./artifacts/*.nupkg | grep -E "skills/|README"
+          tar -tzf ./artifacts/*.tgz | head -40
           tar -tzf ./artifacts/*.unitypackage | head -30
 
       - name: 🔐 NuGet 登录 (OIDC → 临时 API Key)

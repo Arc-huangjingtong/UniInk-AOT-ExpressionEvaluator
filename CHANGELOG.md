@@ -8,6 +8,11 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ### Added
 
+- agent skills : `skills/uniink/` ( consumer , shipped inside the nupkg at `skills/uniink/` per the NuGet
+  convention , and as the **Agent Skill ( AI )** Unity sample , the tarball and the `.unitypackage` ) and
+  `.github/skills/uniink-repo/` ( how to work on this repository )
+- `Tools/check-skills.py` validates the skill frontmatter , the links and the Unity copy , and runs in CI
+
 - `InkValue.SetSetter` and a `RegisterVariable( name , value , setter )` overload : an assignment to a registered
   variable now notifies its owner , so the value can be mirrored into a field ( `hp = hp - 10` )
 - setter tests : type changes , once per assignment , not called on read , getter + setter round trip , reentrancy

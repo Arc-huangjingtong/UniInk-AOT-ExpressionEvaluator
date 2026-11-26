@@ -2,6 +2,7 @@
 # Keep the Unity Package Manager folder in shape :
 #   - copy the library sources into Runtime/
 #   - keep package.json's version in step with the csproj
+#   - copy the consumer skill into Samples~/AgentSkill
 #   - make sure every file / folder inside the package has a .meta file
 #
 #   Tools/sync-unity-package.sh          # write
@@ -43,6 +44,24 @@ for file in UniInk.cs UniInk.Extensions.cs; do
         fi
     fi
 done
+
+# ---------- agent skill ----------
+SKILL_SRC="$ROOT/skills/uniink"
+SKILL_DST="$PACKAGE/Samples~/AgentSkill"
+
+if [[ ! -d "$SKILL_SRC" ]]; then
+    echo "missing skill source: skills/uniink"
+    status=1
+elif [[ $CHECK -eq 1 ]]; then
+    if ! diff -r -q -x '*.meta' "$SKILL_SRC" "$SKILL_DST" >/dev/null 2>&1; then
+        echo "skill drift: Samples~/AgentSkill"
+        status=1
+    fi
+else
+    rm -rf "$SKILL_DST"
+    mkdir -p "$SKILL_DST"
+    cp -R "$SKILL_SRC"/. "$SKILL_DST"/
+fi
 
 # ---------- .meta ----------
 # Unity refuses to load an asset inside an immutable package ("Packages/...") when

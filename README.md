@@ -294,6 +294,20 @@ var res = ink.Evaluate("grower + 10086").GetResult_Int();
 
 ```
 
+- ### 🤖 Agent Skill
+
+The package ships a skill for AI coding agents ( `skills/uniink/SKILL.md` , the
+[Agent Skills](https://agentskills.io/) format ) :
+
+- **NuGet** : it lives inside the package under `skills/uniink/` , so it is in your NuGet cache after
+  `dotnet restore` ( `dotnet-inspect package Arc.UniInk -S Skills` lists it )
+- **Unity** : `Window > Package Manager > UniInk > Samples > Agent Skill ( AI ) > Import` , or import it
+  from the classic `.unitypackage` ( `Assets/Arc.UniInk/Skills/` )
+
+The skill explains the syntax that parses , the type rules , the error model , the release contract of the
+pooled `InkValue` and how to extend the evaluator — so an agent writes working expressions instead of
+guessing , and knows what the language does **not** support .
+
 - ### ✨Support Property Setter
 
 An assignment ( `a = 3` ) notifies the owner of the variable , so the value can be mirrored into your own field :

@@ -28,6 +28,11 @@
       "displayName": "Basic Evaluation",
       "description": "Evaluate an expression, run an if statement and read the typed result.",
       "path": "Samples~/BasicEvaluation"
+    },
+    {
+      "displayName": "Agent Skill ( AI )",
+      "description": "SKILL.md for AI coding agents: syntax, type rules, errors and integration, so an agent writes correct UniInk code.",
+      "path": "Samples~/AgentSkill"
     }
   ]
 }

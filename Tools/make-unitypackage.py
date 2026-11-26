@@ -24,6 +24,7 @@ import tarfile
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / 'Arc.UniInk'
 SAMPLE = ROOT / 'Unity/Packages/com.arc.uniink/Samples~/BasicEvaluation/UniInkSample.cs'
+SKILL  = ROOT / 'skills/uniink'
 CSPROJ = SRC / 'Arc.UniInk.csproj'
 PREFIX = 'Assets/Arc.UniInk'
 GUID_NS = 'com.arc.uniink.unitypackage:'
@@ -82,6 +83,7 @@ AOT-friendly, zero-allocation C# expression & mini-script evaluator for Unity IL
 - `UniInk.cs` — the evaluator ( required )
 - `UniInk.Extensions.cs` — `if` / `else` statement support and the typed helpers ( optional )
 - `Samples/BasicEvaluation/UniInkSample.cs` — a MonoBehaviour example
+- `Skills/uniink/SKILL.md` — a skill for AI coding agents ( optional )
 
 Both sources live in the `Arc.UniInk` namespace : `using Arc.UniInk;`
 
@@ -107,6 +109,19 @@ def collect() -> list[tuple[str, bytes | None]]:
     entries.append((f'{PREFIX}/Samples', None))
     entries.append((f'{PREFIX}/Samples/BasicEvaluation', None))
     entries.append((f'{PREFIX}/Samples/BasicEvaluation/UniInkSample.cs', SAMPLE.read_bytes()))
+
+    # the agent skill : SKILL.md plus the references it links to
+    entries.append((f'{PREFIX}/Skills', None))
+    entries.append((f'{PREFIX}/Skills/uniink', None))
+
+    for path in sorted(SKILL.rglob('*')):
+        rel = path.relative_to(SKILL)
+
+        if path.is_dir():
+            entries.append((f'{PREFIX}/Skills/uniink/{rel.as_posix()}', None))
+        else:
+            entries.append((f'{PREFIX}/Skills/uniink/{rel.as_posix()}', path.read_bytes()))
+
     return entries
 
 
