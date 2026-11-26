@@ -1,7 +1,7 @@
 {
   "name": "com.arc.uniink",
   "displayName": "UniInk - AOT Expression Evaluator",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "unity": "2021.3",
   "description": "AOT-friendly, zero-allocation C#-style expression and mini-script evaluator. No reflection, no boxing on the common path; supports variables, functions, lambdas and if/else. Works on IL2CPP.",
   "keywords": [

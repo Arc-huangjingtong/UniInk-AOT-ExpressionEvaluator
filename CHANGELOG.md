@@ -6,6 +6,10 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [1.3.6] - 2026-11-26
+
 ### Fixed
 
 - the `if` statement path leaked one pooled `InkValue` per executed branch ( 392 B per `if` ) and cloned every
@@ -103,7 +107,8 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 - NuGet packaging and the first published workflow
 
-[Unreleased]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/ver1.3.5...HEAD
+[Unreleased]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/ver1.3.6...HEAD
+[1.3.6]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/ver1.3.5...ver1.3.6
 [1.3.5]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/ver1.3...ver1.3.5
 [1.3.0]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/ver1.2...ver1.3
 [1.2.0]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/v0.1.3...ver1.2
