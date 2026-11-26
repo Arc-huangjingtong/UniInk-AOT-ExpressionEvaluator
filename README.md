@@ -76,14 +76,17 @@ Both files live in the `Arc.UniInk` namespace, so remember to add `using Arc.Uni
 - ### You can easy to extend the operator and function and more,because the code is clear and simple( only about 2600 lines )
 - ### The performance is very good, the GC is 0 and the boxing is 0.
 
-| Method                               | Mean         | Error      | StdDev     | Ratio | RatioSD | Gen0     | Gen1    | Allocated | Alloc Ratio |
-|------------------------------------- |-------------:|-----------:|-----------:|------:|--------:|---------:|--------:|----------:|------------:|
-| TEST_Arithmetic__UniInk              |   121.798 us |  2.3316 us |  2.0669 us |  1.00 |    0.00 |        - |       - |         - |          NA |
-| TEST_Arithmetic__UniInk_Compiled     |    85.862 us |  1.0163 us |  0.8487 us |  0.71 |    0.01 |        - |       - |         - |          NA |
-| TEST_Arithmetic__ExpressionEvaluator |   767.686 us | 13.8328 us | 17.4941 us |  6.35 |    0.20 | 259.7656 |  3.9063 | 2175126 B |          NA |
-| TEST_Arithmetic__Sprache             | 1,222.876 us | 24.1360 us | 32.2209 us | 10.02 |    0.25 | 529.2969 | 95.7031 | 4423511 B |          NA |
-| TEST_Arithmetic__ParsecSharp         |   340.351 us |  4.7187 us |  4.4139 us |  2.79 |    0.05 | 201.6602 |  0.9766 | 1686897 B |          NA |
-| TEST_IfStatement__UniInk             |     4.001 us |  0.0797 us |  0.1924 us |  0.03 |    0.00 |        - |       - |         - |          NA |
+| Method                               | Mean      | Error    | StdDev   | Ratio | RatioSD | Gen0     | Gen1    | Allocated | Alloc Ratio |
+|------------------------------------- |----------:|---------:|---------:|------:|--------:|---------:|--------:|----------:|------------:|
+| TEST_Arithmetic__UniInk              | 131.93 us | 2.378 us | 2.224 us |  1.00 |    0.00 |        - |       - |         - |          NA |
+| TEST_Arithmetic__UniInk_Compiled     |  89.50 us | 1.776 us | 2.309 us |  0.68 |    0.02 |        - |       - |         - |          NA |
+| TEST_Arithmetic__ExpressionEvaluator | 648.03 us | 6.185 us | 4.829 us |  4.94 |    0.07 | 259.7656 |  3.9063 | 2175124 B |          NA |
+| TEST_Arithmetic__Sprache             | 723.05 us | 7.927 us | 7.027 us |  5.49 |    0.12 | 529.2969 | 94.7266 | 4423541 B |          NA |
+| TEST_Arithmetic__ParsecSharp         | 256.61 us | 3.342 us | 2.791 us |  1.95 |    0.04 | 201.6602 |  0.9766 | 1686898 B |          NA |
+| TEST_IfStatement__UniInk             | 135.97 us | 2.649 us | 2.348 us |  1.03 |    0.02 |        - |       - |         - |          NA |
+
+`TEST_IfStatement__UniInk` runs the same four arithmetic expressions, each wrapped in its own `if` statement, so the
+two rows are directly comparable : the `if` machinery costs about 3% on top of the arithmetic work.
 
 summary : UniInk is fast , and UniInk support more features. would you like to try it?
 

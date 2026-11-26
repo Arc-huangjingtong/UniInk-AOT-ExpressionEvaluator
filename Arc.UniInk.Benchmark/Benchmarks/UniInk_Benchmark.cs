@@ -42,22 +42,13 @@
           + "65-66-67-68-69-70-71-72-73-74-75-76-77-78-79-80-81-82-83-84-85-86-87-88-89-90-91-92-93-94-95-"
           + "96-97-98-99-100";
 
-        private const string TEST_INPUT_IF_STATEMENT = @" if ( 1 > 2 )      
-                                                      {                 
-                                                         123            
-                                                      }                 
-                                                      else if ( 3 > 6 ) 
-                                                      {                 
-                                                         456            
-                                                      }                 
-                                                      else if ( 3 < 6 ) 
-                                                      {                 
-                                                        return 456      
-                                                      }                 
-                                                      else              
-                                                      {                 
-                                                        return 666      
-                                                      }                 ";
+        /// <summary> The four arithmetic inputs , each wrapped in its own if statement :
+        /// the same arithmetic work as TEST_Arithmetic__UniInk , plus one if statement per expression </summary>
+        private static readonly string TEST_INPUT_IF_STATEMENT = string.Concat(
+            "if ( 1 < 2 ) { return ", TEST_INPUT_ARITHMETIC_INT_01, " };",
+            "if ( 1 < 2 ) { return ", TEST_INPUT_ARITHMETIC_INT_02, " };",
+            "if ( 1 < 2 ) { return ", TEST_INPUT_ARITHMETIC_INT_03, " };",
+            "if ( 1 < 2 ) { return ", TEST_INPUT_ARITHMETIC_INT_04, " }");
 
         private static readonly InkSyntaxList compiledTestInputArithmeticInt01 = Ink.CompileLexerAndFill(TEST_INPUT_ARITHMETIC_INT_01, 0, TEST_INPUT_ARITHMETIC_INT_01.Length - 1);
 

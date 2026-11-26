@@ -6,8 +6,16 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+- the `if` statement path leaked one pooled `InkValue` per executed branch ( 392 B per `if` ) and cloned every
+  `return` value instead of only the last one , so a four branch script allocated 2744 B per evaluation ;
+  both are released now and the `if` benchmark reports 0 B
+
 ### Added
 
+- the `if` benchmark now runs the same four arithmetic expressions wrapped in `if` statements , so it is directly
+  comparable with the arithmetic benchmark instead of measuring a handful of literals
 - every release now attaches `com.arc.uniink-<version>.tgz` ( `npm pack` layout ) next to the nupkg , so the Unity
   package can be installed offline with **Add package from tarball**
 - CI runs `npm pack --dry-run` to make sure the package still packs
