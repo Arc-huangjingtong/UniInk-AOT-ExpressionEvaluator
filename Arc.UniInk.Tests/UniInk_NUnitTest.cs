@@ -689,7 +689,7 @@
             var ink = new UniInk();
 
             var seen = 0;
-            ink.RegisterVariable("a", InkValue.GetIntValue(0), value => seen = value.ValueInt);
+            ink.RegisterVariable("a", InkValue.SetSetter(InkValue.GetIntValue(0), value => seen = value.ValueInt));
 
             ink.Evaluate("a = 3");
 

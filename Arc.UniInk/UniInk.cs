@@ -1,18 +1,13 @@
 ﻿namespace Arc.UniInk
 {
 
-    // ReSharper disable SpecifyACultureInStringConversionExplicitly
-    // ReSharper disable PartialTypeWithSinglePart
-    using System;
-    using System.Collections.Generic;
-
     /* ================================================== SUMMARY  ================================================== */
     /* Title    :  UniInk (https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator)                       */
     /* Author   :  Arc (https://github.com/Arc-huangjingtong)                                                         */
-    /* Version  :  1.3.6 (AOT expression evaluator)                                                                    */
+    /* Version  :  1.3.6 (AOT expression evaluator)                                                                   */
     /* Licence  :  MIT (https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/blob/main/LICENSE)        */
-    /* Support  :  [netstandard2.0 / 2.1] [C# 9.0+] [IL2CPP Support]                                                   */
-    /* Feature  :  [Easy-use] [High performance] [zero box & unbox] [zero GC!] [zero reflection runtime]              */
+    /* Support  :  [netstandard2.0 / 2.1] [C# 9.0+] [IL2CPP Support]                                                  */
+    /* Feature  :  [Easy-use] [High performance] [zero GC!] [zero reflection runtime] [Thread-safe]                   */
     /* ============================================================================================================== */
 
     /*===================================================  GUIDE  ====================================================*/
@@ -91,9 +86,15 @@
     /*     // 5.2 Custom Getter (when you evaluate the variable, it will be auto called)                              */
     /*     Ink.RegisterVariable("grower", InkValue.SetGetter(InkValue.GetIntValue(0), value => value.Value_int++));   */
     /*                                                                                                                */
-    /*                                                                                                                */
-    /*                                                                                                                */
     /*================================================================================================================*/
+
+
+    // ReSharper disable SpecifyACultureInStringConversionExplicitly
+    // ReSharper disable PartialTypeWithSinglePart
+    using System;
+    using System.Collections.Generic;
+
+
 
     /// <summary> The C# Evaluator easy to use : you can execute simple expression or scripts with a string </summary>
     /// <remarks> If you want to custom your own rules , you should read the code easily and modify it ! </remarks>
@@ -118,37 +119,32 @@
 
         /***************************************************  Ctor  ***************************************************/
 
-        /// <summary> Default Constructor : Initialize variables and parsing Methods </summary>
-        /// <remarks> the variables are saved the object’s reference, not the value </remarks>
-        /// <param name="variables"> Set variables can replace a key string with value object </param>
-        public UniInk(IDictionary<string, InkValue> variables = null)
-        {
-            if (variables == null) return;
-
-            foreach (var variable in variables)
-            {
-                DicVariables.Add(GetStringSliceHashCode(variable.Key, 0, variable.Key.Length - 1), variable.Value);
-            }
-        }
+        /// <summary> Constructor : an empty interpreter , register the functions and variables afterwards </summary>
+        /// <remarks> The <c>IDictionary</c> overload lives in UniInk.Extensions.cs , this file stays usable alone </remarks>
+        public UniInk() { }
 
         /***************************************************  APIs  ***************************************************/
 
         /// <summary> Evaluate an expression or simple scripts </summary>
-        /// <returns> return the result object , when valueType , will be replaced to a InkValue </returns>
-        public InkValue Evaluate(string expression) => Evaluate(expression, 0, expression.Length - 1);
-
-        /// <summary> Evaluate an expression or simple scripts in string slice </summary>
-        /// <returns> return the result object , when valueType , will be replaced to a InkValue </returns>
         /// <param name="expression"> the expression to Evaluate </param>
-        /// <param name="startIndex"> The start index of the expression(contain the start index) </param>
-        /// <param name="endIndex"> The end index of the expression(contain the end index) </param>
-        public InkValue Evaluate(string expression, int startIndex, int endIndex)
+        /// <returns> return the result object , will be replaced to a InkValue </returns>
+        public InkValue Evaluate(string expression)
         {
             if (string.IsNullOrWhiteSpace(expression))
             {
                 return null;
             }
 
+            return Evaluate(expression, 0, expression.Length - 1);
+        }
+
+        /// <summary> Evaluate an expression or simple scripts in string slice </summary>
+        /// <param name="expression"> the expression to Evaluate </param>
+        /// <param name="startIndex"> The start index of the expression(contain the start index) </param>
+        /// <param name="endIndex"> The end index of the expression(contain the end index) </param>
+        /// <returns> return the result object , will be replaced to a InkValue </returns>
+        public InkValue Evaluate(string expression, int startIndex, int endIndex)
+        {
             var context = InkEvalContext.Current;
 
             context.PushFrame(expression);
@@ -186,8 +182,7 @@
                 DicFunctions.Add(hash, inkFunc);
             }
         }
-
-        /// <summary> Register a local variable </summary>
+        
         /// <summary> Register a local variable </summary>
         /// <param name="varName"> the name used inside the expression </param>
         /// <param name="inkValue"> the variable cell , it is kept by the table </param>
@@ -203,17 +198,9 @@
                 DicVariables.Add(hash, inkValue);
             }
         }
+        
 
-        /// <summary> Register a local variable and mirror every assignment into <paramref name="setter"/> </summary>
-        /// <param name="varName"> the name used inside the expression </param>
-        /// <param name="inkValue"> the variable cell , it is kept by the table </param>
-        /// <param name="setter"> called with the new value after every assignment </param>
-        public void RegisterVariable(string varName, InkValue inkValue, Action<InkValue> setter)
-        {
-            RegisterVariable(varName, InkValue.SetSetter(inkValue, setter));
-        }
-
-        /// <summary> UniInk Lexer  :   Fill the SyntaxList       </summary>
+        /// <summary> UniInk Lexer : Fill the SyntaxList </summary>
         public InkSyntaxList CompileLexerAndFill(string expression, int startIndex, int endIndex)
         {
             var keys = InkSyntaxList.Get();
@@ -252,11 +239,11 @@
         {
             var c = expression[i];
 
-            if (char.IsDigit(c))              return EvaluateNumber(expression, keys, ref i);
-            if (c == '\'')                    return EvaluateChar(expression, keys, ref i);
-            if (c == '"')                     return EvaluateString(expression, keys, ref i);
+            if (char.IsDigit(c)) return EvaluateNumber(expression, keys, ref i);
+            if (c == '\'') return EvaluateChar(expression, keys, ref i);
+            if (c == '"') return EvaluateString(expression, keys, ref i);
             if (char.IsLetter(c) || c == '_') return EvaluateWord(expression, keys, ref i);
-            if (c >= 128)                     return EvaluateOperators(expression, keys, ref i); // the placeholders
+            if (c >= 128) return EvaluateOperators(expression, keys, ref i); // the placeholders
 
             return EvaluateSymbol(expression, keys, ref i);
         }
@@ -266,7 +253,7 @@
         {
             if (EvaluateOperators(expression, keys, ref i)) return true;
             if (DicFunctions.Count > 0 && EvaluateFunction(expression, keys, ref i)) return true;
-            if (EvaluateBool(expression, keys, ref i))     return true;
+            if (EvaluateBool(expression, keys, ref i)) return true;
 
             return EvaluateVariable(expression, keys, ref i);
         }
@@ -274,8 +261,7 @@
         /// <summary> A symbol : every ASCII symbol operator is one or two characters , the longer names are keywords </summary>
         private static bool EvaluateSymbol(string expression, InkSyntaxList keys, ref int i)
         {
-            if (i + 1 < expression.Length
-             && InkOperator.DicValues.TryGetValue(GetStringSliceHashCode(expression, i, i + 1), out var pair))
+            if (i + 1 < expression.Length && InkOperator.DicValues.TryGetValue(GetStringSliceHashCode(expression, i, i + 1), out var pair))
             {
                 keys.Add(pair);
                 i += 1;
@@ -835,7 +821,7 @@
         /// <remarks> The first character may be upper case , so <c>true</c> and <c>True</c> both match </remarks>
         private static bool StartsWithOrdinal(string input, int startIndex, string value)
         {
-            if (input.Length - startIndex < value.Length)           return false;
+            if (input.Length - startIndex                < value.Length) return false;
             if (char.ToLowerInvariant(input[startIndex]) != value[0]) return false;
 
             for (var offset = 1 ; offset < value.Length ; offset++)
@@ -1355,7 +1341,9 @@
         public static int GetStringSliceHashCode(string str) => GetStringSliceHashCode(str, 0, str.Length - 1);
     }
 
+
     /*************************************************  Helper Class  *************************************************/
+
 
     /// <summary> UniInk Operator : Custom your own Operator! </summary>
     public partial class InkOperator
@@ -1539,23 +1527,8 @@
         /// <summary> the lower the value, the higher the priority </summary>
         public readonly short PriorityIndex;
 
-        /// <summary> the name of the operator      </summary>
+        /// <summary> the name of the operator </summary>
         public readonly string Name;
-
-        /// <summary> the indexer of the operator    </summary>
-        protected static short Indexer;
-
-        /// <summary> the only value of the operator </summary>
-        protected readonly short OperatorValue = Indexer++;
-
-        /// <summary> Override Equals Method </summary>
-        /// <param name="otherOperator"> the other operator to compare </param>
-        /// <returns> the result is equal or not </returns>
-        public override bool Equals(object otherOperator) => otherOperator is InkOperator @operator && OperatorValue == @operator.OperatorValue;
-
-        /// <summary> Override GetHashCode Method </summary>
-        /// <returns> the hash code of the operator </returns>
-        public override int GetHashCode() => OperatorValue;
 
         /// <summary> Override ToString Method </summary>
         public override string ToString() => $"Operator : {Name}  Priority : {PriorityIndex}";
@@ -1663,6 +1636,7 @@
         }
     }
 
+
     /// <summary> UniInk Function : Custom your own Function! </summary>
     public partial class InkFunction
     {
@@ -1675,6 +1649,7 @@
         /// <summary> The function delegate that will be invoked </summary>
         public readonly Func<List<object>, object> FuncDelegate;
     }
+
 
     /// <summary> UniInk evaluation context : the pools of the calling thread and the state of the running evaluation </summary>
     /// <remarks>
@@ -1701,12 +1676,14 @@
         /// <summary> The temp syntax lists created by the running evaluation ( the lambda cache ) </summary>
         public readonly List<InkSyntaxList> TempLists = new(UniInk.INK_SYNTAX_POOL_CAPACITY);
 
+
         private sealed class Frame
         {
             public readonly Dictionary<int, InkValue> TempVariables = new(UniInk.VARIABLE_TEMP_CAPACITY);
             public          int                       TempListMark;
             public          string                    Source;
         }
+
 
         private readonly List<Frame>  frames     = new(4) { new Frame() }; // [0] is the root frame
         private readonly Stack<Frame> freeFrames = new(4);
@@ -1763,6 +1740,7 @@
         }
     }
 
+
     /// <summary> In UniInk , every valueType is Object , No Boxing! </summary>
     public partial class InkValue
     {
@@ -1792,6 +1770,7 @@
 #if DEBUG
         /// <summary> DEBUG only : how many times Get() has been called </summary>
         public static int GetTime;
+
         /// <summary> DEBUG only : how many times Release() has been called </summary>
         public static int ReleaseTime;
 #endif
@@ -1926,9 +1905,7 @@
 #if DEBUG
             if (value.isReleased)
             {
-                throw new InvalidOperationException(
-                    $"InkValue.Release : the value has already been released ( last type : {value.ValueType} ) ! " +
-                    "Enqueuing it twice would hand the same instance to two different computations .");
+                throw new InvalidOperationException($"InkValue.Release : the value has already been released ( last type : {value.ValueType} ) ! Enqueuing it twice would hand the same instance to two different computations .");
             }
 
             value.isReleased = true;
@@ -2163,7 +2140,7 @@
         public object GetResult_Object() => Take(TypeCode.Object, static value => value.ValueObject);
 
         /// <summary> Read the result with the expected type , then release the value </summary>
-        private T Take<T>(TypeCode expected, Func<InkValue, T> read)
+        private T Take <T>(TypeCode expected, Func<InkValue, T> read)
         {
             if (!IsCalculate) Calculate();
 
@@ -2182,14 +2159,7 @@
         /************************************************  Promotion  *************************************************/
 
         /// <summary> Numeric rank used by the implicit promotion , -1 when the type is not numeric </summary>
-        private static int NumericRank(TypeCode type) => type switch
-        {
-            TypeCode.Char   => 0,
-            TypeCode.Int32  => 1,
-            TypeCode.Single => 2,
-            TypeCode.Double => 3,
-            _               => -1
-        };
+        private static int NumericRank(TypeCode type) => type switch { TypeCode.Char => 0, TypeCode.Int32 => 1, TypeCode.Single => 2, TypeCode.Double => 3, _ => -1 };
 
         /// <summary> Get the common type of two numeric operands , false when no promotion applies </summary>
         /// <remarks> C# style : int -> single -> double , and char promotes to int </remarks>
@@ -2216,45 +2186,18 @@
         }
 
         /// <summary> Read the value as an int </summary>
-        private static int ToInt(InkValue value) => value.ValueType switch
-        {
-            TypeCode.Char   => value.ValueChar,
-            TypeCode.Int32  => value.ValueInt,
-            TypeCode.Single => (int)value.ValueFloat,
-            TypeCode.Double => (int)value.ValueDouble,
-            _               => 0
-        };
+        private static int ToInt(InkValue value) => value.ValueType switch { TypeCode.Char => value.ValueChar, TypeCode.Int32 => value.ValueInt, TypeCode.Single => (int)value.ValueFloat, TypeCode.Double => (int)value.ValueDouble, _ => 0 };
 
         /// <summary> Read the value as a single </summary>
-        private static float ToSingle(InkValue value) => value.ValueType switch
-        {
-            TypeCode.Char   => value.ValueChar,
-            TypeCode.Int32  => value.ValueInt,
-            TypeCode.Single => value.ValueFloat,
-            TypeCode.Double => (float)value.ValueDouble,
-            _               => 0
-        };
+        private static float ToSingle(InkValue value) => value.ValueType switch { TypeCode.Char => value.ValueChar, TypeCode.Int32 => value.ValueInt, TypeCode.Single => value.ValueFloat, TypeCode.Double => (float)value.ValueDouble, _ => 0 };
 
         /// <summary> Read the value as a double </summary>
-        private static double ToDouble(InkValue value) => value.ValueType switch
-        {
-            TypeCode.Char   => value.ValueChar,
-            TypeCode.Int32  => value.ValueInt,
-            TypeCode.Single => value.ValueFloat,
-            TypeCode.Double => value.ValueDouble,
-            _               => 0
-        };
+        private static double ToDouble(InkValue value) => value.ValueType switch { TypeCode.Char => value.ValueChar, TypeCode.Int32 => value.ValueInt, TypeCode.Single => value.ValueFloat, TypeCode.Double => value.ValueDouble, _ => 0 };
 
         /***********************************************  Dispatch  ***************************************************/
 
         /// <summary> A short operand description for the error messages </summary>
-        private static string Describe(object operand) => operand switch
-        {
-            null           => "null",
-            InkValue value => value.ValueType.ToString(),
-            InkOperator op => $"operator {op.Name}",
-            _              => operand.GetType().Name
-        };
+        private static string Describe(object operand) => operand switch { null => "null", InkValue value => value.ValueType.ToString(), InkOperator op => $"operator {op.Name}", _ => operand.GetType().Name };
 
         /// <summary> Apply a built-in operator to the raw operands of the syntax list </summary>
         /// <remarks> left is null for the unary form ( +x , -x , !x ) </remarks>
@@ -2312,17 +2255,17 @@
                 case "-" :
                 case "*" :
                 case "/" :
-                case "%" :  return Arithmetic(op, left, right);
+                case "%" : return Arithmetic(op, left, right);
                 case "==" : return Equality(left, right);
                 case "!=" : return Equality(left, right).Negate();
-                case "<" :  return Relational(InkOperator.Lower, left, right);
+                case "<" :  return Relational(InkOperator.Lower,   left, right);
                 case ">" :  return Relational(InkOperator.Greater, left, right);
                 case "<=" : return Relational(InkOperator.Greater, left, right).Negate();
-                case ">=" : return Relational(InkOperator.Lower, left, right).Negate();
+                case ">=" : return Relational(InkOperator.Lower,   left, right).Negate();
                 case "&&" :
                 case "||" : return Logical(op, left, right);
-                case "!" :  return !right;
-                default :   throw new InkSyntaxException($"unsupported operator : {op.Name}");
+                case "!" : return !right;
+                default :  throw new InkSyntaxException($"unsupported operator : {op.Name}");
             }
         }
 
@@ -2380,23 +2323,17 @@
 
             switch (left.ValueType, right.ValueType)
             {
-                case (TypeCode.Int32, TypeCode.Int32) :     answer.ValueBool = left.ValueInt == right.ValueInt; break;
-                case (TypeCode.Boolean, TypeCode.Boolean) : answer.ValueBool = left.ValueBool == right.ValueBool; break;
-                case (TypeCode.Char, TypeCode.Char) :       answer.ValueBool = left.ValueChar == right.ValueChar; break;
-                case (TypeCode.Single, TypeCode.Single) :   answer.ValueBool = Math.Abs(left.ValueFloat - right.ValueFloat) < UniInk.EPSILON_FLOAT; break;
+                case (TypeCode.Int32, TypeCode.Int32) :     answer.ValueBool = left.ValueInt                                  == right.ValueInt; break;
+                case (TypeCode.Boolean, TypeCode.Boolean) : answer.ValueBool = left.ValueBool                                 == right.ValueBool; break;
+                case (TypeCode.Char, TypeCode.Char) :       answer.ValueBool = left.ValueChar                                 == right.ValueChar; break;
+                case (TypeCode.Single, TypeCode.Single) :   answer.ValueBool = Math.Abs(left.ValueFloat  - right.ValueFloat)  < UniInk.EPSILON_FLOAT; break;
                 case (TypeCode.Double, TypeCode.Double) :   answer.ValueBool = Math.Abs(left.ValueDouble - right.ValueDouble) < UniInk.EPSILON_DOUBLE; break;
                 case (TypeCode.String, TypeCode.String) :   answer.ValueBool = ValueMetaEquals(left, right); break;
                 default :
                 {
                     if (TryGetPromotedType(left, right, out var promoted))
                     {
-                        answer.ValueBool = promoted switch
-                        {
-                            TypeCode.Int32  => ToInt(left) == ToInt(right),
-                            TypeCode.Single => Math.Abs(ToSingle(left) - ToSingle(right)) < UniInk.EPSILON_FLOAT,
-                            TypeCode.Double => Math.Abs(ToDouble(left) - ToDouble(right)) < UniInk.EPSILON_DOUBLE,
-                            _               => false
-                        };
+                        answer.ValueBool = promoted switch { TypeCode.Int32 => ToInt(left) == ToInt(right), TypeCode.Single => Math.Abs(ToSingle(left) - ToSingle(right)) < UniInk.EPSILON_FLOAT, TypeCode.Double => Math.Abs(ToDouble(left) - ToDouble(right)) < UniInk.EPSILON_DOUBLE, _ => false };
                     }
 
                     break;
@@ -2447,35 +2384,14 @@
             throw new InkSyntaxException($"operator [{op.Name}] needs two bool operands, got [{left.ValueType}] and [{right.ValueType}]");
         }
 
-        private static int IntMath(InkOperator op, int left, int right) => op.Name[0] switch
-        {
-            '+' => left + right,
-            '-' => left - right,
-            '*' => left * right,
-            '/' => left / right,
-            _   => left % right
-        };
+        private static int IntMath(InkOperator op, int left, int right) => op.Name[0] switch { '+' => left + right, '-' => left - right, '*' => left * right, '/' => left / right, _ => left % right };
 
-        private static float SingleMath(InkOperator op, float left, float right) => op.Name[0] switch
-        {
-            '+' => left + right,
-            '-' => left - right,
-            '*' => left * right,
-            '/' => left / right,
-            _   => left % right
-        };
+        private static float SingleMath(InkOperator op, float left, float right) => op.Name[0] switch { '+' => left + right, '-' => left - right, '*' => left * right, '/' => left / right, _ => left % right };
 
-        private static double DoubleMath(InkOperator op, double left, double right) => op.Name[0] switch
-        {
-            '+' => left + right,
-            '-' => left - right,
-            '*' => left * right,
-            '/' => left / right,
-            _   => left % right
-        };
+        private static double DoubleMath(InkOperator op, double left, double right) => op.Name[0] switch { '+' => left + right, '-' => left - right, '*' => left * right, '/' => left / right, _ => left % right };
 
-        private static bool IntCompare(InkOperator op, int left, int right)         => op.Name[0] == '>' ? left > right : left < right;
-        private static bool SingleCompare(InkOperator op, float left, float right) => op.Name[0] == '>' ? left > right : left < right;
+        private static bool IntCompare(InkOperator    op, int    left, int    right) => op.Name[0] == '>' ? left > right : left < right;
+        private static bool SingleCompare(InkOperator op, float  left, float  right) => op.Name[0] == '>' ? left > right : left < right;
         private static bool DoubleCompare(InkOperator op, double left, double right) => op.Name[0] == '>' ? left > right : left < right;
 
         /// <summary> Compare two string values held by <see cref="ValueMeta"/> without allocating </summary>
@@ -2579,6 +2495,7 @@
             return this;
         }
     }
+
 
     /// <summary> InkSyntaxList is a list of object, it can be used to store the syntax object </summary>
     public partial class InkSyntaxList
@@ -2714,6 +2631,7 @@
         /// <summary> Set the index dirty </summary>
         public void SetDirty(int index) => IndexDirty[index] = true;
     }
+
 
     /// <summary> InkSyntaxException throw when the syntax is wrong  </summary>
     public class InkSyntaxException : Exception

@@ -10,6 +10,7 @@
 
     using System.Text.RegularExpressions;
     using System;
+    using System.Collections.Generic;
 
 
     /// <summary> Provide commonly tools in <see cref="UniInk"/> </summary>
@@ -97,6 +98,23 @@
     // Part: Support for UniInk : If Statement
     public partial class UniInk
     {
+        /***************************************************  Ctor  ***************************************************/
+
+        /// <summary> Default Constructor : Initialize variables and parsing Methods </summary>
+        /// <remarks> the variables are saved the object’s reference, not the value </remarks>
+        /// <param name="variables"> Set variables can replace a key string with value object </param>
+        public UniInk(IDictionary<string, InkValue> variables = null)
+        {
+            if (variables == null) return;
+
+            foreach (var variable in variables)
+            {
+                DicVariables.Add(GetStringSliceHashCode(variable.Key, 0, variable.Key.Length - 1), variable.Value);
+            }
+        }
+        
+        /***************************************************  APIs  ***************************************************/
+        
         /// <summary> Process the script with the if statement(or not) </summary>
         /// <remarks> Not support Nested if statement </remarks>
         protected static object ProcessList_ScriptsWithIfStatement(InkSyntaxList keys)
