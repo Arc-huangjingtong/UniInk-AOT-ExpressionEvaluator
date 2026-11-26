@@ -82,12 +82,16 @@ jobs:
           cd Unity/Packages/com.arc.uniink
           npm pack --pack-destination "$GITHUB_WORKSPACE/artifacts"
 
+      - name: 🎁 导出经典 .unitypackage
+        run: python3 Tools/make-unitypackage.py --out ./artifacts
+
       - name: 📋 列出生成的包
         run: |
           echo "📦 生成的包:"
           ls -lh ./artifacts/
           unzip -l ./artifacts/*.nupkg
           tar -tzf ./artifacts/*.tgz | head -30
+          tar -tzf ./artifacts/*.unitypackage | head -30
 
       - name: 🔐 NuGet 登录 (OIDC → 临时 API Key)
         uses: NuGet/login@v1
@@ -110,6 +114,7 @@ jobs:
             ./artifacts/*.nupkg
             ./artifacts/*.snupkg
             ./artifacts/*.tgz
+            ./artifacts/*.unitypackage
           retention-days: 90
 
       - name: 🎉 创建 GitHub Release
@@ -119,6 +124,7 @@ jobs:
           files: |
             ./artifacts/*.nupkg
             ./artifacts/*.tgz
+            ./artifacts/*.unitypackage
           generate_release_notes: true
           draft: false
           prerelease: ${{ contains(steps.get_version.outputs.version, '-') }}

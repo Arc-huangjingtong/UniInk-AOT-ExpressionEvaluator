@@ -19,6 +19,9 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 - every release now attaches `com.arc.uniink-<version>.tgz` ( `npm pack` layout ) next to the nupkg , so the Unity
   package can be installed offline with **Add package from tarball**
 - CI runs `npm pack --dry-run` to make sure the package still packs
+- every release also attaches `Arc.UniInk-<version>.unitypackage` , built by `Tools/make-unitypackage.py`
+  without Unity ( a gzipped tar of `asset` / `asset.meta` / `pathname` entries ) , for users who prefer
+  `Assets > Import Package` over the package manager
 
 ## [1.3.5] - 2026-11-25
 

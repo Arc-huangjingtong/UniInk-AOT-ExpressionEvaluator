@@ -38,6 +38,13 @@ Offline / air-gapped ? Download `com.arc.uniink-<version>.tgz` from the
 [releases](https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/releases) and use
 `Window > Package Manager > + > Add package from tarball...` .
 
+### Option B2 : classic `.unitypackage` ( Unity 2019+ )
+
+No package manager needed : grab `Arc.UniInk-<version>.unitypackage` from the releases and double click it
+( or `Assets > Import Package > Custom Package...` ) . It imports into `Assets/Arc.UniInk/` and works on any
+Unity version that can compile C# 9 , i.e. 2021.3+ for the current sources .
+Pick **either** this or the UPM package — importing both would compile the same classes twice .
+
 ### Option C : Download [UniInk.cs](https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/blob/main/Arc.UniInk/UniInk.cs) is Enough !
 
 > Optional : also grab [UniInk.Extensions.cs](https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/blob/main/Arc.UniInk/UniInk.Extensions.cs) if you need the `if` statement support (or want to extend the interpreter yourself).
