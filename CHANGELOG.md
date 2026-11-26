@@ -6,7 +6,16 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- `InkValue.SetSetter` and a `RegisterVariable( name , value , setter )` overload : an assignment to a registered
+  variable now notifies its owner , so the value can be mirrored into a field ( `hp = hp - 10` )
+- setter tests : type changes , once per assignment , not called on read , getter + setter round trip , reentrancy
+
+### Fixed
+
+- `InkValue.Release` cleared the getter / setter flags but kept the delegates , so a pooled value could hold the
+  owner's lambda alive ( and a stale delegate travelled with the instance )
 
 ## [1.3.6] - 2026-11-26
 

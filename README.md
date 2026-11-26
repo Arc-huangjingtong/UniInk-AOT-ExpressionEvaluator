@@ -294,6 +294,39 @@ var res = ink.Evaluate("grower + 10086").GetResult_Int();
 
 ```
 
+- ### ✨Support Property Setter
+
+An assignment ( `a = 3` ) notifies the owner of the variable , so the value can be mirrored into your own field :
+
+```csharp
+var ink = new UniInk();
+
+var health = 100;
+
+var cell = InkValue.GetIntValue(0);
+
+InkValue.SetGetter(cell, value =>
+{
+    value.ValueType = TypeCode.Int32;
+    value.ValueInt  = health;
+});
+InkValue.SetSetter(cell, value => health = value.ValueInt);
+
+ink.RegisterVariable("hp", cell);
+
+ink.Evaluate("hp = hp - 10");   // the setter writes 90 back into health
+```
+
+Or register the cell and the setter in one call :
+
+```csharp
+ink.RegisterVariable("hp", InkValue.GetIntValue(health), value => health = value.ValueInt);
+```
+
+- the setter runs **after** the value has been written and receives the cell ( read `ValueType` / `ValueInt` / `ValueObject` )
+- it runs once per assignment , never when the variable is only read
+- a getter runs every time the variable is **referenced** ( `hp = hp - 10` reads it for the right side )
+- without a setter an assignment still works , the value just stays inside the cell
 
 - ### ✨Support Control Flow(If Statement)
 

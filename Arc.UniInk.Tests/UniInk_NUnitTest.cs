@@ -545,7 +545,7 @@
         #endregion
 
 
-        #region 5.Best Practice: Property Getter (setter will be supported in the future...)
+        #region 5.Best Practice: Property Getter / Setter
 
 
         [Repeat(10000)]
@@ -560,6 +560,164 @@
 
                 InkValue.Release(value);
             }
+        }
+
+
+        #endregion
+
+
+        #region 5.1 Setter : an assignment notifies the owner of the variable
+
+
+        [Test]
+        public static void Test_Setter_IsCalledOnAssignment()
+        {
+            var ink = new UniInk();
+
+            var seen = -1;
+            ink.RegisterVariable("a", InkValue.SetSetter(InkValue.GetIntValue(0), value => seen = value.ValueInt));
+
+            ink.Evaluate("a = 42");
+
+            Assert.That(seen, Is.EqualTo(42));
+        }
+
+
+        [Test]
+        public static void Test_Setter_SeesTheNewType()
+        {
+            var ink = new UniInk();
+
+            var seenType  = TypeCode.Empty;
+            var seenValue = false;
+            ink.RegisterVariable("a", InkValue.SetSetter(InkValue.GetIntValue(0), value =>
+            {
+                seenType  = value.ValueType;
+                seenValue = value.ValueBool;
+            }));
+
+            ink.Evaluate("a = true");
+
+            Assert.That(seenType,  Is.EqualTo(TypeCode.Boolean));
+            Assert.That(seenValue, Is.True);
+        }
+
+
+        [Test]
+        public static void Test_Setter_IsNotCalledWhenTheVariableIsOnlyRead()
+        {
+            var ink = new UniInk();
+
+            var calls = 0;
+            ink.RegisterVariable("a", InkValue.SetSetter(InkValue.GetIntValue(1), _ => calls++));
+
+            var value = ink.Evaluate("a + 1");
+
+            Assert.That(calls, Is.EqualTo(0), "reading a variable must not call its setter");
+            Assert.That(value.GetResult_Int(), Is.EqualTo(2));
+        }
+
+
+        [Test]
+        public static void Test_Setter_IsCalledOncePerAssignment()
+        {
+            var ink = new UniInk();
+
+            var calls = 0;
+            ink.RegisterVariable("a", InkValue.SetSetter(InkValue.GetIntValue(0), _ => calls++));
+
+            ink.Evaluate("a = 1");
+
+            Assert.That(calls, Is.EqualTo(1));
+        }
+
+
+        [Test]
+        public static void Test_Setter_AndGetter_RoundTrip()
+        {
+            var ink = new UniInk();
+
+            var field = 10;
+            var cell  = InkValue.GetIntValue(0);
+
+            InkValue.SetGetter(cell, value =>
+            {
+                value.ValueType = TypeCode.Int32;
+                value.ValueInt  = field;
+            });
+            InkValue.SetSetter(cell, value => field = value.ValueInt);
+
+            ink.RegisterVariable("a", cell);
+
+            ink.Evaluate("a = a + 5");
+
+            Assert.That(field, Is.EqualTo(15));
+        }
+
+
+        [Test]
+        public static void Test_Setter_IsCalledForEveryAssignmentInAScript()
+        {
+            var ink = new UniInk();
+
+            var seen = new List<int>();
+            ink.RegisterVariable("a", InkValue.SetSetter(InkValue.GetIntValue(0), value => seen.Add(value.ValueInt)));
+
+            ink.Evaluate("a = 1; a = a + 1; a");
+
+            Assert.That(seen, Is.EqualTo(new[] { 1, 2 }));
+        }
+
+
+        [Test]
+        public static void Test_Setter_MayEvaluateAgain()
+        {
+            var ink = new UniInk();
+
+            var nested = 0;
+            ink.RegisterVariable("a", InkValue.SetSetter(InkValue.GetIntValue(0), _ => nested = ink.Evaluate("1 + 1").GetResult_Int()));
+
+            ink.Evaluate("a = 7");
+
+            Assert.That(nested, Is.EqualTo(2));
+        }
+
+
+        [Test]
+        public static void Test_Setter_ConvenienceOverload()
+        {
+            var ink = new UniInk();
+
+            var seen = 0;
+            ink.RegisterVariable("a", InkValue.GetIntValue(0), value => seen = value.ValueInt);
+
+            ink.Evaluate("a = 3");
+
+            Assert.That(seen, Is.EqualTo(3));
+        }
+
+
+        [Test]
+        public static void Test_Setter_IsNotRequired()
+        {
+            var ink = new UniInk();
+
+            Assert.DoesNotThrow(() => ink.Evaluate("var b = 1; b = 2; b"));
+        }
+
+
+        [Test]
+        public static void Test_Release_ClearsTheGetterAndSetter()
+        {
+            var value = InkValue.Get();
+
+            InkValue.SetGetter(value, _ => { });
+            InkValue.SetSetter(value, _ => { });
+
+            InkValue.Release(value);
+
+            Assert.That(value.Getter, Is.Null, "a pooled value must not keep the owner's delegate alive");
+            Assert.That(value.Setter, Is.Null);
         }
 
 

@@ -200,6 +200,9 @@
         }
 
         /// <summary> Register a local variable </summary>
+        /// <summary> Register a local variable </summary>
+        /// <param name="varName"> the name used inside the expression </param>
+        /// <param name="inkValue"> the variable cell , it is kept by the table </param>
         public void RegisterVariable(string varName, InkValue inkValue)
         {
             var hash = GetStringSliceHashCode(varName, 0, varName.Length - 1);
@@ -211,6 +214,15 @@
                 inkValue.DontRelease = true;
                 DicVariables.Add(hash, inkValue);
             }
+        }
+
+        /// <summary> Register a local variable and mirror every assignment into <paramref name="setter"/> </summary>
+        /// <param name="varName"> the name used inside the expression </param>
+        /// <param name="inkValue"> the variable cell , it is kept by the table </param>
+        /// <param name="setter"> called with the new value after every assignment </param>
+        public void RegisterVariable(string varName, InkValue inkValue, Action<InkValue> setter)
+        {
+            RegisterVariable(varName, InkValue.SetSetter(inkValue, setter));
         }
 
         /// <summary> UniInk Lexer  :   Fill the SyntaxList       </summary>
@@ -1635,6 +1647,8 @@
                         rightValue.Calculate();
                         rightValue.CopyTo(leftValue);
 
+                        NotifySetter(leftValue);
+
                         return null;
                     }
                     case not null :
@@ -1642,6 +1656,8 @@
                         leftValue.ValueType   = TypeCode.Object;
                         leftValue.ValueObject = right;
                         leftValue.IsCalculate = true;
+
+                        NotifySetter(leftValue);
 
                         return null;
                     }
@@ -1651,6 +1667,15 @@
             }
 
             throw new InkSyntaxException("the left side of the assignment must be a variable");
+        }
+
+        /// <summary> Tell the owner of the variable that the value changed </summary>
+        private static void NotifySetter(InkValue value)
+        {
+            if (value.IsIsSetter)
+            {
+                value.Setter?.Invoke(value);
+            }
         }
 
         /// <summary> Return statement implementation </summary>
@@ -1903,6 +1928,19 @@
             return value;
         }
 
+        /// <summary> Sets a setter action for the InkValue </summary>
+        /// <remarks> The action runs after every assignment to the value ( <c>a = 3</c> ) ,
+        /// so the owner of a registered variable can mirror the new value </remarks>
+        /// <param name="value">The InkValue to modify</param>
+        /// <param name="setter">The setter action to set</param>
+        /// <returns>The modified InkValue</returns>
+        public static InkValue SetSetter(InkValue value, Action<InkValue> setter)
+        {
+            value.IsIsSetter = true;
+            value.Setter     = setter;
+            return value;
+        }
+
         /// <summary> Releases an InkValue back to the pool for reuse </summary>
         /// <remarks>
         /// Releasing the same instance twice is a bug : it throws in DEBUG builds , because the second call would
@@ -1935,6 +1973,8 @@
             value.IsIsSetter  = false;
             value.IsGetter    = false;
             value.IsReturner  = false;
+            value.Setter      = null;
+            value.Getter      = null;
             value.ValueInt    = 0;
             value.ValueBool   = false;
             value.ValueChar   = '\0';
