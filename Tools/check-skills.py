@@ -22,6 +22,8 @@ SKILLS = [
 ]
 
 NAME_RULE = re.compile(r'^[a-z0-9]+(?:-[a-z0-9]+)*$')
+MAX_DESCRIPTION = 1024
+MAX_COMPATIBILITY = 500
 LINK_RULE = re.compile(r'\]\(([^)\s]+\.md)\)')
 UPM_COPY = ROOT / 'Unity/Packages/com.arc.uniink/Samples~/AgentSkill'
 
@@ -76,8 +78,30 @@ for skill in SKILLS:
 
     if not description:
         fail(f'{skill_md}: description is missing')
-    elif len(description) > 1024:
-        fail(f'{skill_md}: description is {len(description)} characters , the limit is 1024')
+    elif len(description) > MAX_DESCRIPTION:
+        fail(f'{skill_md}: description is {len(description)} characters , the limit is {MAX_DESCRIPTION}')
+
+    compatibility = fields.get('compatibility', '')
+
+    if compatibility and len(compatibility) > MAX_COMPATIBILITY:
+        fail(f'{skill_md}: compatibility is {len(compatibility)} characters , the limit is {MAX_COMPATIBILITY}')
+
+    if not fields.get('license'):
+        fail(f'{skill_md}: license is missing')
+
+    # the spec allows an arbitrary string map under metadata ; the parser only keeps the top level keys ,
+    # so check the shape of the raw block instead
+    text = skill_md.read_text(encoding='utf-8')
+    front = text[4:text.find('\n---', 4)]
+
+    if '\nmetadata:' not in front:
+        fail(f'{skill_md}: metadata is missing')
+
+    for line in front.splitlines():
+        if line.startswith('metadata:'):
+            continue
+        if line.startswith('  ') and ':' not in line:
+            fail(f'{skill_md}: metadata line "{line.strip()}" is not key: value')
 
     text = skill_md.read_text(encoding='utf-8')
     for target in sorted(set(LINK_RULE.findall(text))):

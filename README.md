@@ -304,9 +304,19 @@ The package ships a skill for AI coding agents ( `skills/uniink/SKILL.md` , the
 - **Unity** : `Window > Package Manager > UniInk > Samples > Agent Skill ( AI ) > Import` , or import it
   from the classic `.unitypackage` ( `Assets/Arc.UniInk/Skills/` )
 
-The skill explains the syntax that parses , the type rules , the error model , the release contract of the
-pooled `InkValue` and how to extend the evaluator — so an agent writes working expressions instead of
-guessing , and knows what the language does **not** support .
+The skill follows the [Agent Skills](https://agentskills.io/specification) layout :
+
+```
+skills/uniink/
+├── SKILL.md                 entry : the two rules , a decision table , the capability matrix
+├── references/              syntax , types , errors , interop and tested recipes ( loaded on demand )
+└── assets/UniInkSetup.cs    a copy-paste MonoBehaviour
+```
+
+It explains the syntax that parses , the type rules , the error model , the release contract of the pooled
+`InkValue` and how to extend the evaluator — so an agent writes working expressions instead of guessing , and
+knows what the language does **not** support . Every expression in `references/recipes.md` is checked against the
+real library .
 
 - ### ✨Support Property Setter
 

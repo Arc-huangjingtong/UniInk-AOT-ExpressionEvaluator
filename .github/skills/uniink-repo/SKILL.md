@@ -1,9 +1,13 @@
 ---
 name: uniink-repo
-description: Develop the UniInk repository itself — build , test , benchmark , update the Unity package , release. Use when a task changes Arc.UniInk.cs , UniInk.Extensions.cs , the tests , the benchmarks , the UPM package under Unity/ , the CI workflows or the release process.
+description: Develop the UniInk repository itself — build , test , benchmark , update the Unity package , release. Use when a task changes Arc.UniInk.cs , UniInk.Extensions.cs , the tests , the benchmarks , the UPM package under Unity/ , the skills , the CI workflows or the release process.
 license: MIT
+compatibility: Needs the .NET 10 SDK ( the benchmark targets net10.0 ) , bash , python3 and npm on the PATH. No network for the build itself , NuGet access for restore.
 metadata:
+  package: Arc.UniInk
+  version: "1.3.6"
   repository: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator
+  skill: repo-dev
 ---
 
 # Working on the UniInk repository
@@ -22,6 +26,9 @@ Arc.UniInk.Tests/         NUnit , the only test project
 Arc.UniInk.Benchmark/     BenchmarkDotNet , NOT a test project anymore
 Unity/Packages/com.arc.uniink/   the UPM package ( sources are a COPY )
 skills/uniink/            the consumer skill ( shipped in the nupkg and the Unity package )
+  SKILL.md                entry : decision table , capability matrix , the two rules
+  references/             syntax , types , errors , interop , recipes
+  assets/UniInkSetup.cs   a copy-paste MonoBehaviour
 .github/skills/uniink-repo/      this skill
 Tools/                    sync-unity-package.sh , make-unitypackage.py
 ```

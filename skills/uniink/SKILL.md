@@ -1,22 +1,27 @@
 ---
 name: uniink
-description: Write and debug UniInk expressions and mini-scripts (the Arc.UniInk NuGet / Unity package), and integrate the evaluator into a .NET or Unity project. Use when a task mentions UniInk, Arc.UniInk, an embedded expression evaluator, or running a small expression script on IL2CPP / AOT.
+description: Write, review and debug UniInk expressions and mini-scripts, and integrate the Arc.UniInk evaluator into a .NET or Unity project. Use when a task mentions UniInk or Arc.UniInk, when a game or tool needs to evaluate a runtime expression / small script (config formulas, gating conditions, rule tables), or when an expression has to run on IL2CPP / AOT without reflection.
 license: MIT
+compatibility: .NET Standard 2.0+ or Unity 2021.3+ (C# 9, IL2CPP supported). No runtime dependencies, no network, works offline.
 metadata:
   package: Arc.UniInk
+  version: "1.3.6"
+  min-unity: "2021.3"
+  min-dotnet: "netstandard2.0"
   repository: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator
 ---
 
 # UniInk
 
-UniInk is a single file C#-style **expression and mini-script evaluator** built for AOT runtimes
-(Unity IL2CPP and .NET). It never uses reflection, boxes nothing on the common path and allocates
-nothing per evaluation, as long as the caller follows the release contract below.
+UniInk evaluates **expressions and mini-scripts** written in a small C#-like language. One file
+( `UniInk.cs` ) plus an optional extension file ( `UniInk.Extensions.cs` for `if` / `else` ). It never uses
+reflection, boxes nothing on the common path and allocates nothing per evaluation — as long as the caller
+follows the release contract below.
 
-It evaluates **expressions**, not a programming language. There are no loops, arrays, classes,
-casts, switch or ternary operators. If a task needs those, say so instead of inventing syntax.
+It is **not** a script engine for a whole program. No loops, arrays, classes, casts, `switch` or ternary.
+When a task needs those, say so instead of inventing syntax.
 
-## Quick start
+## 60 second start
 
 ```csharp
 using Arc.UniInk;
@@ -24,61 +29,72 @@ using Arc.UniInk;
 var ink = new UniInk();
 
 var value  = ink.Evaluate("1 + 2 * 3");   // InkValue owned by the caller
-var answer = value.GetResult_Int();       // 7, and the instance goes back to the pool
+var answer = value.GetResult_Int();       // 7 , and the instance goes back to the pool
 ```
-
-`if` statements live in `UniInk.Extensions.cs` (the same namespace) :
 
 ```csharp
-var r = ink.EvaluateInt("if ( 1 < 2 ) { return 10 } else { return 20 }");   // 10
+// if / else lives in UniInk.Extensions.cs ( same namespace )
+var r = ink.EvaluateInt("if ( hp < 20 ) { return 1 } else { return 0 }");
 ```
 
-## The two rules people break
+## The two rules that break code
 
-1. **Release what you get.** `Evaluate` / `ExecuteProcess` hand out a pooled `InkValue`. Read it with
-   `GetResult_Int()` / `GetResult_Bool()` / `GetResult_Float()` / `GetResult_Double()` /
-   `GetResult_Char()` / `GetResult_String()` / `GetResult_Object()` ( they release it ) or call
-   `InkValue.Release(value)`. Forgetting it drains the pool and turns "zero allocation" into "allocates".
-2. **The syntax is small.** Reject `while`, `for`, `foreach`, `a[0]`, `a.b`, `(int)x`, `x ? y : z`,
-   `switch`, `++`, `+=`, string interpolation and `1 + true` — none of them parse.
+1. **Release what you get.** `Evaluate` and `ExecuteProcess` return a pooled `InkValue`. Read it with
+   `GetResult_Int` / `_Bool` / `_Float` / `_Double` / `_Char` / `_String` / `_Object` ( they release it ) or call
+   `InkValue.Release( value )` . Forgetting it drains the pool and turns "zero allocation" into "allocates".
+2. **Do not write syntax the language does not have.** `while` , `for` , `a[0]` , `a.b` , `(int)x` , `x ? y : z` ,
+   `switch` , `++` , `+=` , string interpolation and `1 + true` all throw `InkSyntaxException`.
 
-## What is supported
+## Decision table
 
-| Feature | Example | Notes |
-|---|---|---|
-| numbers | `42`, `-42`, `1.5f`, `1.5` | int / single / double |
-| char / string / bool | `'a'`, `"hi"`, `true` | `'a'` + 1 is int 98 |
-| arithmetic | `1 + 2 * 3 - 4 / 2 % 3` | integer division stays integer |
-| comparison | `1 < 2`, `1.5f >= 1.5f`, `'a' == 'a'` | works per type and after promotion |
-| logic | `true && false || 1 + 1 == 2` | `&&` / `||` on bool only |
-| assignment | `a = 1` | on a registered cell or a `var` |
-| variables | `var a = 1; a + 1` | `var` lives for one `Evaluate` call |
-| functions | `ink.RegisterFunction("SUM", new InkFunction(args => ...))` then `SUM(1,2,3)` | args are `InkValue` |
-| lambdas | `FLT(Config, var c => GET(c, Rarity) == 2)` | only as a function argument |
-| `if` / `else if` / `else` | `if ( a > 1 ) { return 1 } else { return 2 }` | body must `return` when you need a value |
+| The task asks for… | Do this |
+|---|---|
+| a formula with numbers and comparison | plain `Evaluate` , see [references/syntax.md](references/syntax.md) |
+| a condition with branches | `Evaluate_IfStatement` / `EvaluateInt` from `UniInk.Extensions.cs` |
+| reading a game value inside the expression | `RegisterVariable` ( a cell ) , then assign to it to write back |
+| a value that must refresh on each read | `InkValue.SetGetter` |
+| writing an assignment back into your own field | `InkValue.SetSetter` or `RegisterVariable( name , cell , setter )` |
+| a custom function | `RegisterFunction( name , new InkFunction( args => … ) )` |
+| filtering a list with a lambda | register a helper like `FLT( Config , var c => GET( c , Rarity ) == 2 )` |
+| evaluating the same constant expression in a loop | `CompileLexerAndFill` once + `ExecuteProcess` + `InkSyntaxList.Recover` , see [references/interop.md](references/interop.md) |
+| loops , arrays , classes , casts | **not supported** — tell the user, do not fake it |
+| a new operator or keyword | the operator table is a plain static list ; extend `InkOperator` and the dispatch , not the caller |
 
-## Details
+## Capability matrix
 
-- [references/syntax.md](references/syntax.md) — the grammar that actually parses, operator precedence
-- [references/types.md](references/types.md) — promotion rules, what throws on mixed types
-- [references/errors.md](references/errors.md) — `InkSyntaxException`, position, caret, common messages
-- [references/interop.md](references/interop.md) — functions, variables, getters / setters, threading, Unity vs .NET
+| Supported | Not supported |
+|---|---|
+| `int` `single` `double` `char` `string` `bool` literals | arrays , indexers , property access |
+| `+ - * / %` with C# promotion , `!` , `&&` `||` | bitwise `& | ^ ~ << >>` |
+| `< > <= >= == !=` per type and after promotion | ternary `?:` , `switch` , casts |
+| `=` assignment , `var name = …` ( one call ) | `++` `--` `+=` `-=` |
+| registered functions and variables | loops , `break` / `continue` |
+| lambdas **only** as a function argument | storing or returning a lambda |
+| `if` / `else if` / `else` with `{ return … }` | nested `if` inside a branch |
 
 ## Integration
 
-**.NET** — `dotnet add package Arc.UniInk` ( `netstandard2.0` + `netstandard2.1` ).
+| Host | How |
+|---|---|
+| .NET | `dotnet add package Arc.UniInk` ( `netstandard2.0` + `netstandard2.1` ) |
+| Unity 2021.3+ | Package Manager → git URL `…?path=Unity/Packages/com.arc.uniink` , or the `.tgz` / `.unitypackage` from the releases |
+| copy | drop `UniInk.cs` ( required ) and `UniInk.Extensions.cs` ( optional ) into the project |
 
-**Unity 2021.3+** — package manager :
-`https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator.git?path=Unity/Packages/com.arc.uniink`
-or grab `com.arc.uniink-<version>.tgz` / `Arc.UniInk-<version>.unitypackage` from the releases page.
+Start from [assets/UniInkSetup.cs](assets/UniInkSetup.cs) — a MonoBehaviour that evaluates an expression ,
+guards the result and reports `InkSyntaxException` with its position.
 
-**Copying the source** is supported too : `UniInk.cs` ( required ) and `UniInk.Extensions.cs`
-( optional, adds `if` / `else` and `EvaluateInt` / `EvaluateBool` ). Both files are in the
-`Arc.UniInk` namespace.
+## Details , loaded on demand
+
+- [references/syntax.md](references/syntax.md) — literals , operators and their priority , statements , lambdas
+- [references/types.md](references/types.md) — promotion , division , what throws on mixed types , `GetResult_*`
+- [references/errors.md](references/errors.md) — `InkSyntaxException` , position , caret , common messages
+- [references/interop.md](references/interop.md) — functions , variables , getters / setters , threading , hosts
+- [references/recipes.md](references/recipes.md) — worked examples : damage formula , gating , config filter , state write back
 
 ## Never do this
 
-- register functions with reflection or attributes (`[InkMethod]` style) — it cannot work on IL2CPP
-- keep a `Predicate<object>` or an `InkValue` from a lambda argument after the same `Evaluate` call
-- mutate a registered `InkValue` from your own code while another thread is evaluating
-- use `InkValue` after `Release` — the instance is already back in the pool
+- register functions through reflection or attributes ( `[InkMethod]` style ) — it cannot work on IL2CPP
+- keep a lambda argument or an `InkValue` from one `Evaluate` call alive after it returns
+- mutate a registered cell from another thread while an evaluation is running
+- use an `InkValue` after `Release` — the instance is already back in the pool
+- call `ClearCache` ( it clears the pools of the calling thread ) in the middle of an evaluation

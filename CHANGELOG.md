@@ -8,6 +8,11 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ### Added
 
+- the consumer skill now follows the Agent Skills specification completely : `compatibility` and `metadata`
+  ( the version is kept in step with the package ) , a decision table and a capability matrix in `SKILL.md` ,
+  `references/recipes.md` with twelve expressions checked against the real library , and
+  `assets/UniInkSetup.cs` as a copy-paste template ( shipped in the UPM sample , not in the `.unitypackage` ,
+  where a .cs under Assets would be compiled )
 - `InkValue.SetSetter` : an assignment to a registered variable notifies its owner , so the value can be
   mirrored into a field ( `hp = hp - 10` ) ; the setter runs once per assignment , never on a read
 - agent skills : `skills/uniink/` ( the consumer skill , shipped inside the nupkg at `skills/uniink/` per the

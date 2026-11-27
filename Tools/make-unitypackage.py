@@ -84,6 +84,7 @@ AOT-friendly, zero-allocation C# expression & mini-script evaluator for Unity IL
 - `UniInk.Extensions.cs` — `if` / `else` statement support and the typed helpers ( optional )
 - `Samples/BasicEvaluation/UniInkSample.cs` — a MonoBehaviour example
 - `Skills/uniink/SKILL.md` — a skill for AI coding agents ( optional )
+- the `.cs` template of the skill ships with the UPM sample , not here : Unity compiles every .cs under Assets
 
 Both sources live in the `Arc.UniInk` namespace : `using Arc.UniInk;`
 
@@ -110,17 +111,29 @@ def collect() -> list[tuple[str, bytes | None]]:
     entries.append((f'{PREFIX}/Samples/BasicEvaluation', None))
     entries.append((f'{PREFIX}/Samples/BasicEvaluation/UniInkSample.cs', SAMPLE.read_bytes()))
 
-    # the agent skill : SKILL.md plus the references it links to
-    entries.append((f'{PREFIX}/Skills', None))
-    entries.append((f'{PREFIX}/Skills/uniink', None))
+    # the agent skill : the documents only . A .cs file under Assets/ is compiled by Unity , and the template
+    # already ships inside the UPM sample , so importing both copies would declare the class twice .
+    skill_files = [
+        path for path in sorted(SKILL.rglob('*'))
+        if path.is_file() and path.suffix != '.cs'
+    ]
 
-    for path in sorted(SKILL.rglob('*')):
-        rel = path.relative_to(SKILL)
+    directories = {f'{PREFIX}/Skills', f'{PREFIX}/Skills/uniink'}
 
-        if path.is_dir():
-            entries.append((f'{PREFIX}/Skills/uniink/{rel.as_posix()}', None))
-        else:
-            entries.append((f'{PREFIX}/Skills/uniink/{rel.as_posix()}', path.read_bytes()))
+    for path in skill_files:
+        rel  = path.relative_to(SKILL).as_posix()
+        stem = rel
+
+        while '/' in stem:
+            stem = stem.rsplit('/', 1)[0]
+            directories.add(f'{PREFIX}/Skills/uniink/{stem}')
+
+    for directory in sorted(directories):
+        entries.append((directory, None))
+
+    for path in skill_files:
+        rel = path.relative_to(SKILL).as_posix()
+        entries.append((f'{PREFIX}/Skills/uniink/{rel}', path.read_bytes()))
 
     return entries
 
