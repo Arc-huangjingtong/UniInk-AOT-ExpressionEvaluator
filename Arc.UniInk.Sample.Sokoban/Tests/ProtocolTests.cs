@@ -57,7 +57,7 @@ namespace Arc.UniInk.Sample.Sokoban.Tests
             Assert.That(turn.Ok, Is.True, turn.Error);
             Assert.That(turn.FromAction, Is.True);
             Assert.That(turn.Direction, Is.EqualTo(Direction.Right));
-            Assert.That(protocol.Requested, Is.EqualTo(Direction.Right));
+            Assert.That(protocol.Requested, Is.EqualTo(new[] { Direction.Right }));
 
             game.Move(turn.Direction);
 
@@ -80,7 +80,7 @@ namespace Arc.UniInk.Sample.Sokoban.Tests
         }
 
         [Test]
-        public void TheLastActionNamedWins()
+        public void BothArmsQueueTheirAction()
         {
             // both arms are parsed before the condition is evaluated , so R and D both run and D wins
             var protocol = new Protocol(NewGame());
@@ -88,7 +88,63 @@ namespace Arc.UniInk.Sample.Sokoban.Tests
 
             Assert.That(turn.Ok, Is.True, turn.Error);
             Assert.That(turn.FromAction, Is.True);
-            Assert.That(turn.Direction, Is.EqualTo(Direction.Down), "the last named action wins");
+            Assert.That(turn.Moves, Is.EqualTo(new[] { Direction.Right, Direction.Down }), "both arms queue their action");
+        }
+
+        [Test]
+        public void RR_IsTwoMoves()
+        {
+            // the corridor level : #@$...# — two pushes to the right are legal
+            var game     = NewGame(3);
+            var protocol = new Protocol(game);
+            var turn     = protocol.Evaluate("RR");
+
+            Assert.That(turn.Ok, Is.True, turn.Error);
+            Assert.That(turn.FromAction, Is.True);
+            Assert.That(turn.Moves, Has.Count.EqualTo(2));
+            Assert.That(turn.Moves[0], Is.EqualTo(Direction.Right));
+            Assert.That(turn.Moves[1], Is.EqualTo(Direction.Right));
+
+            foreach (var direction in turn.Moves) game.Move(direction);
+
+            Assert.That(game.PlayerX, Is.EqualTo(3));
+            Assert.That(game.Pushes, Is.EqualTo(2));
+        }
+
+        [Test]
+        public void RL_IsRightThenLeft()
+        {
+            var game     = NewGame(3);
+            var protocol = new Protocol(game);
+            var turn     = protocol.Evaluate("RL");
+
+            Assert.That(turn.Moves, Is.EqualTo(new[] { Direction.Right, Direction.Left }));
+
+            foreach (var direction in turn.Moves) game.Move(direction);
+
+            Assert.That(game.PlayerX, Is.EqualTo(1), "the pair cancels out");
+        }
+
+        [Test]
+        public void ABlockedMoveStopsTheSequence()
+        {
+            // the first level : the player can push right once , then the box is against the wall
+            var game     = NewGame();
+            var protocol = new Protocol(game);
+            var turn     = protocol.Evaluate("RRR");
+
+            Assert.That(turn.Moves, Has.Count.EqualTo(3));
+
+            var moved = 0;
+
+            foreach (var direction in turn.Moves)
+            {
+                if (!game.Move(direction)) break;
+
+                moved++;
+            }
+
+            Assert.That(moved, Is.EqualTo(1), "the first push works , the next two are blocked");
         }
 
         [Test]
@@ -98,7 +154,7 @@ namespace Arc.UniInk.Sample.Sokoban.Tests
 
             Assert.That(protocol.Evaluate("R").FromAction, Is.True);
             Assert.That(protocol.Evaluate("1").FromAction, Is.False, "a plain direction code must not inherit the request");
-            Assert.That(protocol.Requested, Is.Null);
+            Assert.That(protocol.Requested, Is.Empty);
         }
 
         [Test]

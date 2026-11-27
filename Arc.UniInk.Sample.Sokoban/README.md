@@ -40,21 +40,28 @@ A policy is **one expression** : there is no loop , the loop is the turn .
 
 ## The action getters
 
-`U` `R` `D` `L` are registered with `InkValue.SetGetter` : the getter runs when the name is **parsed** , it records
-the direction and reports whether the move is legal ( `1` / `0` ) . The host applies the recorded direction after
-the evaluation , so one turn is always exactly one move :
+`U` `R` `D` `L` are registered with `InkValue.SetGetter` : the getter runs when the name is **parsed** and
+**appends** the direction to the move queue of the turn ( it also reports whether that move is legal right now ,
+`1` / `0` ) . The host then plays the queue in order and stops at the first blocked move , so the policy string
+reads like a key sequence :
 
 ```
-R
+R          one move
+RR         two moves to the right
+RL         right , then left ( they cancel out )
+RUUL       up twice , then left
 ```
 
 ```
 if ( solved ) { return 0 } else { return R }
 ```
 
+A sequence longer than one move is best written as the bare letters : the queue is what the host plays .
+
 A getter runs at parse time , **before** the condition is evaluated — and the parser walks both arms of an
 `if` . So never branch between action names : `if ( BOX_AT( right ) ) { return R } else { return D }` records
-`R` **and** `D` and the last one wins ( `D` ) . Branch between direction **codes** instead :
+`R` **and** `D` , and the queue holds both ( the host plays right , then down ) . Branch between direction
+**codes** when the choice must depend on the board :
 
 ```
 if ( BOX_AT( right ) && ! WALL( px + 2 , py ) ) { return right } else { return down }

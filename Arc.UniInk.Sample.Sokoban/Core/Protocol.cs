@@ -8,26 +8,30 @@ namespace Arc.UniInk.Sample.Sokoban.Core
     /// <summary> What one policy evaluation produced </summary>
     public readonly struct TurnResult
     {
-        private TurnResult(bool ok, Direction direction, bool fromAction, string error)
+        private TurnResult(bool ok, IReadOnlyList<Direction> moves, bool fromAction, string error)
         {
             Ok         = ok;
-            Direction  = direction;
+            Moves      = moves;
             FromAction = fromAction;
             Error      = error;
         }
 
         public bool Ok { get; }
 
-        public Direction Direction { get; }
+        /// <summary> The moves the policy asked for , in the order it named them </summary>
+        public IReadOnlyList<Direction> Moves { get; }
 
-        /// <summary> True when the policy named an action getter ( <c>R</c> , <c>L</c> , <c>U</c> , <c>D</c> ) </summary>
+        /// <summary> True when the policy named action getters ( <c>R</c> , <c>L</c> , <c>U</c> , <c>D</c> ) </summary>
         public bool FromAction { get; }
+
+        /// <summary> The first move , when there is one </summary>
+        public Direction Direction => Moves.Count > 0 ? Moves[0] : Direction.Up;
 
         public string Error { get; }
 
-        public static TurnResult Move(Direction direction, bool fromAction) => new(true, direction, fromAction, null);
+        public static TurnResult Sequence(IReadOnlyList<Direction> moves, bool fromAction) => new(true, moves, fromAction, null);
 
-        public static TurnResult Fail(string error) => new(false, Direction.Up, false, error);
+        public static TurnResult Fail(string error) => new(false, Array.Empty<Direction>(), false, error);
     }
 
     /// <summary>
@@ -43,8 +47,10 @@ namespace Arc.UniInk.Sample.Sokoban.Core
     {
         private readonly Game game;
 
-        /// <summary> The direction an action getter ( R / L / U / D ) asked for , the last one wins </summary>
-        public Direction? Requested { get; private set; }
+        private readonly List<Direction> moves = new();
+
+        /// <summary> The moves the action getters ( R / L / U / D ) asked for , in the order they were named </summary>
+        public IReadOnlyList<Direction> Requested => moves;
 
         public Protocol(Game game) => this.game = game;
 
@@ -90,7 +96,7 @@ namespace Arc.UniInk.Sample.Sokoban.Core
         /// </remarks>
         public TurnResult Evaluate(string policy)
         {
-            Requested = null;
+            moves.Clear();
 
             if (string.IsNullOrWhiteSpace(policy))
             {
@@ -109,10 +115,10 @@ namespace Arc.UniInk.Sample.Sokoban.Core
                     return TurnResult.Fail("the policy returned nothing");
                 }
 
-                if (Requested is not null)
+                if (moves.Count > 0)
                 {
-                    // an action getter already answered : the evaluated value only reports whether it is legal
-                    return TurnResult.Move(Requested.Value, true);
+                    // the action getters already answered : RR is two moves , RL is right then left
+                    return TurnResult.Sequence(moves.ToArray(), true);
                 }
 
                 var raw = value.GetResult_Int();
@@ -122,7 +128,7 @@ namespace Arc.UniInk.Sample.Sokoban.Core
                     return TurnResult.Fail($"the policy returned {raw} , expected a direction 0..3");
                 }
 
-                return TurnResult.Move((Direction)raw, false);
+                return TurnResult.Sequence(new[] { (Direction)raw }, false);
             }
             catch (InkSyntaxException exception)
             {
@@ -137,7 +143,8 @@ namespace Arc.UniInk.Sample.Sokoban.Core
 
             return InkValue.SetGetter(cell, value =>
             {
-                Requested       = direction;
+                moves.Add(direction);
+
                 value.ValueType = TypeCode.Int32;
                 value.ValueInt  = game.CanMove(direction) ? 1 : 0;
             });

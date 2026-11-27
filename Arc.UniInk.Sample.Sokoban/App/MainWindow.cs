@@ -173,19 +173,28 @@ namespace Arc.UniInk.Sample.Sokoban.App
                 return;
             }
 
-            if (!game.Move(turn.Direction))
-            {
-                timer.Stop();
-                Status($"the policy asked for {turn.Direction} , which is blocked", true);
+            var moved = 0;
 
-                return;
+            foreach (var direction in turn.Moves)
+            {
+                if (!game.Move(direction)) break;
+
+                moved++;
             }
 
             Render();
 
-            var how = turn.FromAction ? " ( action getter )" : string.Empty;
+            if (moved < turn.Moves.Count)
+            {
+                timer.Stop();
+                Status($"moved {moved}/{turn.Moves.Count} , then {turn.Moves[moved]} is blocked", true);
 
-            Status(game.Solved ? "Solved!" : $"{turn.Direction}{how} · steps {game.Steps} · pushes {game.Pushes}", game.Solved);
+                return;
+            }
+
+            var how = turn.FromAction ? $" ({turn.Moves.Count} action getter{ (turn.Moves.Count == 1 ? "" : "s" ) })" : string.Empty;
+
+            Status(game.Solved ? "Solved!" : $"{turn.Moves.Count} move{ (turn.Moves.Count == 1 ? "" : "s" ) }{how} · steps {game.Steps} · pushes {game.Pushes}", game.Solved);
         }
 
         /// <summary> Play the shortest solution from the solver , one move per tick </summary>
