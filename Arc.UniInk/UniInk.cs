@@ -119,8 +119,7 @@
 
         /***************************************************  Ctor  ***************************************************/
 
-        /// <summary> Constructor : an empty interpreter , register the functions and variables afterwards </summary>
-        /// <remarks> The <c>IDictionary</c> overload lives in UniInk.Extensions.cs , this file stays usable alone </remarks>
+        /// <summary> Default Constructor : you can read the code easily and modify it ! </summary>
         public UniInk() { }
 
         /***************************************************  APIs  ***************************************************/
@@ -128,15 +127,7 @@
         /// <summary> Evaluate an expression or simple scripts </summary>
         /// <param name="expression"> the expression to Evaluate </param>
         /// <returns> return the result object , will be replaced to a InkValue </returns>
-        public InkValue Evaluate(string expression)
-        {
-            if (string.IsNullOrWhiteSpace(expression))
-            {
-                return null;
-            }
-
-            return Evaluate(expression, 0, expression.Length - 1);
-        }
+        public InkValue Evaluate(string expression) => string.IsNullOrWhiteSpace(expression) ? null : Evaluate(expression, 0, expression.Length - 1);
 
         /// <summary> Evaluate an expression or simple scripts in string slice </summary>
         /// <param name="expression"> the expression to Evaluate </param>
