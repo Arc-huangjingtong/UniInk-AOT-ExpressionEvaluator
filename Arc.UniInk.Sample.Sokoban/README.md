@@ -27,7 +27,8 @@ expression must evaluate to an `int` : `0` up , `1` right , `2` down , `3` left 
 | `steps` , `pushes` | variable | the counters of the level |
 | `solved` | variable | `1` when every box is on a goal |
 | `up` `right` `down` `left` | variable | the direction codes , so a policy can `return right` |
-| **`U` `R` `D` `L`** | **action getter** | naming one asks the host to move that way : the policy can be the single letter `R` |
+| **`U` `R` `D` `L`** | **action getter** ( arrow scheme ) | naming one queues that move : the policy can be the single letter `R` , or `RR` for two |
+| **`W` `A` `S` `D`** | **action getter** ( WASD scheme ) | the same four moves , chosen with the **WASD** toggle in the window |
 | `WALL( x , y )` | function | the square is a wall ( outside the board counts as a wall ) |
 | `BOX( x , y )` | function | a box stands there |
 | `GOAL( x , y )` | function | the square is a goal |
@@ -57,6 +58,9 @@ if ( solved ) { return 0 } else { return R }
 ```
 
 A sequence longer than one move is best written as the bare letters : the queue is what the host plays .
+
+The two schemes cannot both be active : `D` means **down** in the arrow scheme and **right** in WASD , so
+`Protocol` takes an `InputScheme` and registers one set or the other ( `U` / `R` / `D` / `L` by default ) .
 
 A getter runs at parse time , **before** the condition is evaluated — and the parser walks both arms of an
 `if` . So never branch between action names : `if ( BOX_AT( right ) ) { return R } else { return D }` records

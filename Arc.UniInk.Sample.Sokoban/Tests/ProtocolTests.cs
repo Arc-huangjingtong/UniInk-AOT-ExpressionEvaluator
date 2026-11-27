@@ -148,6 +148,42 @@ namespace Arc.UniInk.Sample.Sokoban.Tests
         }
 
         [Test]
+        public void TheWasdSchemeMapsDFourWays()
+        {
+            var game = NewGame(3);
+
+            Assert.That(new Protocol(game, InputScheme.Wasd).Evaluate("W").Direction, Is.EqualTo(Direction.Up));
+            Assert.That(new Protocol(game, InputScheme.Wasd).Evaluate("A").Direction, Is.EqualTo(Direction.Left));
+            Assert.That(new Protocol(game, InputScheme.Wasd).Evaluate("S").Direction, Is.EqualTo(Direction.Down));
+            Assert.That(new Protocol(game, InputScheme.Wasd).Evaluate("D").Direction, Is.EqualTo(Direction.Right));
+        }
+
+        [Test]
+        public void DMeansDownInTheArrowScheme()
+        {
+            Assert.That(new Protocol(NewGame(), InputScheme.UrDL).Evaluate("D").Direction, Is.EqualTo(Direction.Down));
+        }
+
+        [Test]
+        public void TheWasdSchemeQueuesASequence()
+        {
+            var protocol = new Protocol(NewGame(3), InputScheme.Wasd);
+            var turn     = protocol.Evaluate("DD");
+
+            Assert.That(turn.FromAction, Is.True);
+            Assert.That(turn.Moves, Is.EqualTo(new[] { Direction.Right, Direction.Right }));
+        }
+
+        [Test]
+        public void TheOtherSchemesLettersAreUnknown()
+        {
+            var turn = new Protocol(NewGame(), InputScheme.UrDL).Evaluate("W");
+
+            Assert.That(turn.Ok, Is.False);
+            Assert.That(turn.Error, Does.Contain("unknown identifier"));
+        }
+
+        [Test]
         public void TheActionRequestResetsBetweenTurns()
         {
             var protocol = new Protocol(NewGame());

@@ -26,6 +26,7 @@ namespace Arc.UniInk.Sample.Sokoban.App
         private readonly ComboBox levelBox  = new() { Width = 220, Margin = new Thickness(0, 0, 8, 0) };
         private readonly TextBox  policyBox = new() { AcceptsReturn = true, MinHeight = 90, FontFamily = FontFamily.Default };
         private readonly TextBlock status   = new() { TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 8, 0, 0) };
+        private readonly CheckBox  wasd     = new() { Content = "WASD" };
         private readonly Canvas board      = new() { Width = 1, Height = 1 };
         private readonly DispatcherTimer timer;
         private readonly DispatcherTimer solutionTimer;
@@ -82,7 +83,7 @@ namespace Arc.UniInk.Sample.Sokoban.App
                 Orientation = Orientation.Horizontal,
                 Spacing     = 8,
                 Margin      = new Thickness(12, 12, 12, 0),
-                Children    = { levelBox, runTurn, auto, solve, reset }
+                Children    = { levelBox, runTurn, auto, solve, wasd, reset }
             };
 
             var boardHost = new Border
@@ -163,7 +164,8 @@ namespace Arc.UniInk.Sample.Sokoban.App
                 return;
             }
 
-            var turn = new Protocol(game).Evaluate(policyBox.Text);
+            var scheme = wasd.IsChecked == true ? InputScheme.Wasd : InputScheme.UrDL;
+            var turn   = new Protocol(game, scheme).Evaluate(policyBox.Text);
 
             if (!turn.Ok)
             {

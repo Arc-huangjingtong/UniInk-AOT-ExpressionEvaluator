@@ -5,6 +5,13 @@ using Ink = Arc.UniInk.UniInk;   // the namespace and the class share the name
 
 namespace Arc.UniInk.Sample.Sokoban.Core
 {
+    /// <summary> Which letters name the four moves . D means down in <see cref="UrDL"/> and right in <see cref="Wasd"/> </summary>
+    public enum InputScheme
+    {
+        UrDL,
+        Wasd
+    }
+
     /// <summary> What one policy evaluation produced </summary>
     public readonly struct TurnResult
     {
@@ -46,13 +53,18 @@ namespace Arc.UniInk.Sample.Sokoban.Core
     public sealed class Protocol
     {
         private readonly Game game;
+        private readonly InputScheme scheme;
 
         private readonly List<Direction> moves = new();
 
         /// <summary> The moves the action getters ( R / L / U / D ) asked for , in the order they were named </summary>
         public IReadOnlyList<Direction> Requested => moves;
 
-        public Protocol(Game game) => this.game = game;
+        public Protocol(Game game, InputScheme scheme = InputScheme.UrDL)
+        {
+            this.game   = game;
+            this.scheme = scheme;
+        }
 
         /// <summary> A fresh interpreter wired to the current game state </summary>
         public Ink CreateInk()
@@ -72,10 +84,20 @@ namespace Arc.UniInk.Sample.Sokoban.Core
 
             // action getters : naming R / L / U / D asks the host to move that way once this turn ends .
             // A getter runs when the name is parsed , so the last action named in the policy wins .
-            ink.RegisterVariable("U", Action(Direction.Up));
-            ink.RegisterVariable("R", Action(Direction.Right));
-            ink.RegisterVariable("D", Action(Direction.Down));
-            ink.RegisterVariable("L", Action(Direction.Left));
+            if (scheme == InputScheme.Wasd)
+            {
+                ink.RegisterVariable("W", Action(Direction.Up));
+                ink.RegisterVariable("A", Action(Direction.Left));
+                ink.RegisterVariable("S", Action(Direction.Down));
+                ink.RegisterVariable("D", Action(Direction.Right));
+            }
+            else
+            {
+                ink.RegisterVariable("U", Action(Direction.Up));
+                ink.RegisterVariable("R", Action(Direction.Right));
+                ink.RegisterVariable("D", Action(Direction.Down));
+                ink.RegisterVariable("L", Action(Direction.Left));
+            }
 
             ink.RegisterFunction("WALL"    , new InkFunction(args => Bool(game.IsWall(Int(args, 0), Int(args, 1)))));
             ink.RegisterFunction("BOX"     , new InkFunction(args => Bool(game.HasBox(Int(args, 0), Int(args, 1)))));
