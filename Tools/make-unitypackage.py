@@ -24,7 +24,7 @@ import tarfile
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = ROOT / 'Arc.UniInk'
 SAMPLE = ROOT / 'Unity/Packages/com.arc.uniink/Samples~/BasicEvaluation/UniInkSample.cs'
-SKILL  = ROOT / 'skills/uniink'
+SKILL  = ROOT / '.agents/skills/uniink'
 CSPROJ = SRC / 'Arc.UniInk.csproj'
 PREFIX = 'Assets/Arc.UniInk'
 GUID_NS = 'com.arc.uniink.unitypackage:'

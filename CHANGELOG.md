@@ -15,9 +15,9 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
   where a .cs under Assets would be compiled )
 - `InkValue.SetSetter` : an assignment to a registered variable notifies its owner , so the value can be
   mirrored into a field ( `hp = hp - 10` ) ; the setter runs once per assignment , never on a read
-- agent skills : `skills/uniink/` ( the consumer skill , shipped inside the nupkg at `skills/uniink/` per the
+- agent skills : `.agents/skills/uniink/` ( the consumer skill , shipped inside the nupkg at `skills/uniink/` per the
   NuGet convention , and as the **Agent Skill ( AI )** Unity sample , the tarball and the `.unitypackage` ) and
-  `.github/skills/uniink-repo/` ( how to work on this repository )
+  `.agents/skills/uniink-repo/` ( how to work on this repository )
 - `Tools/check-skills.py` validates the skill frontmatter , the links and the Unity copy ; CI runs it and proves
   that the nupkg carries the skill
 - setter tests : called on assignment , sees the new type , not called on a read , once per assignment ,

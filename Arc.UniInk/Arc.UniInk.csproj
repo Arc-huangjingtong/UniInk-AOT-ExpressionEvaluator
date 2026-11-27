@@ -46,7 +46,7 @@
 
     <ItemGroup>
         <!-- Agent Skills : the convention for NuGet packages is skills/<name>/SKILL.md -->
-        <None Include="..\skills\uniink\**\*" Pack="true" PackagePath="skills\uniink\" />
+        <None Include="..\.agents\skills\uniink\**\*" Pack="true" PackagePath="skills/uniink" />
     </ItemGroup>
 
 

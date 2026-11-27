@@ -34,12 +34,12 @@ fi
 
 # ---------- skill metadata ----------
 # the consumer skill quotes the package version , keep it in step
-SKILL_MD="$ROOT/skills/uniink/SKILL.md"
+SKILL_MD="$ROOT/.agents/skills/uniink/SKILL.md"
 skill_version="$(grep -o '^  version: "[^"]*"' "$SKILL_MD" 2>/dev/null | head -1 | sed -E 's/.*"([^"]*)"/\1/')"
 
 if [[ -n "$skill_version" && "$skill_version" != "$version" ]]; then
     if [[ $CHECK -eq 1 ]]; then
-        echo "version drift: skills/uniink/SKILL.md metadata.version=$skill_version"
+        echo "version drift: .agents/skills/uniink/SKILL.md metadata.version=$skill_version"
         status=1
     else
         sed -i.bak -E "s|^  version: \"[^\"]*\"|  version: \"$version\"|" "$SKILL_MD"
@@ -62,11 +62,11 @@ for file in UniInk.cs UniInk.Extensions.cs; do
 done
 
 # ---------- agent skill ----------
-SKILL_SRC="$ROOT/skills/uniink"
+SKILL_SRC="$ROOT/.agents/skills/uniink"
 SKILL_DST="$PACKAGE/Samples~/AgentSkill"
 
 if [[ ! -d "$SKILL_SRC" ]]; then
-    echo "missing skill source: skills/uniink"
+    echo "missing skill source: .agents/skills/uniink"
     status=1
 elif [[ $CHECK -eq 1 ]]; then
     if ! diff -r -q -x '*.meta' "$SKILL_SRC" "$SKILL_DST" >/dev/null 2>&1; then

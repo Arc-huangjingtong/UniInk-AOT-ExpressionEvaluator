@@ -6,10 +6,11 @@ Checks , for every skill directory :
   - the frontmatter has a name and a description
   - name matches the directory name and the agentskills.io character rules
   - every relative markdown link in SKILL.md resolves
-  - the UPM copy under Samples~/AgentSkill matches skills/uniink ( .meta aside )
+  - the UPM copy under Samples~/AgentSkill matches .agents/skills/uniink ( .meta aside )
 
 Usage: Tools/check-skills.py
 """
+import os
 import pathlib
 import re
 import sys
@@ -17,8 +18,8 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 SKILLS = [
-    ROOT / 'skills/uniink',
-    ROOT / '.github/skills/uniink-repo',
+    ROOT / '.agents/skills/uniink',
+    ROOT / '.agents/skills/uniink-repo',
 ]
 
 NAME_RULE = re.compile(r'^[a-z0-9]+(?:-[a-z0-9]+)*$')
@@ -110,8 +111,34 @@ for skill in SKILLS:
         if not (skill / target).is_file():
             fail(f'{skill_md}: link target "{target}" does not exist')
 
+# the per-tool discovery paths are symlinks to the shared tree : a dangling link hides the skill from a client
+DISCOVERY_LINKS = {
+    '.claude/skills':  '../.agents/skills',
+    '.cursor/skills':  '../.agents/skills',
+    '.github/skills':  '../.agents/skills',
+}
+
+print('checking the per-tool discovery links')
+
+for link, target in DISCOVERY_LINKS.items():
+    path = ROOT / link
+
+    if not path.is_symlink():
+        fail(f'{link}: should be a symlink to {target} ( see AGENTS.md )')
+        continue
+
+    actual = os.readlink(path)
+
+    if actual != target:
+        fail(f'{link}: points at {actual} , expected {target}')
+        continue
+
+    for skill in SKILLS:
+        if not (path / skill.name / 'SKILL.md').is_file():
+            fail(f'{link}: does not resolve to {skill.name}/SKILL.md')
+
 # the Unity package carries a copy of the consumer skill
-print('checking the UPM copy of skills/uniink')
+print('checking the UPM copy of .agents/skills/uniink')
 source = SKILLS[0]
 
 if not UPM_COPY.is_dir():

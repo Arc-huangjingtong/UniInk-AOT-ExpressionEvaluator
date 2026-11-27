@@ -25,12 +25,13 @@ Arc.UniInk/               the library ( netstandard2.0 + netstandard2.1 )
 Arc.UniInk.Tests/         NUnit , the only test project
 Arc.UniInk.Benchmark/     BenchmarkDotNet , NOT a test project anymore
 Unity/Packages/com.arc.uniink/   the UPM package ( sources are a COPY )
-skills/uniink/            the consumer skill ( shipped in the nupkg and the Unity package )
-  SKILL.md                entry : decision table , capability matrix , the two rules
-  references/             syntax , types , errors , interop , recipes
-  assets/UniInkSetup.cs   a copy-paste MonoBehaviour
-.github/skills/uniink-repo/      this skill
-Tools/                    sync-unity-package.sh , make-unitypackage.py
+.agents/skills/          the shared Agent Skills tree ( .claude / .cursor / .github link to it )
+  uniink/                 the consumer skill ( shipped in the nupkg and the Unity package )
+    SKILL.md              entry : decision table , capability matrix , the two rules
+    references/           syntax , types , errors , interop , recipes
+    assets/               a copy-paste MonoBehaviour
+  uniink-repo/            this skill
+Tools/                    sync-unity-package.sh , make-unitypackage.py , check-skills.py
 ```
 
 ## Everyday commands
@@ -40,6 +41,7 @@ dotnet build Arc.UniInk.sln -c Release
 dotnet test  Arc.UniInk.Tests/Arc.UniInk.Tests.csproj -c Release
 dotnet test  Arc.UniInk.Tests/Arc.UniInk.Tests.csproj -c Debug     # pool contract assertions
 bash Tools/sync-unity-package.sh --check                          # UPM copy + version + .meta
+python3 Tools/check-skills.py                                     # skills , links and the UPM copy
 dotnet run -c Release --project Arc.UniInk.Benchmark              # full BDN suite , ~2 min
 ```
 
