@@ -8,6 +8,10 @@ play by writing one expression per turn .
 dotnet run --project Arc.UniInk.Sample.Sokoban/App -c Release
 ```
 
+The project sets `<UseAppHost>false</UseAppHost>` , so `dotnet run` starts the dll directly : a standalone apphost
+on macOS needs a signature and is killed by Gatekeeper ( `Killed: 9` ) . If you build your own copy , run
+`dotnet bin/Release/net10.0/Arc.UniInk.Sample.Sokoban.App.dll` instead of the executable .
+
 - Arrow keys move the player by hand .
 - **Run one turn** evaluates the policy once . **Auto run** repeats it . **Solve ( BFS )** plays the shortest
   solution found by the solver . **Reset** restarts the level .

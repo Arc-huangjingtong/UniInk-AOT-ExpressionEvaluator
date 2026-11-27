@@ -7,6 +7,8 @@
         <RootNamespace>Arc.UniInk.Sample.Sokoban.App</RootNamespace>
         <IsPackable>false</IsPackable>
         <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+        <!-- dotnet run must launch the dll : the macOS apphost needs signing and is killed by Gatekeeper -->
+        <UseAppHost>false</UseAppHost>
     </PropertyGroup>
 
     <ItemGroup>

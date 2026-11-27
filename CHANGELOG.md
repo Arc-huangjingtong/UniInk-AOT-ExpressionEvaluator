@@ -10,7 +10,8 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 - `Arc.UniInk.Sample.Sokoban/` : an Avalonia Sokoban where one UniInk expression per turn controls the player ,
   with a board protocol ( `px` / `py` / `WALL` / `BOX` / `GOAL` / `CAN_MOVE` … ) , a BFS solver and tests that prove
-  every level solvable . Not shipped in the nupkg or the Unity package
+  every level solvable . Not shipped in the nupkg or the Unity package . The app sets `UseAppHost=false` , so
+  `dotnet run` works on macOS where an unsigned apphost is killed by Gatekeeper
 - the consumer skill now follows the Agent Skills specification completely : `compatibility` and `metadata`
   ( the version is kept in step with the package ) , a decision table and a capability matrix in `SKILL.md` ,
   `references/recipes.md` with twelve expressions checked against the real library , and
