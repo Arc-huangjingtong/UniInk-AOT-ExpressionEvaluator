@@ -6,30 +6,34 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-### Changed
-
-- the lexer dispatches on the character class instead of trying seven scanners per character : the
-  `ParsingMethodDelegate` list , `StartsWithBoolFromIndex` and `StartsWithInputStrFromIndex` are gone and
-  `Evaluate( string )` keeps its empty / null guard on the outer overload only . `UniInk.cs` 2810 -> 2685 lines ,
-  `TEST_Arithmetic__UniInk` 126.8 us -> 92.2 us , allocation still 0
-
-### Removed
-
-- `InkOperator.Equals` / `GetHashCode` / `Indexer` / `OperatorValue` ( the operators are singletons , reference
-  equality is the same thing ) and the `RegisterVariable( name , value , setter )` overload
-- the `UniInk( IDictionary )` constructor moved to `UniInk.Extensions.cs` ; `UniInk.cs` keeps an explicit
-  parameterless one so the single file still stands alone
-
 ### Added
 
-- agent skills : `skills/uniink/` ( consumer , shipped inside the nupkg at `skills/uniink/` per the NuGet
-  convention , and as the **Agent Skill ( AI )** Unity sample , the tarball and the `.unitypackage` ) and
+- `InkValue.SetSetter` : an assignment to a registered variable notifies its owner , so the value can be
+  mirrored into a field ( `hp = hp - 10` ) ; the setter runs once per assignment , never on a read
+- agent skills : `skills/uniink/` ( the consumer skill , shipped inside the nupkg at `skills/uniink/` per the
+  NuGet convention , and as the **Agent Skill ( AI )** Unity sample , the tarball and the `.unitypackage` ) and
   `.github/skills/uniink-repo/` ( how to work on this repository )
-- `Tools/check-skills.py` validates the skill frontmatter , the links and the Unity copy , and runs in CI
+- `Tools/check-skills.py` validates the skill frontmatter , the links and the Unity copy ; CI runs it and proves
+  that the nupkg carries the skill
+- setter tests : called on assignment , sees the new type , not called on a read , once per assignment ,
+  getter + setter round trip , every assignment of a script , reentrancy , no setter required
 
-- `InkValue.SetSetter` and a `RegisterVariable( name , value , setter )` overload : an assignment to a registered
-  variable now notifies its owner , so the value can be mirrored into a field ( `hp = hp - 10` )
-- setter tests : type changes , once per assignment , not called on read , getter + setter round trip , reentrancy
+### Changed
+
+- the lexer dispatches on the character class ( number / char / string / word / symbol ) instead of trying seven
+  scanners for every character : the `ParsingMethodDelegate` list , `StartsWithBoolFromIndex` and
+  `StartsWithInputStrFromIndex` are gone . `UniInk.cs` 2810 -> 2685 lines , `TEST_Arithmetic__UniInk`
+  126.8 us -> 92.2 us , allocation still 0
+- `ExecuteProcess` returns `InkValue` instead of `object` , so `Evaluate` forwards the result without a cast
+- `RecoverResources` is now `ReleaseInkSyntaxList` ; it sits together with `ExecuteProcess` and `ClearCache` next
+  to `CompileLexerAndFill`
+- `InkOperator` drops `Equals` , `GetHashCode` , `Indexer` and `OperatorValue` : the operators are the static
+  singletons , so reference equality is the same thing and one virtual call per comparison goes away
+- `UniInk( IDictionary )` moved to `UniInk.Extensions.cs` ; `UniInk.cs` keeps a parameterless constructor , so the
+  single file still stands alone
+- `GetStringSliceHashCode` is internal and the whole-string overload is gone
+- `RegisterVariable` keeps only the cell overload , `SetSetter` is the way to attach a setter
+- the `// ReSharper disable` header comments are gone
 
 ### Fixed
 

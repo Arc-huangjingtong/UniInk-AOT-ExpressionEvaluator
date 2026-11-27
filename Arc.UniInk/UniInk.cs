@@ -89,11 +89,8 @@
     /*================================================================================================================*/
 
 
-    // ReSharper disable SpecifyACultureInStringConversionExplicitly
-    // ReSharper disable PartialTypeWithSinglePart
     using System;
     using System.Collections.Generic;
-
 
 
     /// <summary> The C# Evaluator easy to use : you can execute simple expression or scripts with a string </summary>
@@ -119,7 +116,7 @@
 
         /***************************************************  Ctor  ***************************************************/
 
-        /// <summary> Default Constructor : you can read the code easily and modify it ! </summary>
+        /// <summary> Default Constructor </summary>
         public UniInk() { }
 
         /***************************************************  APIs  ***************************************************/
@@ -127,7 +124,7 @@
         /// <summary> Evaluate an expression or simple scripts </summary>
         /// <param name="expression"> the expression to Evaluate </param>
         /// <returns> return the result object , will be replaced to a InkValue </returns>
-        public InkValue Evaluate(string expression) => string.IsNullOrWhiteSpace(expression) ? null : Evaluate(expression, 0, expression.Length - 1);
+        public InkValue Evaluate(string expression) => Evaluate(expression, 0, expression.Length - 1);
 
         /// <summary> Evaluate an expression or simple scripts in string slice </summary>
         /// <param name="expression"> the expression to Evaluate </param>
@@ -146,7 +143,7 @@
             {
                 keys = CompileLexerAndFill(expression, startIndex, endIndex);
 
-                return ExecuteProcess(keys) as InkValue;
+                return ExecuteProcess(keys);
             }
             catch (InkSyntaxException exception) when (exception.Expression is null)
             {
@@ -165,6 +162,8 @@
         }
 
         /// <summary> Register a local function </summary>
+        /// <param name="fucName"> the name used inside the expression </param>
+        /// <param name="inkFunc"> the function cell , it is kept by the table </param>
         public void RegisterFunction(string fucName, InkFunction inkFunc)
         {
             var hash = GetStringSliceHashCode(fucName, 0, fucName.Length - 1);
@@ -173,7 +172,7 @@
                 DicFunctions.Add(hash, inkFunc);
             }
         }
-        
+
         /// <summary> Register a local variable </summary>
         /// <param name="varName"> the name used inside the expression </param>
         /// <param name="inkValue"> the variable cell , it is kept by the table </param>
@@ -189,7 +188,7 @@
                 DicVariables.Add(hash, inkValue);
             }
         }
-        
+
 
         /// <summary> UniInk Lexer : Fill the SyntaxList </summary>
         public InkSyntaxList CompileLexerAndFill(string expression, int startIndex, int endIndex)
@@ -222,6 +221,34 @@
 
             return keys;
         }
+
+        /// <summary> Release the resources in UniInk </summary>
+        public void ReleaseInkSyntaxList(InkSyntaxList keys)
+        {
+            InkSyntaxList.ReleaseAll(keys);
+            InkSyntaxList.ReleaseTemp();
+
+            ReleaseTempVariables();
+        }
+
+        /// <summary> UniInk process the compiled SyntaxList </summary>
+        /// <remarks> The returned object is an InkValue owned by the caller : release it ( or use GetResult_* ) </remarks>
+        public static InkValue ExecuteProcess(InkSyntaxList keys)
+        {
+            var res = InputIsScript(keys) ? ProcessList_Scripts(keys) : ProcessList(keys, 0, keys.Count - 1);
+
+            return res as InkValue;
+        }
+
+
+        /// <summary> Clear the cache in UniInk anytime , Internal cache pool will be clear </summary>
+        /// <remarks> Most of the time you don't need to call </remarks>
+        public static void ClearCache()
+        {
+            InkValue.ReleasePool();
+            InkSyntaxList.ReleasePool();
+        }
+
 
         /// <summary> Lex the token that starts at <paramref name="i"/> , chosen by its first character </summary>
         /// <remarks> The shapes are the grammar : digit -> number , quote -> char / string ,
@@ -292,31 +319,6 @@
             return new InkSyntaxException($"unknown identifier [{name}] : register the variable or function first", index, expression);
         }
 
-        /// <summary> UniInk process the compiled SyntaxList </summary>
-        /// <remarks> The returned object is an InkValue owned by the caller : release it ( or use GetResult_* ) </remarks>
-        public static object ExecuteProcess(InkSyntaxList keys)
-        {
-            var res = InputIsScript(keys) ? ProcessList_Scripts(keys) : ProcessList(keys, 0, keys.Count - 1);
-
-            return res;
-        }
-
-        /// <summary> Release the resources in UniInk </summary>
-        public void RecoverResources(InkSyntaxList keys)
-        {
-            InkSyntaxList.ReleaseAll(keys);
-            InkSyntaxList.ReleaseTemp();
-
-            ReleaseTempVariables();
-        }
-
-        /// <summary> Clear the cache in UniInk anytime , Internal cache pool will be clear </summary>
-        /// <remarks> Most of the time you don't need to call </remarks>
-        public static void ClearCache()
-        {
-            InkValue.ReleasePool();
-            InkSyntaxList.ReleasePool();
-        }
 
         /*************************************************  Process  **************************************************/
 
@@ -1315,7 +1317,7 @@
         /// <param name="startIndex"> the start index </param>
         /// <param name="endIndex"> the end index </param>
         /// <returns> the hash code of the string slice </returns>
-        public static int GetStringSliceHashCode(string str, int startIndex, int endIndex)
+        internal static int GetStringSliceHashCode(string str, int startIndex, int endIndex)
         {
             var hash = 0;
             for (var i = startIndex ; i <= endIndex ; i++)
@@ -1325,11 +1327,6 @@
 
             return hash;
         }
-
-        /// <summary> Get the hash code of the whole string </summary>
-        /// <param name="str"> the string to get hash code </param>
-        /// <returns> the hash code of the string </returns>
-        public static int GetStringSliceHashCode(string str) => GetStringSliceHashCode(str, 0, str.Length - 1);
     }
 
 

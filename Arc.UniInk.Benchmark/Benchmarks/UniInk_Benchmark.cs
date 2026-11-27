@@ -80,10 +80,10 @@
         {
             // ExecuteProcess hands out an InkValue that the caller owns : read it with GetResult_Int ,
             // which releases the instance back to the pool ( otherwise the benchmark allocates 4 x 392 B per op )
-            var result1 = ((InkValue)UniInk.ExecuteProcess(compiledTestInputArithmeticInt01)).GetResult_Int();
-            var result2 = ((InkValue)UniInk.ExecuteProcess(compiledTestInputArithmeticInt02)).GetResult_Int();
-            var result3 = ((InkValue)UniInk.ExecuteProcess(compiledTestInputArithmeticInt03)).GetResult_Int();
-            var result4 = ((InkValue)UniInk.ExecuteProcess(compiledTestInputArithmeticInt04)).GetResult_Int();
+            var result1 = UniInk.ExecuteProcess(compiledTestInputArithmeticInt01).GetResult_Int();
+            var result2 = UniInk.ExecuteProcess(compiledTestInputArithmeticInt02).GetResult_Int();
+            var result3 = UniInk.ExecuteProcess(compiledTestInputArithmeticInt03).GetResult_Int();
+            var result4 = UniInk.ExecuteProcess(compiledTestInputArithmeticInt04).GetResult_Int();
 
             InkSyntaxList.Recover(compiledTestInputArithmeticInt01);
             InkSyntaxList.Recover(compiledTestInputArithmeticInt02);
