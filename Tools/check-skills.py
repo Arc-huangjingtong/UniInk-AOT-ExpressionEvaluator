@@ -113,9 +113,7 @@ for skill in SKILLS:
 
 # the per-tool discovery paths are symlinks to the shared tree : a dangling link hides the skill from a client
 DISCOVERY_LINKS = {
-    '.claude/skills':  '../.agents/skills',
-    '.cursor/skills':  '../.agents/skills',
-    '.github/skills':  '../.agents/skills',
+    '.github/skills': '../.agents/skills',
 }
 
 print('checking the per-tool discovery links')

@@ -13,13 +13,14 @@ Two skills live in `.agents/skills/` ( the shared Agent Skills location ) :
 
 Load `uniink` before you write an expression , `uniink-repo` before you touch the library or the release process .
 
-The same skills are reachable from the clients that do not scan `.agents/skills/` — these paths are symlinks :
+`.github/skills` is a symlink to the same tree , so Copilot / VS Code find the skills as well :
 
 ```
-.claude/skills  ->  ../.agents/skills     Claude Code
-.cursor/skills  ->  ../.agents/skills     Cursor
 .github/skills  ->  ../.agents/skills     GitHub Copilot / VS Code
 ```
+
+A client that only reads its own directory ( Claude Code reads `.claude/skills` , Cursor `.cursor/skills` ) can
+point one symlink at `.agents/skills` — nothing needs to be copied .
 
 ## Quick commands
 

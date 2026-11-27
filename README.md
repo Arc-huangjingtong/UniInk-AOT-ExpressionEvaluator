@@ -305,8 +305,7 @@ The package ships a skill for AI coding agents ( `skills/uniink/SKILL.md` , the
   from the classic `.unitypackage` ( `Assets/Arc.UniInk/Skills/` )
 
 The skill follows the [Agent Skills](https://agentskills.io/specification) layout and lives in the shared
-`.agents/skills/` tree ( `.claude/skills` , `.cursor/skills` and `.github/skills` are symlinks to it , so every
-client finds it ) :
+`.agents/skills/` tree ( `.github/skills` is a symlink to it , so Copilot / VS Code find it too ) :
 
 ```
 .agents/skills/uniink/
