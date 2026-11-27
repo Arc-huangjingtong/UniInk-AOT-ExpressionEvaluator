@@ -1,7 +1,7 @@
 using NUnit.Framework;
-using UniInk.Sample.Sokoban.Core;
+using Arc.UniInk.Sample.Sokoban.Core;
 
-namespace UniInk.Sample.Sokoban.Tests
+namespace Arc.UniInk.Sample.Sokoban.Tests
 {
     public sealed class SolverTests
     {

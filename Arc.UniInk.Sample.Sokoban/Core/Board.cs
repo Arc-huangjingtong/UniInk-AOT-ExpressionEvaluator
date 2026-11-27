@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace UniInk.Sample.Sokoban.Core
+namespace Arc.UniInk.Sample.Sokoban.Core
 {
     /// <summary> One square of the level </summary>
     public enum Tile

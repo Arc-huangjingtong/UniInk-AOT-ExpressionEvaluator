@@ -1,11 +1,11 @@
-# UniInk.Sample.Sokoban
+# Arc.UniInk.Sample.Sokoban
 
 A small **Sokoban that a string controls** : every turn the game evaluates one UniInk expression and applies the
 direction it answers with . The point is to show the evaluator driving real behaviour — and to let an AI agent
 play by writing one expression per turn .
 
 ```
-dotnet run --project Samples/UniInk.Sample.Sokoban/App -c Release
+dotnet run --project Arc.UniInk.Sample.Sokoban/App -c Release
 ```
 
 - Arrow keys move the player by hand .

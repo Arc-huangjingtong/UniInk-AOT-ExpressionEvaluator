@@ -95,7 +95,3 @@ nupkgs/
 # The Unity package lives inside a Packages folder : keep it tracked
 !Unity/Packages/
 !Unity/Packages/**
-
-# The sample projects keep their own build output
-Samples/**/bin/
-Samples/**/obj/

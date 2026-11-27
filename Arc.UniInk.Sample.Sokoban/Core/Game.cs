@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace UniInk.Sample.Sokoban.Core
+namespace Arc.UniInk.Sample.Sokoban.Core
 {
     /// <summary> One playable level : the player , the boxes and the rules </summary>
     public sealed class Game

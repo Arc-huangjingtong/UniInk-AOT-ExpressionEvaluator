@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace UniInk.Sample.Sokoban.Core
+namespace Arc.UniInk.Sample.Sokoban.Core
 {
     /// <summary> Breadth first solver , used to prove that a level is solvable and to drive the "Solve" button </summary>
     public static class Solver

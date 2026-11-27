@@ -1,7 +1,7 @@
 using System;
 using Avalonia;
 
-namespace UniInk.Sample.Sokoban.App
+namespace Arc.UniInk.Sample.Sokoban.App
 {
     public static class Program
     {

@@ -6,9 +6,9 @@ using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
-using UniInk.Sample.Sokoban.Core;
+using Arc.UniInk.Sample.Sokoban.Core;
 
-namespace UniInk.Sample.Sokoban.App
+namespace Arc.UniInk.Sample.Sokoban.App
 {
     /// <summary> The window : the board , a policy box and one evaluation per turn </summary>
     public sealed class MainWindow : Window

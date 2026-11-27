@@ -397,7 +397,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the released versions.
 
 # 🎮Samples
 
-- [UniInk.Sample.Sokoban](Samples/UniInk.Sample.Sokoban/README.md) — a Sokoban window where **one UniInk
+- [Arc.UniInk.Sample.Sokoban](Arc.UniInk.Sample.Sokoban/README.md) — a Sokoban window where **one UniInk
   expression per turn** controls the player . The board is exposed as variables and functions , so a human or an
   AI agent can play by writing a policy string . Includes a BFS solver that proves every level is solvable .
 

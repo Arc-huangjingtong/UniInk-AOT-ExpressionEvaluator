@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Themes.Fluent;
 
-namespace UniInk.Sample.Sokoban.App
+namespace Arc.UniInk.Sample.Sokoban.App
 {
     public sealed class App : Application
     {

@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Core\UniInk.Sample.Sokoban.Core.csproj" />
+        <ProjectReference Include="..\Core\Arc.UniInk.Sample.Sokoban.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>

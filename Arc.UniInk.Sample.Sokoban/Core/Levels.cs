@@ -1,4 +1,4 @@
-namespace UniInk.Sample.Sokoban.Core
+namespace Arc.UniInk.Sample.Sokoban.Core
 {
     /// <summary> The built in levels , small enough for a policy written as an expression </summary>
     public static class Levels

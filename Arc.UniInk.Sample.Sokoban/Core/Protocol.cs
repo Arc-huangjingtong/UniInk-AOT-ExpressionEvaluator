@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Arc.UniInk;
 using Ink = Arc.UniInk.UniInk;   // the namespace and the class share the name
 
-namespace UniInk.Sample.Sokoban.Core
+namespace Arc.UniInk.Sample.Sokoban.Core
 {
     /// <summary> What one policy evaluation produced </summary>
     public readonly struct TurnResult

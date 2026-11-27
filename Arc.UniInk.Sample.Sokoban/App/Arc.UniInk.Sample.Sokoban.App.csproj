@@ -4,13 +4,13 @@
         <TargetFramework>net10.0</TargetFramework>
         <LangVersion>9</LangVersion>
         <Nullable>disable</Nullable>
-        <RootNamespace>UniInk.Sample.Sokoban.App</RootNamespace>
+        <RootNamespace>Arc.UniInk.Sample.Sokoban.App</RootNamespace>
         <IsPackable>false</IsPackable>
         <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Core\UniInk.Sample.Sokoban.Core.csproj" />
+        <ProjectReference Include="..\Core\Arc.UniInk.Sample.Sokoban.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>
