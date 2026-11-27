@@ -6,6 +6,20 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+- the lexer dispatches on the character class instead of trying seven scanners per character : the
+  `ParsingMethodDelegate` list , `StartsWithBoolFromIndex` and `StartsWithInputStrFromIndex` are gone and
+  `Evaluate( string )` keeps its empty / null guard on the outer overload only . `UniInk.cs` 2810 -> 2685 lines ,
+  `TEST_Arithmetic__UniInk` 126.8 us -> 92.2 us , allocation still 0
+
+### Removed
+
+- `InkOperator.Equals` / `GetHashCode` / `Indexer` / `OperatorValue` ( the operators are singletons , reference
+  equality is the same thing ) and the `RegisterVariable( name , value , setter )` overload
+- the `UniInk( IDictionary )` constructor moved to `UniInk.Extensions.cs` ; `UniInk.cs` keeps an explicit
+  parameterless one so the single file still stands alone
+
 ### Added
 
 - agent skills : `skills/uniink/` ( consumer , shipped inside the nupkg at `skills/uniink/` per the NuGet
