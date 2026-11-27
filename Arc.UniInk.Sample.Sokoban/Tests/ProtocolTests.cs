@@ -48,6 +48,60 @@ namespace Arc.UniInk.Sample.Sokoban.Tests
         }
 
         [Test]
+        public void TheActionGetterMovesRight()
+        {
+            var game     = NewGame();
+            var protocol = new Protocol(game);
+            var turn     = protocol.Evaluate("R");
+
+            Assert.That(turn.Ok, Is.True, turn.Error);
+            Assert.That(turn.FromAction, Is.True);
+            Assert.That(turn.Direction, Is.EqualTo(Direction.Right));
+            Assert.That(protocol.Requested, Is.EqualTo(Direction.Right));
+
+            game.Move(turn.Direction);
+
+            Assert.That(game.Solved, Is.True);
+        }
+
+        [Test]
+        public void TheActionGettersReportLegality()
+        {
+            var protocol = new Protocol(NewGame());
+
+            // the first level : a wall left and up , a box right , the player can only go right
+            Assert.That(protocol.Evaluate("L").Direction, Is.EqualTo(Direction.Left));
+            Assert.That(protocol.Evaluate("U").Direction, Is.EqualTo(Direction.Up));
+
+            var ink = protocol.CreateInk();
+
+            Assert.That(ink.Evaluate("R").GetResult_Int(), Is.EqualTo(1), "pushing right is legal");
+            Assert.That(ink.Evaluate("L").GetResult_Int(), Is.EqualTo(0), "the left neighbour is a wall");
+        }
+
+        [Test]
+        public void TheLastActionNamedWins()
+        {
+            // both arms are parsed before the condition is evaluated , so R and D both run and D wins
+            var protocol = new Protocol(NewGame());
+            var turn     = protocol.Evaluate("if ( BOX_AT( right ) ) { return R } else { return D }");
+
+            Assert.That(turn.Ok, Is.True, turn.Error);
+            Assert.That(turn.FromAction, Is.True);
+            Assert.That(turn.Direction, Is.EqualTo(Direction.Down), "the last named action wins");
+        }
+
+        [Test]
+        public void TheActionRequestResetsBetweenTurns()
+        {
+            var protocol = new Protocol(NewGame());
+
+            Assert.That(protocol.Evaluate("R").FromAction, Is.True);
+            Assert.That(protocol.Evaluate("1").FromAction, Is.False, "a plain direction code must not inherit the request");
+            Assert.That(protocol.Requested, Is.Null);
+        }
+
+        [Test]
         public void AnEmptyPolicyIsReported()
         {
             var turn = new Protocol(NewGame()).Evaluate("   ");

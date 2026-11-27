@@ -27,6 +27,7 @@ expression must evaluate to an `int` : `0` up , `1` right , `2` down , `3` left 
 | `steps` , `pushes` | variable | the counters of the level |
 | `solved` | variable | `1` when every box is on a goal |
 | `up` `right` `down` `left` | variable | the direction codes , so a policy can `return right` |
+| **`U` `R` `D` `L`** | **action getter** | naming one asks the host to move that way : the policy can be the single letter `R` |
 | `WALL( x , y )` | function | the square is a wall ( outside the board counts as a wall ) |
 | `BOX( x , y )` | function | a box stands there |
 | `GOAL( x , y )` | function | the square is a goal |
@@ -36,6 +37,28 @@ expression must evaluate to an `int` : `0` up , `1` right , `2` down , `3` left 
 | `GOAL_AT( d )` | function | the square in direction `d` is a goal |
 
 A policy is **one expression** : there is no loop , the loop is the turn .
+
+## The action getters
+
+`U` `R` `D` `L` are registered with `InkValue.SetGetter` : the getter runs when the name is **parsed** , it records
+the direction and reports whether the move is legal ( `1` / `0` ) . The host applies the recorded direction after
+the evaluation , so one turn is always exactly one move :
+
+```
+R
+```
+
+```
+if ( solved ) { return 0 } else { return R }
+```
+
+A getter runs at parse time , **before** the condition is evaluated — and the parser walks both arms of an
+`if` . So never branch between action names : `if ( BOX_AT( right ) ) { return R } else { return D }` records
+`R` **and** `D` and the last one wins ( `D` ) . Branch between direction **codes** instead :
+
+```
+if ( BOX_AT( right ) && ! WALL( px + 2 , py ) ) { return right } else { return down }
+```
 
 ## Example policies
 

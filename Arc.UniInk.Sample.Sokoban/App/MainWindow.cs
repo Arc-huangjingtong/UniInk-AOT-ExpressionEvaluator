@@ -182,7 +182,10 @@ namespace Arc.UniInk.Sample.Sokoban.App
             }
 
             Render();
-            Status(game.Solved ? "Solved!" : $"{turn.Direction} · steps {game.Steps} · pushes {game.Pushes}", game.Solved);
+
+            var how = turn.FromAction ? " ( action getter )" : string.Empty;
+
+            Status(game.Solved ? "Solved!" : $"{turn.Direction}{how} · steps {game.Steps} · pushes {game.Pushes}", game.Solved);
         }
 
         /// <summary> Play the shortest solution from the solver , one move per tick </summary>
