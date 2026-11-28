@@ -4,6 +4,8 @@ A small **Sokoban that a string controls** : every turn the game evaluates one U
 direction it answers with . The point is to show the evaluator driving real behaviour — and to let an AI agent
 play by writing one expression per turn .
 
+![The window at 1080 x 720](docs/sokoban.png)
+
 ```
 dotnet run --project Arc.UniInk.Sample.Sokoban/App -c Release
 ```
@@ -12,9 +14,10 @@ The project sets `<UseAppHost>false</UseAppHost>` , so `dotnet run` starts the d
 on macOS needs a signature and is killed by Gatekeeper ( `Killed: 9` ) . If you build your own copy , run
 `dotnet bin/Release/net10.0/Arc.UniInk.Sample.Sokoban.App.dll` instead of the executable .
 
-- Arrow keys move the player by hand .
+- Arrow keys move the player by hand , **Space** runs one turn of the policy .
 - **Run one turn** evaluates the policy once . **Auto run** repeats it . **Solve ( BFS )** plays the shortest
-  solution found by the solver . **Reset** restarts the level .
+  solution found by the solver . **Reset** restarts the level . The header counts steps , pushes and boxes home ,
+  the strip under the board explains the squares , and the side panel lists the board functions .
 
 ## The protocol ( v1 )
 

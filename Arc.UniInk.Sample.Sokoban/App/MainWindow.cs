@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -10,24 +11,24 @@ using Arc.UniInk.Sample.Sokoban.Core;
 
 namespace Arc.UniInk.Sample.Sokoban.App
 {
-    /// <summary> The window : the board , a policy box and one evaluation per turn </summary>
+    /// <summary> The window : one board , one policy , one evaluation per turn </summary>
     public sealed class MainWindow : Window
     {
-        private const double CellSize = 42;
+        private const double Tile  = 46;
+        private const double Gap   = 6;
 
-        private static readonly IBrush WallBrush     = new SolidColorBrush(Color.Parse("#3C3C3C"));
-        private static readonly IBrush FloorBrush    = new SolidColorBrush(Color.Parse("#F6F1E7"));
-        private static readonly IBrush GoalBrush     = new SolidColorBrush(Color.Parse("#CDE9C9"));
-        private static readonly IBrush BoxBrush      = new SolidColorBrush(Color.Parse("#A1887F"));
-        private static readonly IBrush BoxDoneBrush  = new SolidColorBrush(Color.Parse("#4CAF50"));
-        private static readonly IBrush PlayerBrush   = new SolidColorBrush(Color.Parse("#1E88E5"));
-        private static readonly IBrush TextBrush     = Brushes.White;
+        private readonly ComboBox  levelBox  = new() { Width = 168 };
+        private readonly TextBox   policyBox = new() { Name = "policy", AcceptsReturn = true, MinHeight = 96, FontFamily = Skin.Mono, FontSize = 13, TextWrapping = TextWrapping.Wrap };
+        private readonly TextBlock stepsText = new() { FontFamily = Skin.Mono, FontSize = 12, Foreground = Skin.InkBrush };
+        private readonly TextBlock pushesText = new() { FontFamily = Skin.Mono, FontSize = 12, Foreground = Skin.InkBrush };
+        private readonly TextBlock goalsText  = new() { FontFamily = Skin.Mono, FontSize = 12, Foreground = Skin.InkBrush };
+        private readonly TextBlock levelTitle = new() { FontSize = 12.5, Foreground = Skin.MutedBrush, Margin = new Thickness(0, 2, 0, 0) };
+        private readonly TextBlock status     = new() { FontSize = 12.5, FontWeight = FontWeight.Medium, TextWrapping = TextWrapping.Wrap };
+        private readonly TextBlock detail     = new() { FontSize = 11.5, Foreground = Skin.MutedBrush, TextWrapping = TextWrapping.Wrap };
+        private readonly Canvas    board      = new();
+        private readonly CheckBox  wasd       = new() { Content = "WASD" };
+        private readonly CheckBox  auto       = new() { Content = "Auto run" };
 
-        private readonly ComboBox levelBox  = new() { Width = 220, Margin = new Thickness(0, 0, 8, 0) };
-        private readonly TextBox  policyBox = new() { AcceptsReturn = true, MinHeight = 90, FontFamily = FontFamily.Default };
-        private readonly TextBlock status   = new() { TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 8, 0, 0) };
-        private readonly CheckBox  wasd     = new() { Content = "WASD" };
-        private readonly Canvas board      = new() { Width = 1, Height = 1 };
         private readonly DispatcherTimer timer;
         private readonly DispatcherTimer solutionTimer;
 
@@ -37,10 +38,15 @@ namespace Arc.UniInk.Sample.Sokoban.App
 
         public MainWindow()
         {
-            Title = "UniInk Sokoban — one expression per turn";
-            Width = 980;
-            Height = 640;
+            Title           = "UniInk Sokoban";
+            Width           = 1080;
+            Height          = 720;
+            MinWidth        = 940;
+            MinHeight       = 640;
+            Background      = Skin.BackdropBrush;
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
+
+            Styles.AddRange(Skin.Build());
 
             timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(320) };
             timer.Tick += (_, _) => Step();
@@ -48,92 +54,346 @@ namespace Arc.UniInk.Sample.Sokoban.App
             solutionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(220) };
             solutionTimer.Tick += (_, _) => PlaySolutionStep();
 
-            Content = BuildLayout();
-
-            for (var i = 0 ; i < Levels.Count ; i++) levelBox.Items.Add(Levels.Get(i).Name);
+            for (var i = 0 ; i < Levels.Count ; i++) levelBox.Items.Add($"{i + 1} · {Levels.Get(i).Name}");
 
             levelBox.SelectedIndex = 0;
             levelBox.SelectionChanged += (_, _) => LoadLevel(levelBox.SelectedIndex);
 
+            Content = BuildLayout();
+
             policyBox.Text = "if ( BOX_AT( right ) && ! WALL( px + 2 , py ) ) { return right } else { return down }";
 
             LoadLevel(0);
-
             KeyDown += OnKeyDown;
         }
 
         private Control BuildLayout()
         {
-            var runTurn  = new Button { Content = "Run one turn" };
-            var auto     = new CheckBox { Content = "Auto run" };
-            var solve    = new Button { Content = "Solve ( BFS )" };
-            var reset    = new Button { Content = "Reset" };
+            var root = new Grid
+            {
+                RowDefinitions = new RowDefinitions("Auto,*,Auto"),
+                Margin         = new Thickness(24, 20, 24, 20),
+                RowSpacing     = 18
+            };
 
-            runTurn.Click += (_, _) => Step();
+            var header = BuildHeader();
+            var body   = BuildBody();
+            var footer = BuildFooter();
+
+            Grid.SetRow(header, 0);
+            Grid.SetRow(body, 1);
+            Grid.SetRow(footer, 2);
+
+            root.Children.Add(header);
+            root.Children.Add(body);
+            root.Children.Add(footer);
+
+            return root;
+        }
+
+        private Control BuildHeader()
+        {
+            var title = new StackPanel
+            {
+                Spacing  = 0,
+                Children =
+                {
+                    new TextBlock { Text = "UniInk · Sokoban", FontSize = 19, FontWeight = FontWeight.SemiBold, Foreground = Skin.InkBrush },
+                    levelTitle
+                }
+            };
+
+            var counters = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Spacing     = 10,
+                VerticalAlignment = VerticalAlignment.Center,
+                Children    = { Chip("steps", stepsText), Chip("pushes", pushesText), Chip("boxes", goalsText) }
+            };
+
+            var right = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Spacing     = 10,
+                VerticalAlignment = VerticalAlignment.Center,
+                Children    = { counters, levelBox }
+            };
+
+            var header = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto") };
+
+            Grid.SetColumn(title, 0);
+            Grid.SetColumn(right, 1);
+
+            header.Children.Add(title);
+            header.Children.Add(right);
+
+            return header;
+        }
+
+        /// <summary> What the squares mean , so the board reads without a manual </summary>
+        private static Control BuildLegend()
+        {
+            var goal = Skin.GoalRingBrush;
+
+            var legend = new StackPanel
+            {
+                Orientation         = Orientation.Horizontal,
+                Spacing             = 18,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+
+            legend.Children.Add(Item(Skin.WallBrush, "wall", false));
+            legend.Children.Add(Item(Skin.FloorBrush, "floor", false));
+            legend.Children.Add(Item(goal, "goal", true));
+            legend.Children.Add(Item(Skin.BoxBrush, "box", false));
+            legend.Children.Add(Item(Skin.PlayerBrush, "player", false));
+
+            Grid.SetRow(legend, 1);
+
+            return legend;
+        }
+
+        private static Control Item(IBrush brush, string label, bool ring)
+        {
+            return new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Spacing     = 7,
+                Children    =
+                {
+                    new Border
+                    {
+                        Width           = 12,
+                        Height          = 12,
+                        CornerRadius    = new CornerRadius(ring ? 6 : 3),
+                        Background      = ring ? Brushes.Transparent : brush,
+                        BorderBrush     = brush,
+                        BorderThickness = ring ? new Thickness(2.0) : new Thickness(0.0),
+                        VerticalAlignment = VerticalAlignment.Center
+                    },
+                    new TextBlock { Text = label, FontSize = 11, Foreground = Skin.MutedBrush, VerticalAlignment = VerticalAlignment.Center }
+                }
+            };
+        }
+
+        /// <summary> The board functions , in the monospace voice of the language </summary>
+        private static Control Functions()
+        {
+            var grid = new UniformGrid { Columns = 2 };
+
+            foreach (var name in new[] { "WALL( x , y )", "BOX( x , y )", "GOAL( x , y )", "FREE( x , y )", "CAN_MOVE( d )", "BOX_AT( d )", "GOAL_AT( d )", "px , py" })
+            {
+                grid.Children.Add(new TextBlock
+                {
+                    Text      = name,
+                    FontFamily = Skin.Mono,
+                    FontSize  = 11,
+                    Foreground = Skin.MutedBrush,
+                    Margin    = new Thickness(0, 0, 0, 5)
+                });
+            }
+
+            return grid;
+        }
+
+        private int Home()
+        {
+            var home = 0;
+
+            foreach (var box in game.Boxes)
+            {
+                if (game.IsGoal(box.X, box.Y)) home++;
+            }
+
+            return home;
+        }
+
+        private static Control Chip(string label, TextBlock value)
+        {
+            return new Border
+            {
+                Background      = Skin.SurfaceBrush,
+                BorderBrush     = Skin.LineBrush,
+                BorderThickness = new Thickness(1),
+                CornerRadius    = new CornerRadius(8),
+                Padding         = new Thickness(10, 5),
+                Child           = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Spacing     = 6,
+                    Children    = { new TextBlock { Text = label, FontSize = 10.5, Foreground = Skin.MutedBrush, VerticalAlignment = VerticalAlignment.Center }, value }
+                }
+            };
+        }
+
+        private Control BuildBody()
+        {
+            var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("*,400"), ColumnSpacing = 20 };
+
+            var boardCard = new Border
+            {
+                Background       = Skin.SurfaceBrush,
+                BorderBrush      = Skin.LineBrush,
+                BorderThickness  = new Thickness(1),
+                CornerRadius     = new CornerRadius(16),
+                BoxShadow        = Skin.CardShadow,
+                Padding          = new Thickness(20),
+                Child            = new Grid
+                {
+                    RowDefinitions = new RowDefinitions("*,Auto"),
+                    RowSpacing     = 14,
+                    Children =
+                    {
+                        new Border
+                        {
+                            Background      = Skin.BoardBrush,
+                            BorderBrush     = Skin.LineBrush,
+                            BorderThickness = new Thickness(1.0),
+                            CornerRadius    = new CornerRadius(12),
+                            Padding         = new Thickness(12),
+                            Child           = new Viewbox
+                            {
+                                Stretch             = Stretch.Uniform,
+                                MaxWidth            = 640,
+                                MaxHeight           = 520,
+                                HorizontalAlignment = HorizontalAlignment.Center,
+                                VerticalAlignment   = VerticalAlignment.Center,
+                                Child               = board
+                            }
+                        },
+                        BuildLegend()
+                    }
+                }
+            };
+
+            var side = BuildSide();
+
+            Grid.SetColumn(boardCard, 0);
+            Grid.SetColumn(side, 1);
+
+            grid.Children.Add(boardCard);
+            grid.Children.Add(side);
+
+            return grid;
+        }
+
+        private Control BuildSide()
+        {
+            var examples = new WrapPanel();
+
+            foreach (var example in new[] { "R", "RR", "RL", "UUL", "if ( BOX_AT( right ) )" })
+            {
+                var text = example;
+
+                var chip = new Button
+                {
+                    Content  = text,
+                    Classes  = { "ghost" },
+                    FontFamily = Skin.Mono,
+                    FontSize = 11.5,
+                    Margin   = new Thickness(0, 0, 6, 6),
+                    Padding  = new Thickness(9, 4)
+                };
+
+                chip.Click += (_, _) => { policyBox.Text = text; policyBox.Focus(); };
+
+                examples.Children.Add(chip);
+            }
+
+            var policy = new StackPanel
+            {
+                Spacing  = 8,
+                Children = { Skin.Caption("Policy"), policyBox, examples }
+            };
+
+            var statusCard = new Border
+            {
+                Background      = Skin.SurfaceAltBrush,
+                CornerRadius    = new CornerRadius(10),
+                Padding         = new Thickness(12, 10),
+                Child           = new StackPanel { Spacing = 3, Children = { status, detail } }
+            };
+
+            var sideCard = new Border
+            {
+                Background      = Skin.SurfaceBrush,
+                BorderBrush     = Skin.LineBrush,
+                BorderThickness = new Thickness(1),
+                CornerRadius    = new CornerRadius(16),
+                BoxShadow       = Skin.SoftShadow,
+                Padding         = new Thickness(20),
+                Child           = new StackPanel
+                {
+                    Spacing  = 18,
+                    Children =
+                    {
+                        policy,
+                        new StackPanel
+                        {
+                            Spacing  = 8,
+                            Children = { Skin.Caption("Status"), statusCard }
+                        },
+                        new StackPanel
+                        {
+                            Spacing  = 8,
+                            Children = { Skin.Caption("Board"), Functions() }
+                        },
+                        new TextBlock
+                        {
+                            Text         = "One UniInk expression per turn. It returns a direction code ( 0 up , 1 right , 2 down , 3 left ) " +
+                                           "or names an action letter, which queues that move.",
+                            FontSize     = 11.5,
+                            Foreground   = Skin.MutedBrush,
+                            TextWrapping = TextWrapping.Wrap
+                        }
+                    }
+                }
+            };
+
+            return sideCard;
+        }
+
+        private Control BuildFooter()
+        {
+            var run = new Button { Name = "run", Content = "Run one turn", Classes = { "primary" } };
+            var solve = new Button { Name = "solve", Content = "Solve ( BFS )" };
+            var reset = new Button { Content = "Reset" };
+
+            run.Click += (_, _) => Step();
+            solve.Click += (_, _) => SolveLevel();
+            reset.Click += (_, _) => LoadLevel(levelBox.SelectedIndex);
+
             auto.IsCheckedChanged += (_, _) =>
             {
                 if (auto.IsChecked == true) timer.Start();
                 else                        timer.Stop();
             };
-            solve.Click += (_, _) => SolveLevel();
-            reset.Click += (_, _) => LoadLevel(levelBox.SelectedIndex);
 
-            var toolbar = new StackPanel
+            var left = new StackPanel
             {
                 Orientation = Orientation.Horizontal,
-                Spacing     = 8,
-                Margin      = new Thickness(12, 12, 12, 0),
-                Children    = { levelBox, runTurn, auto, solve, wasd, reset }
-            };
-
-            var boardHost = new Border
-            {
-                Background      = new SolidColorBrush(Color.Parse("#2B2B2B")),
-                CornerRadius    = new CornerRadius(8),
-                Padding         = new Thickness(14),
-                Margin          = new Thickness(12),
-                HorizontalAlignment = HorizontalAlignment.Left,
-                VerticalAlignment   = VerticalAlignment.Top,
-                Child           = board
+                Spacing     = 10,
+                VerticalAlignment = VerticalAlignment.Center,
+                Children    = { run, auto, solve, wasd, reset }
             };
 
             var hint = new TextBlock
             {
-                Text         = "Arrows also move the player. The policy is one UniInk expression, evaluated once per turn; " +
-                               "it must return a direction: up / right / down / left ( 0 / 1 / 2 / 3 ).",
-                TextWrapping = TextWrapping.Wrap,
-                Opacity      = 0.75,
-                Margin       = new Thickness(0, 6, 0, 0)
+                Text      = "Space runs a turn · arrows move the player",
+                FontSize  = 11,
+                Foreground = Skin.MutedBrush,
+                VerticalAlignment = VerticalAlignment.Center
             };
 
-            var side = new StackPanel
-            {
-                Margin   = new Thickness(0, 12, 12, 12),
-                Spacing  = 6,
-                Children = { new TextBlock { Text = "Policy" }, policyBox, hint, status }
-            };
+            var footer = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto") };
 
-            var grid = new Grid
-            {
-                ColumnDefinitions = new ColumnDefinitions("*,380"),
-                RowDefinitions    = new RowDefinitions("Auto,*")
-            };
+            Grid.SetColumn(left, 0);
+            Grid.SetColumn(hint, 1);
 
-            Grid.SetColumn(toolbar, 0);
-            Grid.SetColumnSpan(toolbar, 2);
-            Grid.SetRow(toolbar, 0);
+            footer.Children.Add(left);
+            footer.Children.Add(hint);
 
-            Grid.SetColumn(boardHost, 0);
-            Grid.SetRow(boardHost, 1);
-
-            Grid.SetColumn(side, 1);
-            Grid.SetRow(side, 1);
-
-            grid.Children.Add(toolbar);
-            grid.Children.Add(boardHost);
-            grid.Children.Add(side);
-
-            return grid;
+            return footer;
         }
 
         private void LoadLevel(int index)
@@ -144,22 +404,22 @@ namespace Arc.UniInk.Sample.Sokoban.App
 
             game = new Game(Levels.Get(index < 0 ? 0 : index));
 
-            board.Width  = game.Width * CellSize;
-            board.Height = game.Height * CellSize;
+            board.Width  = game.Width * Tile + Gap * 2;
+            board.Height = game.Height * Tile + Gap * 2;
 
-            policyBox.Text = policyBox.Text;   // keep the policy across levels
+            levelTitle.Text = game.Level.Hint;
+            detail.Text     = "Level " + (index + 1) + " · " + game.Level.Name;
+
             Render();
-            Status(game.Level.Hint, false);
+            Message("Ready", Skin.MutedBrush);
         }
 
-        /// <summary> Evaluate the policy once and apply the move it answers with </summary>
         private void Step()
         {
             if (game.Solved)
             {
                 timer.Stop();
-
-                Status("Solved — reset or pick another level.", true);
+                Message("Solved — reset or pick another level", Skin.SuccessBrush);
 
                 return;
             }
@@ -170,7 +430,7 @@ namespace Arc.UniInk.Sample.Sokoban.App
             if (!turn.Ok)
             {
                 timer.Stop();
-                Status($"policy error: {turn.Error}", true);
+                Message("Policy error", Skin.DangerBrush, turn.Error);
 
                 return;
             }
@@ -189,17 +449,23 @@ namespace Arc.UniInk.Sample.Sokoban.App
             if (moved < turn.Moves.Count)
             {
                 timer.Stop();
-                Status($"moved {moved}/{turn.Moves.Count} , then {turn.Moves[moved]} is blocked", true);
+                Message($"Blocked after {moved} of {turn.Moves.Count} move(s)", Skin.DangerBrush, $"{turn.Moves[moved]} is not possible here");
 
                 return;
             }
 
-            var how = turn.FromAction ? $" ({turn.Moves.Count} action getter{ (turn.Moves.Count == 1 ? "" : "s" ) })" : string.Empty;
+            var source = turn.FromAction ? "action letter" : "direction code";
 
-            Status(game.Solved ? "Solved!" : $"{turn.Moves.Count} move{ (turn.Moves.Count == 1 ? "" : "s" ) }{how} · steps {game.Steps} · pushes {game.Pushes}", game.Solved);
+            if (game.Solved)
+            {
+                Message("Solved!", Skin.SuccessBrush, $"{game.Steps} steps · {game.Pushes} pushes");
+            }
+            else
+            {
+                Message($"{turn.Moves.Count} move(s) played", Skin.InkBrush, $"{source} · {game.Steps} steps · {game.Pushes} pushes");
+            }
         }
 
-        /// <summary> Play the shortest solution from the solver , one move per tick </summary>
         private void SolveLevel()
         {
             if (game.Solved) return;
@@ -210,10 +476,12 @@ namespace Arc.UniInk.Sample.Sokoban.App
 
             if (solution is null || solution.Count == 0)
             {
-                Status("no solution found", true);
+                Message("No solution found", Skin.DangerBrush);
 
                 return;
             }
+
+            Message("Solving…", Skin.AccentBrush, $"{solution.Count} moves");
 
             solutionTimer.Start();
         }
@@ -223,18 +491,26 @@ namespace Arc.UniInk.Sample.Sokoban.App
             if (solution is null || solutionStep >= solution.Count || game.Solved)
             {
                 solutionTimer.Stop();
-                Status(game.Solved ? "Solved by BFS!" : "the solution ran out", game.Solved);
+                Message(game.Solved ? "Solved by BFS" : "The solution ran out", game.Solved ? Skin.SuccessBrush : Skin.DangerBrush);
 
                 return;
             }
 
             game.Move(solution[solutionStep++]);
             Render();
-            Status($"solver {solutionStep}/{solution.Count} · steps {game.Steps} · pushes {game.Pushes}", game.Solved);
+            Message("Solving…", Skin.AccentBrush, $"{solutionStep} / {solution.Count}");
         }
 
         private void OnKeyDown(object sender, KeyEventArgs args)
         {
+            if (args.Key == Key.Space)
+            {
+                Step();
+                args.Handled = true;
+
+                return;
+            }
+
             var direction = args.Key switch
             {
                 Key.Up    => Direction.Up
@@ -249,74 +525,132 @@ namespace Arc.UniInk.Sample.Sokoban.App
             if (game.Move(direction.Value))
             {
                 Render();
-                Status($"{direction} · steps {game.Steps} · pushes {game.Pushes}", game.Solved);
+                Message("Moved by hand", Skin.MutedBrush, $"{game.Steps} steps · {game.Pushes} pushes");
             }
             else
             {
-                Status("blocked", false);
+                Message("Blocked", Skin.DangerBrush);
             }
 
             args.Handled = true;
         }
 
-        private void Status(string text, bool error) => status.Text = text;
+        private void Message(string text, IBrush color, string sub = null)
+        {
+            status.Text      = text;
+            status.Foreground = color;
+            detail.Text      = sub;
+        }
 
         private void Render()
         {
             board.Children.Clear();
 
+            stepsText.Text  = game.Steps.ToString();
+            pushesText.Text = game.Pushes.ToString();
+            goalsText.Text  = $"{Home()} / {game.Boxes.Count}";
+
             for (var y = 0 ; y < game.Height ; y++)
             {
                 for (var x = 0 ; x < game.Width ; x++)
                 {
-                    var background = game.IsWall(x, y)
-                                         ? WallBrush
-                                         : game.IsGoal(x, y)
-                                             ? GoalBrush
-                                             : FloorBrush;
+                    var cell = Cell(x, y);
 
-                    var cell = new Border
-                    {
-                        Width           = CellSize,
-                        Height          = CellSize,
-                        Background      = background,
-                        BorderThickness = new Thickness(0.5),
-                        BorderBrush     = new SolidColorBrush(Color.Parse("#DDD6C8")),
-                        Child           = Glyph(x, y)
-                    };
-
-                    Canvas.SetLeft(cell, x * CellSize);
-                    Canvas.SetTop(cell, y * CellSize);
+                    Canvas.SetLeft(cell, Gap + x * Tile);
+                    Canvas.SetTop(cell, Gap + y * Tile);
                     board.Children.Add(cell);
                 }
             }
         }
 
-        private Control Glyph(int x, int y)
+        private Control Cell(int x, int y)
         {
-            if (game.IsWall(x, y)) return null;
+            var inside = new Border
+            {
+                Width        = Tile - 4,
+                Height       = Tile - 4,
+                CornerRadius = new CornerRadius(9)
+            };
+
+            if (game.IsWall(x, y))
+            {
+                inside.Background = Skin.WallBrush;
+                inside.Child      = new Border
+                {
+                    Height          = 4,
+                    Margin          = new Thickness(5, 4, 5, 0),
+                    VerticalAlignment = VerticalAlignment.Top,
+                    CornerRadius    = new CornerRadius(2),
+                    Background      = Skin.WallTopBrush
+                };
+
+                return inside;
+            }
+
+            inside.Background      = Skin.FloorBrush;
+            inside.BorderBrush     = new SolidColorBrush(Color.Parse("#1D2230"));
+            inside.BorderThickness = new Thickness(1.0);
+
+            if (game.IsGoal(x, y))
+            {
+                inside.Child = new Border
+                {
+                    Width             = 18,
+                    Height            = 18,
+                    CornerRadius      = new CornerRadius(9),
+                    BorderThickness   = new Thickness(2),
+                    BorderBrush       = Skin.GoalRingBrush,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment   = VerticalAlignment.Center
+                };
+            }
 
             if (game.HasBox(x, y))
             {
-                return new Border
+                var onGoal = game.IsGoal(x, y);
+
+                inside.Child = new Border
                 {
-                    Margin          = new Thickness(6),
-                    CornerRadius    = new CornerRadius(4),
-                    Background      = game.IsGoal(x, y) ? BoxDoneBrush : BoxBrush
+                    Width             = 32,
+                    Height            = 32,
+                    CornerRadius      = new CornerRadius(8),
+                    Background        = onGoal ? Skin.BoxDoneBrush : Skin.BoxBrush,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment   = VerticalAlignment.Center,
+                    Child             = new Border
+                    {
+                        Height          = 6,
+                        Margin          = new Thickness(5, 4, 5, 0),
+                        VerticalAlignment = VerticalAlignment.Top,
+                        CornerRadius    = new CornerRadius(3),
+                        Background      = onGoal ? Skin.BoxDoneTopBrush : Skin.BoxTopBrush
+                    }
                 };
             }
-
-            if (game.PlayerX == x && game.PlayerY == y)
+            else if (game.PlayerX == x && game.PlayerY == y)
             {
-                return new Border
+                inside.Child = new Border
                 {
-                    Margin       = new Thickness(9),
-                    CornerRadius = new CornerRadius(20),
-                    Background   = PlayerBrush
+                    Width             = 28,
+                    Height            = 28,
+                    CornerRadius      = new CornerRadius(14),
+                    Background        = Skin.PlayerBrush,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment   = VerticalAlignment.Center,
+                    Child             = new Border
+                    {
+                        Width             = 8,
+                        Height            = 8,
+                        CornerRadius      = new CornerRadius(4),
+                        Margin            = new Thickness(6, 5, 0, 0),
+                        HorizontalAlignment = HorizontalAlignment.Left,
+                        VerticalAlignment   = VerticalAlignment.Top,
+                        Background        = Skin.PlayerGlint
+                    }
                 };
             }
 
-            return null;
+            return inside;
         }
     }
 }
