@@ -16,6 +16,9 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
   counters , a board that scales to the card , a legend under it , the policy editor with example chips , a
   coloured status line and the board functions listed beside it , with a ripple when a box lands home ( every box
   ripples in a short stagger when the level is cleared )
+- the sample gains a hard level — Microban #10 by David W. Skinner , three boxes , 89 moves — and a headless
+  player ( `--list` , `--ask` , `--script` , `--solve` ) so an agent can read the board through UniInk and play it
+  one expression per turn ; `docs/agent-play.md` is a recorded run
 - the sample registers `U` `R` `D` `L` as **getters** : naming one appends to the move queue of the turn , so
   `R` is one move , `RR` two and `RL` right then left , and the host stops at the first blocked move . The
   `W` `A` `S` `D` scheme is selectable instead ( `D` conflicts with the arrow scheme , so only one is registered )

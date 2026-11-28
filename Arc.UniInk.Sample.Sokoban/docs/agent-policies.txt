@@ -1,0 +1,15 @@
+# The agent's script for level 4 ( Skinner 10 ) . One policy per line , one evaluation per turn .
+# Letters are the action getters the sample registers : U up , R right , D down , L left .
+RDDRRUU
+LLRRDDR
+RUUUUUR
+RDDDLRU
+UULLDDD
+LLDDRRU
+UUUDDDD
+LLLLUUR
+RRLDDRR
+UUUDDDL
+LLLLLUU
+RRRRRLD
+DRRUU

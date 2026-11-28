@@ -38,6 +38,19 @@ namespace Arc.UniInk.Sample.Sokoban.Core
                                , "########"
                              } , "one box , three goals — only one of them matters for the win"
             )
+            // Microban 10 by David W. Skinner ( revised April 2000 ) , used here as the hard level
+          , ("Microban 10" , new[]
+                                {
+                                    "###########"
+                                  , "#######.  #"
+                                  , "#######.# #"
+                                  , "#######.# #"
+                                  , "# @ $ $ $ #"
+                                  , "# # # # ###"
+                                  , "#       ###"
+                                  , "###########"
+                                } , "three boxes , three goals in a narrow corridor : the order of the pushes is the puzzle ( Microban 10 , David W. Skinner )"
+            )
         };
 
         public static int Count => Data.Length;

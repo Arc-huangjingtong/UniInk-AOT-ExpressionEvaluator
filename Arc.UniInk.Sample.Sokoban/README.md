@@ -100,12 +100,39 @@ if ( BOX_AT( right ) && GOAL( px + 2 , py ) ) { return right } else { return dow
 The first level is solved by the first policy . The later levels need a real strategy — which is the interesting
 part for an agent : it can read the board through the functions above and decide one move at a time .
 
+## An agent plays a level
+
+The hard level is [Microban #10](https://cdn.jsdelivr.net/gh/OMerkel/Sokoban@master/3rdParty/Levels/Microban.txt)
+by David W. Skinner — three boxes , three goals , 89 moves . The app can be driven headless , so an agent reads the
+board through UniInk and answers with UniInk expressions , one evaluation per turn :
+
+```bash
+# what the board looks like , and what it offers
+dotnet run --project Arc.UniInk.Sample.Sokoban/App -c Release -- --list
+
+# ask questions : each expression is evaluated , nothing moves
+dotnet run --project Arc.UniInk.Sample.Sokoban/App -c Release -- --ask 4 \
+  "px" "py" "BOX( 4 , 4 )" "GOAL( 7 , 1 ) && GOAL( 7 , 2 )" "CAN_MOVE( right )"
+
+# play a script : one policy per line , one evaluation per turn
+dotnet run --project Arc.UniInk.Sample.Sokoban/App -c Release -- \
+  --script 4 docs/agent-policies.txt
+
+# the shortest solution , as URDL letters
+dotnet run --project Arc.UniInk.Sample.Sokoban/App -c Release -- --solve 4
+```
+
+The recorded run is in [docs/agent-play.md](docs/agent-play.md) : the questions the agent asked , then the turns ,
+with the board after each one . Add a delay as a fourth argument ( `--script 4 docs/agent-policies.txt 400` ) when
+you want the turns to play back slowly on screen .
+
 ## Structure
 
 ```
 Core/     the rules ( Board , Game , Levels ) , the protocol ( UniInk names ) and a BFS solver
-App/      the Avalonia window : the board , the policy box , one evaluation per turn
+App/      the Avalonia window , plus a headless player for the --ask / --script / --solve modes
 Tests/    rules , protocol and "every level is solvable" ( the BFS replays the path )
+docs/     the screenshots , the ripple gif and the recorded agent run
 ```
 
 The sample is **not** part of the NuGet package or the Unity package : it is a playground for the evaluator .
