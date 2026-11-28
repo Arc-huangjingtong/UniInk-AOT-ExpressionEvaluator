@@ -125,6 +125,36 @@ dotnet run --project Arc.UniInk.Sample.Sokoban/App -c Release -- --solve 4
 The same script can be played **in the window** , one expression at a time : pick level 5 , paste a policy , press
 **Run one turn** , repeat . The gif below is exactly that — fifteen turns , from `0/3` boxes home to `Solved!` :
 
+[![The agent plays Microban 10](docs/agent-play-poster.png)](docs/agent-play.mp4)
+
+**→ [docs/agent-play.mp4](docs/agent-play.mp4) — 72 seconds , one move per step , with sound**
+
+The video shows an agent working in the window :
+
+1. it **types** the expression one character at a time , with a caret and a key click ,
+2. it runs the plan **one move per step** , with the thinking beat `【。】` → `【。。】` → `【。。。】` before each step ,
+3. when the line is spent it **deletes it quickly** ( four characters per beat ) and types the next one ,
+4. at the end the boxes ripple home , the level reports `Solved!` and a chime closes the take .
+
+Six of the fifteen turns are **decisions written with the board functions** instead of replayed letters :
+
+```
+if ( ! WALL( px + 1 , py ) ) { return right } else { return left }
+if ( CAN_MOVE( down ) ) { return down } else { return up }
+if ( FREE( px , py - 1 ) || BOX( px , py - 1 ) ) { return up } else { return down }
+if ( CAN_MOVE( up ) ) { return up } else { return left }
+```
+
+The soundtrack is generated from the same frame timeline — a slow pad under one sound per event , so every click ,
+step and chime lands on its frame .
+
+The same playback is built into the app , so you can record it without typing anything :
+
+```bash
+dotnet run --project Arc.UniInk.Sample.Sokoban/App -c Release -- \
+  --replay 4 Arc.UniInk.Sample.Sokoban/docs/agent-policies.txt
+```
+
 ![Fifteen turns in the window](docs/sokoban-play.gif)
 
 ![Six of the fifteen turns](docs/sokoban-play-sheet.png)

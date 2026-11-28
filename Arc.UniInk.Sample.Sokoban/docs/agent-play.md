@@ -46,11 +46,10 @@ level 4 : Microban 10 ( 11 x 8 )
   back True
 ```
 
-## 2 . Program the route
+## 2 . Play it
 
-The route comes from the solver in `Core/Solver.cs` ( breadth first over player + boxes ) , then it is written as
-UniInk : plain letter strings while the path is forced , and a **reactive rule** at the end , where reading the board
-is cheaper than replaying a fixed path .
+Nine turns are letter runs ( the action getters queue them ) , six are decisions written with the board functions ,
+and the last two are the reactive rule that pushes the third box home .
 
 ```bash
 dotnet run --project Arc.UniInk.Sample.Sokoban/App -c Release -- \
@@ -69,151 +68,138 @@ level 4 : Microban 10 ( 11 x 8 )
 ###########
 
 ── turn 1 ─────────────────────────────────────────────
-expr : RDDRRUU
-moves : right down down right right up up  ( action letters )
+expr : RDD
+moves : right down down  ( action letters )
 ###########
 #######.  #
 #######.# #
 #######.# #
-#   $@$ $ #
+#   $ $ $ #
 # # # # ###
-#       ###
+#  @    ###
 ###########
 
-[ px 5 py 4 · steps 7 · pushes 0 · boxes 0/3 ]
+[ px 3 py 6 · steps 3 · pushes 0 · boxes 0/3 ]
 ── turn 2 ─────────────────────────────────────────────
-expr : LLRRDDR
-moves : left left right right down down right  ( action letters )
+expr : if ( ! WALL( px + 1 , py ) ) { return right } else { return left }
+moves : right  ( direction code )
 ###########
 #######.  #
 #######.# #
 #######.# #
-# $   $ $ #
+#   $ $ $ #
 # # # # ###
-#     @ ###
+#   @   ###
 ###########
 
-[ px 6 py 6 · steps 14 · pushes 2 · boxes 0/3 ]
+[ px 4 py 6 · steps 4 · pushes 0 · boxes 0/3 ]
 ── turn 3 ─────────────────────────────────────────────
-expr : RUUUUUR
-moves : right up up up up up right  ( action letters )
+expr : RUULLRRD
+moves : right up up left left right right down  ( action letters )
 ###########
-#######.@ #
+#######.  #
+#######.# #
+#######.# #
+# $   $ $ #
+# # #@# ###
+#       ###
+###########
+
+[ px 5 py 5 · steps 12 · pushes 2 · boxes 0/3 ]
+── turn 4 ─────────────────────────────────────────────
+expr : if ( CAN_MOVE( down ) ) { return down } else { return up }
+moves : down  ( direction code )
+###########
+#######.  #
 #######.# #
 #######.# #
 # $   $ $ #
 # # # # ###
-#       ###
+#    @  ###
 ###########
 
-[ px 8 py 1 · steps 21 · pushes 2 · boxes 0/3 ]
-── turn 4 ─────────────────────────────────────────────
-expr : RDDDLRU
-moves : right down down down left right up  ( action letters )
+[ px 5 py 6 · steps 13 · pushes 2 · boxes 0/3 ]
+── turn 5 ─────────────────────────────────────────────
+expr : RRUUUUURRDDDL
+moves : right right up up up up up right right down down down left  ( action letters )
 ###########
 #######.  #
 #######.# #
-#######.#@#
-# $   $$  #
+#######.# #
+# $   $$@ #
 # # # # ###
 #       ###
 ###########
 
-[ px 9 py 3 · steps 28 · pushes 3 · boxes 0/3 ]
-── turn 5 ─────────────────────────────────────────────
-expr : UULLDDD
-moves : up up left left down down down  ( action letters )
-###########
-#######.  #
-#######.# #
-#######.# #
-# $   $@  #
-# # # #$###
-#       ###
-###########
-
-[ px 7 py 4 · steps 35 · pushes 4 · boxes 0/3 ]
+[ px 8 py 4 · steps 26 · pushes 3 · boxes 0/3 ]
 ── turn 6 ─────────────────────────────────────────────
-expr : LLDDRRU
-moves : left left down down right right up  ( action letters )
+expr : if ( ! WALL( px + 1 , py ) ) { return right } else { return left }
+moves : right  ( direction code )
 ###########
 #######.  #
 #######.# #
 #######.# #
-# $ $  $  #
-# # # #@###
+# $   $$ @#
+# # # # ###
 #       ###
 ###########
 
-[ px 7 py 5 · steps 42 · pushes 7 · boxes 0/3 ]
+[ px 9 py 4 · steps 27 · pushes 3 · boxes 0/3 ]
 ── turn 7 ─────────────────────────────────────────────
-expr : UUUDDDD
-moves : up up up down down down down  ( action letters )
+expr : UUULLDDDLLDDRRUUUU
+moves : up up up left left down down down left left down down right right up up up up  ( action letters )
 ###########
 #######*  #
-#######.# #
+#######+# #
 #######.# #
 # $ $     #
 # # # # ###
-#      @###
+#       ###
 ###########
 
-[ px 7 py 6 · steps 49 · pushes 10 · boxes 1/3 ]
+[ px 7 py 2 · steps 45 · pushes 10 · boxes 1/3 ]
 ── turn 8 ─────────────────────────────────────────────
-expr : LLLLUUR
-moves : left left left left up up right  ( action letters )
+expr : if ( CAN_MOVE( down ) ) { return down } else { return up }
+moves : down  ( direction code )
 ###########
 #######*  #
 #######.# #
-#######.# #
-# $ @$    #
+#######+# #
+# $ $     #
 # # # # ###
 #       ###
 ###########
 
-[ px 4 py 4 · steps 56 · pushes 11 · boxes 1/3 ]
+[ px 7 py 3 · steps 46 · pushes 10 · boxes 1/3 ]
 ── turn 9 ─────────────────────────────────────────────
-expr : RRLDDRR
-moves : right right left down down right right  ( action letters )
-###########
-#######*  #
-#######.# #
-#######.# #
-# $    $  #
-# # # # ###
-#      @###
-###########
-
-[ px 7 py 6 · steps 63 · pushes 13 · boxes 1/3 ]
-── turn 10 ─────────────────────────────────────────────
-expr : UUUDDDL
-moves : up up up down down down left  ( action letters )
+expr : DDDLLLLUURRRLDDRRUUU
+moves : down down down left left left left up up right right right left down down right right up up up  ( action letters )
 ###########
 #######*  #
 #######*# #
-#######.# #
+#######+# #
 # $       #
 # # # # ###
-#     @ ###
+#       ###
 ###########
 
-[ px 6 py 6 · steps 70 · pushes 15 · boxes 2/3 ]
-── turn 11 ─────────────────────────────────────────────
-expr : LLLLLUU
-moves : left left left left left up up  ( action letters )
+[ px 7 py 3 · steps 66 · pushes 15 · boxes 2/3 ]
+── turn 10 ─────────────────────────────────────────────
+expr : if ( CAN_MOVE( down ) ) { return down } else { return up }
+moves : down  ( direction code )
 ###########
 #######*  #
 #######*# #
 #######.# #
-#@$       #
+# $    @  #
 # # # # ###
 #       ###
 ###########
 
-[ px 1 py 4 · steps 77 · pushes 15 · boxes 2/3 ]
-── turn 12 ─────────────────────────────────────────────
-expr : RRRRRLD
-moves : right right right right right left down  ( action letters )
+[ px 7 py 4 · steps 67 · pushes 15 · boxes 2/3 ]
+── turn 11 ─────────────────────────────────────────────
+expr : DDLLLLLLUURRRRRLD
+moves : down down left left left left left left up up right right right right right left down  ( action letters )
 ###########
 #######*  #
 #######*# #
@@ -224,9 +210,22 @@ moves : right right right right right left down  ( action letters )
 ###########
 
 [ px 5 py 5 · steps 84 · pushes 20 · boxes 2/3 ]
+── turn 12 ─────────────────────────────────────────────
+expr : if ( CAN_MOVE( down ) ) { return down } else { return up }
+moves : down  ( direction code )
+###########
+#######*  #
+#######*# #
+#######.# #
+#      $  #
+# # # # ###
+#    @  ###
+###########
+
+[ px 5 py 6 · steps 85 · pushes 20 · boxes 2/3 ]
 ── turn 13 ─────────────────────────────────────────────
-expr : DRR
-moves : down right right  ( action letters )
+expr : RR
+moves : right right  ( action letters )
 ###########
 #######*  #
 #######*# #
@@ -273,8 +272,10 @@ solved in 89 steps with 21 pushes
 | `px` , `py` , `steps` , `pushes` | registered variables |
 | `BOX( 4 , 4 )` | a registered function , two arguments |
 | `GOAL( 7 , 1 ) && GOAL( 7 , 2 ) && GOAL( 7 , 3 )` | `&&` over three calls , bool results |
-| `FREE( 7 , 5 )` | walkability , the push rules live in the host |
-| `CAN_MOVE( right )` | the move rule as a function |
+| `FREE( px , py - 1 )` | walkability with arithmetic on the player position |
+| `BOX( px , py - 1 )` | the same square already occupied by a box |
+| `! WALL( px + 1 , py )` | negation and a computed coordinate |
+| `CAN_MOVE( down )` | the push rules as a function |
 | `RDDRRUU` | the four action getters , queued in a single turn |
 | `if ( CAN_MOVE( up ) ) { return up } else { return left }` | a conditional that returns a direction code |
 

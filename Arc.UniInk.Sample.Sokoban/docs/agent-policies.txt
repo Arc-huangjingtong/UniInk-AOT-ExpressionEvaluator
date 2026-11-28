@@ -1,15 +1,15 @@
-RDDRRUU
-LLRRDDR
-RUUUUUR
-RDDDLRU
-UULLDDD
-LLDDRRU
-UUUDDDD
-LLLLUUR
-RRLDDRR
-UUUDDDL
-LLLLLUU
-RRRRRLD
-DRR
+RDD
+if ( ! WALL( px + 1 , py ) ) { return right } else { return left }
+RUULLRRD
+if ( CAN_MOVE( down ) ) { return down } else { return up }
+RRUUUUURRDDDL
+if ( ! WALL( px + 1 , py ) ) { return right } else { return left }
+UUULLDDDLLDDRRUUUU
+if ( CAN_MOVE( down ) ) { return down } else { return up }
+DDDLLLLUURRRLDDRRUUU
+if ( CAN_MOVE( down ) ) { return down } else { return up }
+DDLLLLLLUURRRRRLD
+if ( CAN_MOVE( down ) ) { return down } else { return up }
+RR
 if ( CAN_MOVE( up ) ) { return up } else { return left }
 if ( CAN_MOVE( up ) ) { return up } else { return left }

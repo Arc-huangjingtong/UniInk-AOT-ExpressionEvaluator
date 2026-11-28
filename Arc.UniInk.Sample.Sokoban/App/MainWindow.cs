@@ -37,6 +37,7 @@ namespace Arc.UniInk.Sample.Sokoban.App
         private Game game;
         private List<Direction> solution;
         private int solutionStep;
+        private readonly Queue<Direction> pending = new();
 
         public MainWindow()
         {
@@ -51,7 +52,7 @@ namespace Arc.UniInk.Sample.Sokoban.App
             Styles.AddRange(Skin.Build());
 
             timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(320) };
-            timer.Tick += (_, _) => Step();
+            timer.Tick += (_, _) => AutoTick();
 
             solutionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(220) };
             solutionTimer.Tick += (_, _) => PlaySolutionStep();
@@ -402,6 +403,45 @@ namespace Arc.UniInk.Sample.Sokoban.App
             return footer;
         }
 
+        /// <summary> The demo API : a recorder drives the window one frame at a time through these </summary>
+        public void DemoLoadLevel(int index)
+        {
+            // keep the picker in step when a recorder loads a level directly
+            if (levelBox.SelectedIndex == index) LoadLevel(index);
+            else                                 levelBox.SelectedIndex = index;
+        }
+
+        /// <summary> Show the expression the agent is about to evaluate </summary>
+        public void DemoSetPolicy(string text) => policyBox.Text = text;
+
+        /// <summary> 【。】 【。。】 【。。。】 the thinking beat between two moves </summary>
+        public void DemoThink(int phase)
+        {
+            var dots = new string('。', phase + 1);
+
+            status.Text       = $"【{dots}】 thinking";
+            status.Foreground = Skin.AccentBrush;
+            detail.Text       = $"step {game.Steps + 1} · {policyBox.Text}";
+        }
+
+        /// <summary> Evaluate the current policy , the plan is queued </summary>
+        public void DemoBeginTurn() => BeginTurn();
+
+        /// <summary> One move of the queued plan , 0 when nothing is left </summary>
+        public int DemoMovesLeft() => pending.Count;
+
+        /// <summary> Play a single move , false when it is blocked </summary>
+        public bool DemoPlayOne() => PlayOne();
+
+        /// <summary> The move the plan plays next , so a recorder can show it </summary>
+        public string DemoNextMove() => pending.Count == 0 ? string.Empty : pending.Peek().ToString();
+
+        /// <summary> Ripple every box home , used when the recorder reaches the end </summary>
+        public void DemoCelebrate() => Celebrate();
+
+        /// <summary> Read the board : the plan of the turn , and the counters </summary>
+        public string DemoState() => $"{game.Steps}|{game.Pushes}|{Home()}|{game.Boxes.Count}|{(game.Solved ? 1 : 0)}";
+
         private void LoadLevel(int index)
         {
             timer.Stop();
@@ -420,14 +460,17 @@ namespace Arc.UniInk.Sample.Sokoban.App
             Message("Ready", Skin.MutedBrush);
         }
 
-        private void Step()
+        /// <summary> Evaluate the policy and keep its moves in the queue </summary>
+        private bool BeginTurn()
         {
+            pending.Clear();
+
             if (game.Solved)
             {
                 timer.Stop();
                 Message("Solved — reset or pick another level", Skin.SuccessBrush);
 
-                return;
+                return false;
             }
 
             var scheme = wasd.IsChecked == true ? InputScheme.Wasd : InputScheme.UrDL;
@@ -438,54 +481,123 @@ namespace Arc.UniInk.Sample.Sokoban.App
                 timer.Stop();
                 Message("Policy error", Skin.DangerBrush, turn.Error);
 
-                return;
+                return false;
             }
 
-            var moved = 0;
+            foreach (var direction in turn.Moves) pending.Enqueue(direction);
 
-            foreach (var direction in turn.Moves)
+            return true;
+        }
+
+        /// <summary> Play one queued move and repaint </summary>
+        private bool PlayOne()
+        {
+            if (pending.Count == 0) return false;
+
+            var direction = pending.Dequeue();
+            var before    = HomeCells();
+
+            if (!game.Move(direction))
             {
-                var before = HomeCells();
+                Message($"Blocked — {direction} is not possible here", Skin.DangerBrush, $"{game.Steps} steps · {game.Pushes} pushes");
+                pending.Clear();
 
-                if (!game.Move(direction)) break;
+                return false;
+            }
 
-                moved++;
-
-                foreach (var (x, y) in HomeCells())
-                {
-                    if (!before.Contains((x, y))) Ripple(x, y);
-                }
+            foreach (var (x, y) in HomeCells())
+            {
+                if (!before.Contains((x, y))) Ripple(x, y);
             }
 
             Render();
 
-            if (moved < turn.Moves.Count)
+            return true;
+        }
+
+        /// <summary> Pressing the button plays the whole turn ; the auto run timer plays it move by move </summary>
+        private void Step()
+        {
+            if (game.Solved)
             {
                 timer.Stop();
-                Message($"Blocked after {moved} of {turn.Moves.Count} move(s)", Skin.DangerBrush, $"{turn.Moves[moved]} is not possible here");
+                Message("Solved — reset or pick another level", Skin.SuccessBrush);
 
                 return;
             }
 
-            var source = turn.FromAction ? "action letter" : "direction code";
+            if (pending.Count == 0 && !BeginTurn()) return;
+
+            var total = pending.Count;
+            var moved = 0;
+
+            while (PlayOne()) moved++;
+
+            Finish(total, moved);
+        }
+
+        /// <summary> Auto run : one move per tick , so the board walks instead of jumping </summary>
+        private void AutoTick()
+        {
+            if (game.Solved)
+            {
+                timer.Stop();
+                Message("Solved!", Skin.SuccessBrush, $"{game.Steps} steps · {game.Pushes} pushes");
+
+                return;
+            }
+
+            if (pending.Count == 0)
+            {
+                BeginTurn();
+                DemoThink(0);
+
+                return;
+            }
+
+            if (!PlayOne())
+            {
+                timer.Stop();
+
+                return;
+            }
 
             if (game.Solved)
             {
-                var delay = 0.0;
+                Celebrate();
 
-                foreach (var (x, y) in HomeCells())
-                {
-                    Ripple(x, y, delay, Skin.SuccessBrush);
-                    delay += 90;
-                }
-
-                Render();
-                Message("Solved!", Skin.SuccessBrush, $"{game.Steps} steps · {game.Pushes} pushes");
+                return;
             }
-            else
+
+            Message("Playing", Skin.InkBrush, $"{game.Steps} steps · {game.Pushes} pushes · {Home()} of {game.Boxes.Count} home");
+        }
+
+        private void Finish(int total, int moved)
+        {
+            if (moved < total)
             {
-                Message($"{turn.Moves.Count} move(s) played", Skin.InkBrush, $"{source} · {game.Steps} steps · {game.Pushes} pushes");
+                timer.Stop();
+                Message($"Blocked after {moved} of {total} move(s)", Skin.DangerBrush, $"{game.Steps} steps · {game.Pushes} pushes");
+
+                return;
             }
+
+            if (game.Solved) Celebrate();
+            else Message($"{moved} move(s) played", Skin.InkBrush, $"{game.Steps} steps · {game.Pushes} pushes · {Home()} of {game.Boxes.Count} home");
+        }
+
+        private void Celebrate()
+        {
+            var delay = 0.0;
+
+            foreach (var (x, y) in HomeCells())
+            {
+                Ripple(x, y, delay, Skin.SuccessBrush);
+                delay += 90;
+            }
+
+            Render();
+            Message("Solved!", Skin.SuccessBrush, $"{game.Steps} steps · {game.Pushes} pushes");
         }
 
         private void SolveLevel()

@@ -15,7 +15,16 @@ namespace Arc.UniInk.Sample.Sokoban.App
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                desktop.MainWindow = new MainWindow();
+                var window = new MainWindow();
+
+                desktop.MainWindow = window;
+
+                // --replay : the window plays the script by itself , typing each line and clearing it again
+                if (Program.ReplayScript is { Length: > 0 })
+                {
+                    window.DemoLoadLevel(Program.ReplayLevel);
+                    new Replayer(window, Program.ReplayScript).Start();
+                }
             }
 
             base.OnFrameworkInitializationCompleted();
