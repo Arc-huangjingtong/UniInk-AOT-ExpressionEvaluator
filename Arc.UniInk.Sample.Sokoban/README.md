@@ -14,7 +14,10 @@ The project sets `<UseAppHost>false</UseAppHost>` , so `dotnet run` starts the d
 on macOS needs a signature and is killed by Gatekeeper ( `Killed: 9` ) . If you build your own copy , run
 `dotnet bin/Release/net10.0/Arc.UniInk.Sample.Sokoban.App.dll` instead of the executable .
 
-- Arrow keys move the player by hand , **Space** runs one turn of the policy .
+![A box landing home](docs/sokoban-ripple.gif)
+
+- Arrow keys move the player by hand , **Space** runs one turn of the policy . A box that lands on a goal sends a
+  ripple out of its square , and clearing the level ripples every box home in a short stagger .
 - **Run one turn** evaluates the policy once . **Auto run** repeats it . **Solve ( BFS )** plays the shortest
   solution found by the solver . **Reset** restarts the level . The header counts steps , pushes and boxes home ,
   the strip under the board explains the squares , and the side panel lists the board functions .

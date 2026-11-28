@@ -31,6 +31,8 @@ namespace Arc.UniInk.Sample.Sokoban.App
 
         private readonly DispatcherTimer timer;
         private readonly DispatcherTimer solutionTimer;
+        private readonly DispatcherTimer pulseTimer;
+        private readonly List<Pulse>     pulses = new();
 
         private Game game;
         private List<Direction> solution;
@@ -53,6 +55,10 @@ namespace Arc.UniInk.Sample.Sokoban.App
 
             solutionTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(220) };
             solutionTimer.Tick += (_, _) => PlaySolutionStep();
+
+            // one ripple per box that lands home , and a slow one over the board when the level is cleared
+            pulseTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(16) };
+            pulseTimer.Tick += (_, _) => PulseTick();
 
             for (var i = 0 ; i < Levels.Count ; i++) levelBox.Items.Add($"{i + 1} · {Levels.Get(i).Name}");
 
@@ -439,9 +445,16 @@ namespace Arc.UniInk.Sample.Sokoban.App
 
             foreach (var direction in turn.Moves)
             {
+                var before = HomeCells();
+
                 if (!game.Move(direction)) break;
 
                 moved++;
+
+                foreach (var (x, y) in HomeCells())
+                {
+                    if (!before.Contains((x, y))) Ripple(x, y);
+                }
             }
 
             Render();
@@ -458,6 +471,15 @@ namespace Arc.UniInk.Sample.Sokoban.App
 
             if (game.Solved)
             {
+                var delay = 0.0;
+
+                foreach (var (x, y) in HomeCells())
+                {
+                    Ripple(x, y, delay, Skin.SuccessBrush);
+                    delay += 90;
+                }
+
+                Render();
                 Message("Solved!", Skin.SuccessBrush, $"{game.Steps} steps · {game.Pushes} pushes");
             }
             else
@@ -535,6 +557,108 @@ namespace Arc.UniInk.Sample.Sokoban.App
             args.Handled = true;
         }
 
+        /// <summary> A ripple that expands from a square and fades , the only authored motion of the window </summary>
+        private sealed class Pulse
+        {
+            public int      X;
+            public int      Y;
+            public double   Elapsed;
+            public double   Delay;
+            public double   Life  = 420;
+            public IBrush   Brush = Skin.SuccessBrush;
+            public Border   Ring;
+        }
+
+        private void Ripple(int x, int y, double delay = 0, IBrush brush = null)
+        {
+            pulses.Add(new Pulse { X = x, Y = y, Delay = delay, Brush = brush ?? Skin.SuccessBrush });
+
+            if (!pulseTimer.IsEnabled) pulseTimer.Start();
+        }
+
+        private void PulseTick()
+        {
+            if (pulses.Count == 0)
+            {
+                pulseTimer.Stop();
+
+                return;
+            }
+
+            var alive = new List<Pulse>();
+
+            foreach (var pulse in pulses)
+            {
+                pulse.Elapsed += 16;
+
+                if (pulse.Elapsed >= pulse.Life + pulse.Delay) continue;
+
+                alive.Add(pulse);
+            }
+
+            var same = alive.Count == pulses.Count;
+
+            pulses.Clear();
+            pulses.AddRange(alive);
+
+            // the ring is a live control now : move it every tick , repaint only when one is done
+            foreach (var pulse in pulses) PaintPulse(pulse);
+
+            if (!same) Render();
+        }
+
+        private static Border RippleVisual(Pulse pulse)
+        {
+            var ring = new Border
+            {
+                Width                 = Tile - 6,
+                Height                = Tile - 6,
+                CornerRadius          = new CornerRadius(13),
+                BorderThickness       = new Thickness(2.5),
+                BorderBrush           = pulse.Brush,
+                RenderTransform       = new ScaleTransform(1, 1),
+                RenderTransformOrigin = RelativePoint.Center,
+                IsHitTestVisible      = false
+            };
+
+            Canvas.SetLeft(ring, Gap + pulse.X * Tile + 3);
+            Canvas.SetTop(ring, Gap + pulse.Y * Tile + 3);
+
+            pulse.Ring = ring;
+            PaintPulse(pulse);
+
+            return ring;
+        }
+
+        private static void PaintPulse(Pulse pulse)
+        {
+            if (pulse.Ring is null) return;
+
+            var progress = Math.Clamp((pulse.Elapsed - pulse.Delay) / pulse.Life, 0, 1);
+
+            if (pulse.Ring.RenderTransform is ScaleTransform scale)
+            {
+                var value = 0.9 + 1.15 * progress;
+
+                scale.ScaleX = value;
+                scale.ScaleY = value;
+            }
+
+            pulse.Ring.Opacity = 0.85 * (1 - progress);
+        }
+
+        private List<(int X, int Y)> HomeCells()
+        {
+            var cells = new List<(int X, int Y)>();
+
+            foreach (var box in game.Boxes)
+            {
+                if (game.IsGoal(box.X, box.Y)) cells.Add((box.X, box.Y));
+            }
+
+            return cells;
+        }
+
         private void Message(string text, IBrush color, string sub = null)
         {
             status.Text      = text;
@@ -561,6 +685,10 @@ namespace Arc.UniInk.Sample.Sokoban.App
                     board.Children.Add(cell);
                 }
             }
+
+            foreach (var pulse in pulses) board.Children.Add(RippleVisual(pulse));
+
+            goalsText.Foreground = game.Solved ? Skin.SuccessBrush : Skin.InkBrush;
         }
 
         private Control Cell(int x, int y)
