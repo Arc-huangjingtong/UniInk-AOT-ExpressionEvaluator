@@ -18,7 +18,8 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
   ripples in a short stagger when the level is cleared )
 - the sample gains a hard level — Microban #10 by David W. Skinner , three boxes , 89 moves — and a headless
   player ( `--list` , `--ask` , `--script` , `--solve` ) so an agent can read the board through UniInk and play it
-  one expression per turn ; `docs/agent-play.md` is a recorded run
+  one expression per turn ; `docs/agent-play.md` is a recorded run , and `docs/sokoban-play.gif` shows the same
+  fifteen turns played in the window , one press of Run one turn each
 - the sample registers `U` `R` `D` `L` as **getters** : naming one appends to the move queue of the turn , so
   `R` is one move , `RR` two and `RL` right then left , and the host stops at the first blocked move . The
   `W` `A` `S` `D` scheme is selectable instead ( `D` conflicts with the arrow scheme , so only one is registered )

@@ -49,7 +49,7 @@ namespace Arc.UniInk.Sample.Sokoban.Core
                                   , "# # # # ###"
                                   , "#       ###"
                                   , "###########"
-                                } , "three boxes , three goals in a narrow corridor : the order of the pushes is the puzzle ( Microban 10 , David W. Skinner )"
+                                } , "three boxes , three goals , 89 moves — Microban 10 by D. W. Skinner"
             )
         };
 

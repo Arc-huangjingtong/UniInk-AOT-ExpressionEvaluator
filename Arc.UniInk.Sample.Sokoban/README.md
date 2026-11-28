@@ -122,6 +122,13 @@ dotnet run --project Arc.UniInk.Sample.Sokoban/App -c Release -- \
 dotnet run --project Arc.UniInk.Sample.Sokoban/App -c Release -- --solve 4
 ```
 
+The same script can be played **in the window** , one expression at a time : pick level 5 , paste a policy , press
+**Run one turn** , repeat . The gif below is exactly that — fifteen turns , from `0/3` boxes home to `Solved!` :
+
+![Fifteen turns in the window](docs/sokoban-play.gif)
+
+![Six of the fifteen turns](docs/sokoban-play-sheet.png)
+
 The recorded run is in [docs/agent-play.md](docs/agent-play.md) : the questions the agent asked , then the turns ,
 with the board after each one . Add a delay as a fourth argument ( `--script 4 docs/agent-policies.txt 400` ) when
 you want the turns to play back slowly on screen .

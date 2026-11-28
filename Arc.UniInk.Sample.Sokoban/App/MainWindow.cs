@@ -17,12 +17,12 @@ namespace Arc.UniInk.Sample.Sokoban.App
         private const double Tile  = 46;
         private const double Gap   = 6;
 
-        private readonly ComboBox  levelBox  = new() { Width = 168 };
+        private readonly ComboBox  levelBox  = new() { Name = "level", Width = 168 };
         private readonly TextBox   policyBox = new() { Name = "policy", AcceptsReturn = true, MinHeight = 96, FontFamily = Skin.Mono, FontSize = 13, TextWrapping = TextWrapping.Wrap };
         private readonly TextBlock stepsText = new() { FontFamily = Skin.Mono, FontSize = 12, Foreground = Skin.InkBrush };
         private readonly TextBlock pushesText = new() { FontFamily = Skin.Mono, FontSize = 12, Foreground = Skin.InkBrush };
         private readonly TextBlock goalsText  = new() { FontFamily = Skin.Mono, FontSize = 12, Foreground = Skin.InkBrush };
-        private readonly TextBlock levelTitle = new() { FontSize = 12.5, Foreground = Skin.MutedBrush, Margin = new Thickness(0, 2, 0, 0) };
+        private readonly TextBlock levelTitle = new() { FontSize = 12.5, Foreground = Skin.MutedBrush, Margin = new Thickness(0, 2, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis, MaxWidth = 560 };
         private readonly TextBlock status     = new() { FontSize = 12.5, FontWeight = FontWeight.Medium, TextWrapping = TextWrapping.Wrap };
         private readonly TextBlock detail     = new() { FontSize = 11.5, Foreground = Skin.MutedBrush, TextWrapping = TextWrapping.Wrap };
         private readonly Canvas    board      = new();
