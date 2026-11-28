@@ -1,18 +1,21 @@
 # An agent plays Microban 10
 
-Level 5 in the sample is [Microban #10](https://cdn.jsdelivr.net/gh/OMerkel/Sokoban@master/3rdParty/Levels/Microban.txt)
-by David W. Skinner : three boxes , three goals , 89 moves . The agent below never touches the game code — it reads
-the board through UniInk and answers with UniInk expressions , one evaluation per turn .
+Level 5 of the sample is [Microban #10](https://cdn.jsdelivr.net/gh/OMerkel/Sokoban@master/3rdParty/Levels/Microban.txt)
+by David W. Skinner : three boxes , three goals in a narrow corridor , 89 moves . Everything below goes through
+UniInk : the questions are expressions , the turns are expressions , and the game code never learns what a box is
+beyond the functions the protocol registers .
 
-The loop is the same as the window's :
+The loop , exactly as the window runs it :
 
-1. the host builds a fresh interpreter and registers the board as variables and functions ,
-2. it evaluates one expression ,
-3. it applies the direction the expression answers with ( or the letters it queued ) .
+1. the host builds a fresh interpreter and registers the board ( `px` , `py` , `steps` , `pushes` , `BOX` , `GOAL` ,
+   `WALL` , `FREE` , `CAN_MOVE` , `BOX_AT` , `GOAL_AT` ) ,
+2. it evaluates **one** expression ,
+3. it applies the direction the expression answers with — or, when the expression names action letters , every move
+   they queued , in order .
 
-## 1 . Ask the board
+## 1 . Ask the board first
 
-Each expression is evaluated , nothing moves .
+Nothing moves here : the expressions only answer .
 
 ```
 level 4 : Microban 10 ( 11 x 8 )
@@ -43,14 +46,15 @@ level 4 : Microban 10 ( 11 x 8 )
   back True
 ```
 
-## 2 . Program the moves
+## 2 . Program the route
 
-Every policy line is one turn . The letters go through the four action getters , so a line like `RDDRRUU` plays
-seven moves from one expression .
+The route comes from the solver in `Core/Solver.cs` ( breadth first over player + boxes ) , then it is written as
+UniInk : plain letter strings while the path is forced , and a **reactive rule** at the end , where reading the board
+is cheaper than replaying a fixed path .
 
 ```bash
 dotnet run --project Arc.UniInk.Sample.Sokoban/App -c Release -- \
-  --script 4 Arc.UniInk.Sample.Sokoban/docs/agent-policies.txt
+  --script 4 Arc.UniInk.Sample.Sokoban/docs/agent-policies.txt 400
 ```
 
 ```
@@ -221,8 +225,34 @@ moves : right right right right right left down  ( action letters )
 
 [ px 5 py 5 · steps 84 · pushes 20 · boxes 2/3 ]
 ── turn 13 ─────────────────────────────────────────────
-expr : DRRUU
-moves : down right right up up  ( action letters )
+expr : DRR
+moves : down right right  ( action letters )
+###########
+#######*  #
+#######*# #
+#######.# #
+#      $  #
+# # # # ###
+#      @###
+###########
+
+[ px 7 py 6 · steps 87 · pushes 20 · boxes 2/3 ]
+── turn 14 ─────────────────────────────────────────────
+expr : if ( CAN_MOVE( up ) ) { return up } else { return left }
+moves : up  ( direction code )
+###########
+#######*  #
+#######*# #
+#######.# #
+#      $  #
+# # # #@###
+#       ###
+###########
+
+[ px 7 py 5 · steps 88 · pushes 20 · boxes 2/3 ]
+── turn 15 ─────────────────────────────────────────────
+expr : if ( CAN_MOVE( up ) ) { return up } else { return left }
+moves : up  ( direction code )
 ###########
 #######*  #
 #######*# #
@@ -236,16 +266,17 @@ moves : down right right up up  ( action letters )
 solved in 89 steps with 21 pushes
 ```
 
-## What the expressions used
+## What each expression exercised
 
-| Expression | What it exercised |
+| Expression | Feature |
 |---|---|
-| `px` , `py` | a registered variable |
-| `BOX( 4 , 4 )` , `GOAL( 7 , 1 )` | a registered function with two arguments |
-| `GOAL( 7 , 1 ) && GOAL( 7 , 2 )` | `&&` over two calls |
-| `FREE( 7 , 5 )` | a function that reports walkability |
-| `CAN_MOVE( right )` | a function that reads the push rules |
-| `RDDRRUU` | the four action getters , queued in one turn |
+| `px` , `py` , `steps` , `pushes` | registered variables |
+| `BOX( 4 , 4 )` | a registered function , two arguments |
+| `GOAL( 7 , 1 ) && GOAL( 7 , 2 ) && GOAL( 7 , 3 )` | `&&` over three calls , bool results |
+| `FREE( 7 , 5 )` | walkability , the push rules live in the host |
+| `CAN_MOVE( right )` | the move rule as a function |
+| `RDDRRUU` | the four action getters , queued in a single turn |
+| `if ( CAN_MOVE( up ) ) { return up } else { return left }` | a conditional that returns a direction code |
 
-No reflection , no boxing on the evaluation path , and no code generated at runtime : the same 2 700 line file that
-ships in the NuGet package runs every one of these turns .
+No reflection , no code generation , no boxing on the evaluation path : the same single file that ships in the NuGet
+package answers every turn above .
