@@ -3,7 +3,7 @@
 
     /*******************************************************************************************************************
     *  📰 Title    :  UniInk (https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator)                    *
-    *  🔖 Version  :  1.3.6                                                                                           *
+    *  🔖 Version  :  1.4.0                                                                                           *
     *  😀 Author   :  Arc (https://github.com/Arc-huangjingtong)                                                      *
     *  🔑 License  :  MIT (https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/blob/main/LICENSE)     *
     *  🤝 Support  :  [.NET Standard 2.1] [C# 9.0+] [IL2CPP Support]                                                  *

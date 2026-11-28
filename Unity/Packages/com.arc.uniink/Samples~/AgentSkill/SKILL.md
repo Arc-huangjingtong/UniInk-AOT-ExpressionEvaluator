@@ -5,7 +5,7 @@ license: MIT
 compatibility: .NET Standard 2.0+ or Unity 2021.3+ (C# 9, IL2CPP supported). No runtime dependencies, no network, works offline.
 metadata:
   package: Arc.UniInk
-  version: "1.3.6"
+  version: "1.4.0"
   min-unity: "2021.3"
   min-dotnet: "netstandard2.0"
   repository: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator

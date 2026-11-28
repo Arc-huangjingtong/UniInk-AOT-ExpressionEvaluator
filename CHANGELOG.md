@@ -4,7 +4,7 @@ All notable changes to **UniInk** are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.4.0] - 2026-11-28
 
 ### Added
 
@@ -160,7 +160,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.
 
 - NuGet packaging and the first published workflow
 
-[Unreleased]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/ver1.3.6...HEAD
+[1.4.0]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/ver1.3.6...ver1.4
 [1.3.6]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/ver1.3.5...ver1.3.6
 [1.3.5]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/ver1.3...ver1.3.5
 [1.3.0]: https://github.com/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator/compare/ver1.2...ver1.3

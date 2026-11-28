@@ -9,7 +9,7 @@
 ![Stars Num](https://img.shields.io/github/stars/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator?style=social&logo=github)
 ![Forks Num](https://img.shields.io/github/forks/Arc-huangjingtong/UniInk-AOT-ExpressionEvaluator?style=social&logo=github)
 ![License  ](https://img.shields.io/badge/license-MIT-yellow)
-![Version  ](https://img.shields.io/badge/version-1.3.6-green)
+![Version  ](https://img.shields.io/badge/version-1.4.0-green)
 ![C#       ](https://img.shields.io/badge/CSharp-9.0%2B-blue)
 ![Platforms](https://img.shields.io/badge/platforms-Android%20|%20Windows%20|%20(ios)-lightgrey)
 ---
